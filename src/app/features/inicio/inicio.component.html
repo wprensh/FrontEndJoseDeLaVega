@@ -1,0 +1,76 @@
+<!-- Portada -->
+<section class="portada" aria-labelledby="titulo-portada">
+  <div class="portada-texto">
+    <h1 id="titulo-portada">Forjamos futuros con <span>{{ institucion.lema }}</span></h1>
+    <a mat-flat-button class="boton-institucional" routerLink="/nosotros">Conoce más</a>
+  </div>
+  <div class="portada-franjas" aria-hidden="true"></div>
+  <!--
+    Imagen de portada: copie una foto propia en public/img/portada.jpg y defina en styles.scss
+    la variable CSS jv-foto-portada con url("/img/portada.jpg"). Mientras tanto se ve un fondo ilustrado.
+  -->
+  <div class="portada-imagen" role="img" aria-label="Fotografía de la sede de la institución en Cartagena de Indias"></div>
+</section>
+
+<div class="contenedor">
+  <!-- Valores -->
+  <section class="valores" aria-labelledby="titulo-valores">
+    <h2 id="titulo-valores">Nuestros valores</h2>
+    <ul>
+      @for (valor of valores; track valor.nombre) {
+        <li>
+          <span class="valor-icono" [class]="'tono-' + valor.tono">
+            <mat-icon aria-hidden="true">{{ valor.icono }}</mat-icon>
+          </span>
+          {{ valor.nombre }}
+        </li>
+      }
+    </ul>
+  </section>
+
+  <div class="bloques">
+    <!-- Noticias recientes (desde la API) -->
+    <section class="tarjeta noticias" aria-labelledby="titulo-noticias" [attr.aria-busy]="cargando()">
+      <h2 id="titulo-noticias">Noticias recientes</h2>
+
+      @if (cargando()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Cargando noticias" />
+      } @else if (error()) {
+        <div class="aviso" role="alert">
+          <p>{{ error() }}</p>
+          <button mat-button type="button" (click)="cargarNoticias()">Reintentar</button>
+        </div>
+      } @else {
+        <div class="lista-noticias">
+          @for (noticia of noticias(); track noticia.id) {
+            <article class="noticia">
+              <h3>{{ noticia.titulo }}</h3>
+              <p>{{ noticia.resumen }}</p>
+              <time [attr.datetime]="noticia.fechaPublicacion">{{ aFecha(noticia.fechaPublicacion) | date: 'longDate' }}</time>
+            </article>
+          } @empty {
+            <p class="vacio">Aún no hay noticias publicadas.</p>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Eventos próximos -->
+    <section class="tarjeta eventos" aria-labelledby="titulo-eventos">
+      <h2 id="titulo-eventos">Eventos próximos</h2>
+      <p class="calendario">Calendario académico</p>
+      <ul>
+        @for (evento of eventos(); track evento.id) {
+          <li>
+            <time [attr.datetime]="evento.fechaPublicacion">{{ aFecha(evento.fechaPublicacion) | date: "d 'de' MMMM" }}</time>
+            - {{ evento.titulo }}
+          </li>
+        } @empty {
+          @if (!cargando() && !error()) {
+            <li class="vacio">No hay eventos programados.</li>
+          }
+        }
+      </ul>
+    </section>
+  </div>
+</div>

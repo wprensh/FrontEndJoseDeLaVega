@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  background: var(--jv-azul);
+  color: #fff;
+}
+
+.cabecera {
+  max-inline-size: var(--jv-ancho-maximo);
+  margin-inline: auto;
+  padding: 0.7rem var(--jv-margen) 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.marca {
+  justify-self: center;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: inherit;
+  text-decoration: none;
+  padding-block-end: 0.7rem;
+}
+
+.marca-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.marca-nombre {
+  font: 700 clamp(1rem, 2.3vw, 1.65rem) / 1.15 var(--jv-fuente-titulos);
+  color: var(--jv-amarillo);
+  text-transform: uppercase;
+}
+
+.marca-ciudad {
+  font: 600 clamp(0.85rem, 1.4vw, 1.05rem) / 1.4 var(--jv-fuente-titulos);
+}
+
+.boton-menu {
+  display: none;
+  color: #fff;
+}
+
+.navegacion {
+  grid-column: 1 / -1;
+  background: var(--jv-azul-oscuro);
+  border-top: 2px solid #fff;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.2rem 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+
+  a {
+    display: block;
+    padding: 0.55rem 1.1rem;
+    border-radius: 3px;
+    color: #fff;
+    font: 700 0.85rem / 1.2 var(--jv-fuente-titulos);
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background-color 150ms ease, color 150ms ease;
+
+    &:hover {
+      color: var(--jv-amarillo);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--jv-amarillo);
+      outline-offset: 2px;
+    }
+
+    &.activo {
+      background: var(--jv-amarillo);
+      color: var(--jv-azul);
+    }
+  }
+}
+
+// ---- Pantallas pequeñas: menú desplegable ----
+@media (max-width: 860px) {
+  .cabecera {
+    padding-block-end: 0.7rem;
+  }
+
+  .marca {
+    grid-column: 1;
+    justify-self: start;
+    gap: 0.75rem;
+    padding-block-end: 0;
+  }
+
+  .marca-texto {
+    align-items: flex-start;
+    text-align: start;
+  }
+
+  .boton-menu {
+    display: inline-flex;
+  }
+
+  .navegacion {
+    display: none;
+    margin-block-start: 0.7rem;
+
+    &.abierta {
+      display: block;
+    }
+
+    ul {
+      flex-direction: column;
+      padding: 0.5rem;
+    }
+  }
+}

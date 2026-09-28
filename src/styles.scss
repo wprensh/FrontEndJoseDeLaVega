@@ -1,0 +1,180 @@
+@use '@angular/material' as mat;
+
+// =====================================================================
+//  Tema de Angular Material 19 (Material 3) + identidad visual
+//  de la I.E. José de la Vega: azul marino, amarillo y rojo.
+// =====================================================================
+
+html {
+  color-scheme: light;
+
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$yellow-palette,
+      theme-type: light,
+    ),
+    typography: (
+      brand-family: 'Montserrat, sans-serif',
+      plain-family: '"Plus Jakarta Sans", sans-serif',
+    ),
+    density: 0,
+  ));
+
+  // Ajuste fino de los tokens de sistema de Material a los colores institucionales.
+  // (Envuelto en `& {}` para que Sass lo emita después de las variables generadas por mat.theme.)
+  & {
+    --mat-sys-primary: var(--jv-azul);
+    --mat-sys-on-primary: #ffffff;
+    --mat-sys-primary-container: #dbe6f6;
+    --mat-sys-on-primary-container: var(--jv-azul);
+    --mat-sys-surface: var(--jv-superficie);
+    --mat-sys-background: var(--jv-fondo);
+  }
+}
+
+// ---- Tokens de diseño institucionales (usados por todos los componentes) ----
+:root {
+  --jv-azul: #0a2647;
+  --jv-azul-oscuro: #06182e;
+  --jv-azul-medio: #1d4f91;
+  --jv-amarillo: #ffc700;
+  --jv-rojo: #d7263d;
+  --jv-naranja: #d97706;
+  --jv-fondo: #f4f5f9;
+  --jv-superficie: #ffffff;
+  --jv-superficie-suave: #f6f8fb;
+  --jv-borde: #dfe4ee;
+  --jv-texto: #1b2a41;
+  --jv-texto-suave: #5b6577;
+  --jv-radio: 10px;
+  --jv-sombra: 0 1px 2px rgb(10 38 71 / 6%), 0 6px 18px rgb(10 38 71 / 6%);
+  --jv-fuente-titulos: 'Montserrat', sans-serif;
+  --jv-fuente-texto: 'Plus Jakarta Sans', sans-serif;
+  --jv-ancho-maximo: 1400px;
+  --jv-margen: clamp(1rem, 2.5vw, 2.25rem);
+}
+
+// ---- Base ----
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--jv-fondo);
+  color: var(--jv-texto);
+  font: 400 1rem / 1.55 var(--jv-fuente-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--jv-fuente-titulos);
+  color: var(--jv-azul);
+  line-height: 1.25;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--jv-azul-medio);
+  outline-offset: 2px;
+}
+
+// Enlace de accesibilidad para saltar directamente al contenido con el teclado.
+.saltar-contenido {
+  position: absolute;
+  inset-inline-start: 1rem;
+  inset-block-start: -3rem;
+  z-index: 10;
+  background: var(--jv-amarillo);
+  color: var(--jv-azul);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 700;
+
+  &:focus {
+    inset-block-start: 1rem;
+  }
+}
+
+// ---- Utilidades de maquetación compartidas por las plantillas ----
+.contenedor {
+  max-inline-size: var(--jv-ancho-maximo);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 5vw, 4rem) var(--jv-margen) 3rem;
+}
+
+.tarjeta {
+  background: var(--jv-superficie);
+  border: 1px solid var(--jv-borde);
+  border-radius: var(--jv-radio);
+  padding: 1.25rem 1.4rem;
+}
+
+// Tarjeta con franja superior de color (Misión/Visión, niveles académicos, pasos de admisión).
+.tarjeta-franja {
+  @extend .tarjeta;
+  border-radius: 2px;
+  border-top: 5px solid var(--franja, var(--jv-azul));
+}
+
+// Tarjeta con borde lateral de color (servicios, reseña histórica, recursos del campus).
+.tarjeta-lateral {
+  @extend .tarjeta;
+  border-radius: 2px;
+  border-left: 5px solid var(--franja, var(--jv-azul));
+}
+
+.franja-azul { --franja: var(--jv-azul); }
+.franja-amarilla { --franja: var(--jv-amarillo); }
+.franja-roja { --franja: var(--jv-rojo); }
+
+.boton-institucional {
+  --mdc-filled-button-container-color: var(--jv-amarillo);
+  --mdc-filled-button-label-text-color: var(--jv-azul);
+  --mdc-filled-button-container-shape: 4px;
+  font-family: var(--jv-fuente-titulos) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+}
+
+.boton-azul {
+  --mdc-filled-button-container-color: var(--jv-azul);
+  --mdc-filled-button-label-text-color: var(--jv-amarillo);
+  --mdc-filled-button-container-shape: 4px;
+  font-family: var(--jv-fuente-titulos) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+}
+
+.visualmente-oculto {
+  position: absolute !important;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

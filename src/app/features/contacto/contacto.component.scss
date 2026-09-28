@@ -1,0 +1,62 @@
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+}
+
+address {
+  font-style: normal;
+
+  p {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 0.9rem;
+  }
+
+  mat-icon {
+    color: var(--jv-azul);
+    flex: none;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.enviar {
+  inline-size: 100%;
+}
+
+.error {
+  margin: 0;
+  color: var(--jv-rojo);
+}
+
+.confirmacion {
+  display: flex;
+  gap: 0.75rem;
+  background: #e8f5ec;
+  border-radius: 6px;
+  padding: 1rem;
+
+  mat-icon {
+    color: #1e7a3c;
+    flex: none;
+  }
+
+  p {
+    margin: 0 0 0.35rem;
+  }
+}

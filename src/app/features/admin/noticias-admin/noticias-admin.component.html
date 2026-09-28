@@ -1,0 +1,203 @@
+<div class="contenedor">
+  <app-page-heading
+    titulo="Administrar noticias"
+    subtitulo="Publique las noticias y eventos que aparecen en la página de inicio"
+    etiqueta="Panel administrativo"
+  />
+
+  <div class="rejilla">
+    <!-- ================= Listado ================= -->
+    <section class="tarjeta listado" aria-labelledby="titulo-listado">
+      <div class="barra">
+        <h2 id="titulo-listado">Noticias</h2>
+        <mat-form-field class="buscador">
+          <mat-label>Buscar por título o resumen</mat-label>
+          <input
+            #campoBusqueda
+            matInput
+            type="search"
+            [value]="busqueda()"
+            (keyup.enter)="buscar(campoBusqueda.value)"
+          />
+          <button mat-icon-button matSuffix type="button" aria-label="Buscar" (click)="buscar(campoBusqueda.value)">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      @if (servicio.cargando()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Cargando noticias" />
+      }
+
+      @if (servicio.error(); as error) {
+        <div class="aviso-error" role="alert">
+          <span>{{ error }}</span>
+          <button mat-button type="button" (click)="recargar()">Reintentar</button>
+        </div>
+      }
+
+      <div class="tabla-contenedor">
+        <table mat-table [dataSource]="servicio.noticias()" [trackBy]="porId" aria-labelledby="titulo-listado">
+          <ng-container matColumnDef="titulo">
+            <th mat-header-cell *matHeaderCellDef>Título</th>
+            <td mat-cell *matCellDef="let noticia">
+              <span class="titulo-celda">{{ noticia.titulo }}</span>
+              <span class="resumen-celda">{{ noticia.resumen }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="categoria">
+            <th mat-header-cell *matHeaderCellDef>Categoría</th>
+            <td mat-cell *matCellDef="let noticia">
+              <span class="chip" [attr.data-categoria]="noticia.categoria">{{ etiquetaCategoria(noticia.categoria) }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fechaPublicacion">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let noticia">{{ aFecha(noticia.fechaPublicacion) | date: 'mediumDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="publicada">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let noticia">
+              @if (noticia.publicada) {
+                <span class="estado publicada">Publicada</span>
+              } @else {
+                <span class="estado borrador">Borrador</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef><span class="visualmente-oculto">Acciones</span></th>
+            <td mat-cell *matCellDef="let noticia" class="acciones">
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Editar"
+                [attr.aria-label]="'Editar ' + noticia.titulo"
+                (click)="editar(noticia)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                class="eliminar"
+                matTooltip="Eliminar"
+                [attr.aria-label]="'Eliminar ' + noticia.titulo"
+                (click)="eliminar(noticia)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+          <tr
+            mat-row
+            *matRowDef="let noticia; columns: columnas"
+            [class.fila-editando]="editando()?.id === noticia.id"
+          ></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell sin-datos" [attr.colspan]="columnas.length">
+              @if (!servicio.cargando()) {
+                {{ busqueda() ? 'No hay noticias que coincidan con la búsqueda.' : 'Aún no hay noticias.' }}
+              }
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [length]="servicio.total()"
+        [pageIndex]="pagina() - 1"
+        [pageSize]="tamanoPagina()"
+        [pageSizeOptions]="[5, 10, 25]"
+        (page)="cambiarPagina($event)"
+        aria-label="Seleccionar página de noticias"
+      />
+    </section>
+
+    <!-- ================= Formulario ================= -->
+    <section class="tarjeta-franja franja-amarilla formulario" aria-labelledby="titulo-formulario">
+      <h2 id="titulo-formulario">{{ tituloFormulario() }}</h2>
+
+      <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+        <mat-form-field>
+          <mat-label>Título</mat-label>
+          <input matInput formControlName="titulo" maxlength="150" />
+          @if (formulario.controls.titulo.hasError('required')) {
+            <mat-error>El título es obligatorio.</mat-error>
+          } @else if (formulario.controls.titulo.hasError('servidor')) {
+            <mat-error>{{ formulario.controls.titulo.getError('servidor') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Resumen</mat-label>
+          <textarea matInput formControlName="resumen" rows="2" maxlength="300"></textarea>
+          <mat-hint align="end">{{ formulario.controls.resumen.value.length }} / 300</mat-hint>
+          @if (formulario.controls.resumen.hasError('required')) {
+            <mat-error>El resumen es obligatorio.</mat-error>
+          } @else if (formulario.controls.resumen.hasError('servidor')) {
+            <mat-error>{{ formulario.controls.resumen.getError('servidor') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Contenido</mat-label>
+          <textarea matInput formControlName="contenido" rows="4" maxlength="8000"></textarea>
+        </mat-form-field>
+
+        <div class="fila">
+          <mat-form-field>
+            <mat-label>Categoría</mat-label>
+            <mat-select formControlName="categoria">
+              @for (categoria of categorias; track categoria.valor) {
+                <mat-option [value]="categoria.valor">{{ categoria.etiqueta }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Fecha de publicación</mat-label>
+            <input matInput [matDatepicker]="selectorFecha" formControlName="fechaPublicacion" />
+            <mat-datepicker-toggle matIconSuffix [for]="selectorFecha" />
+            <mat-datepicker #selectorFecha />
+            @if (formulario.controls.fechaPublicacion.hasError('required')) {
+              <mat-error>Seleccione una fecha válida.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field>
+          <mat-label>URL de la imagen (opcional)</mat-label>
+          <input matInput type="url" formControlName="imagenUrl" placeholder="https://..." />
+          @if (formulario.controls.imagenUrl.hasError('pattern')) {
+            <mat-error>Escriba una dirección que empiece por http:// o https://</mat-error>
+          } @else if (formulario.controls.imagenUrl.hasError('servidor')) {
+            <mat-error>{{ formulario.controls.imagenUrl.getError('servidor') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-slide-toggle formControlName="publicada">Publicar en el sitio</mat-slide-toggle>
+
+        @if (errorFormulario()) {
+          <p class="aviso-error" role="alert">{{ errorFormulario() }}</p>
+        }
+
+        <div class="botones">
+          @if (editando()) {
+            <button mat-button type="button" (click)="cancelarEdicion()">Cancelar</button>
+          }
+          <button mat-flat-button class="boton-azul" type="submit" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : editando() ? 'Guardar cambios' : 'Crear noticia' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>

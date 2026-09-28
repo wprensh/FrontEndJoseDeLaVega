@@ -1,0 +1,38 @@
+<header class="cabecera">
+  <a class="marca" routerLink="/inicio" (click)="cerrarMenu()">
+    <app-escudo [tamano]="62" />
+    <span class="marca-texto">
+      <span class="marca-nombre">{{ institucion.nombre }}</span>
+      <span class="marca-ciudad">{{ institucion.ciudad }}</span>
+    </span>
+  </a>
+
+  <button
+    mat-icon-button
+    class="boton-menu"
+    type="button"
+    [attr.aria-expanded]="menuAbierto()"
+    aria-controls="navegacion-principal"
+    aria-label="Abrir menú de navegación"
+    (click)="alternarMenu()"
+  >
+    <mat-icon>{{ menuAbierto() ? 'close' : 'menu' }}</mat-icon>
+  </button>
+
+  <nav id="navegacion-principal" class="navegacion" [class.abierta]="menuAbierto()" aria-label="Navegación principal">
+    <ul>
+      @for (enlace of navegacion; track enlace.ruta) {
+        <li>
+          <a
+            [routerLink]="enlace.ruta"
+            routerLinkActive="activo"
+            ariaCurrentWhenActive="page"
+            (click)="cerrarMenu()"
+          >
+            {{ enlace.etiqueta }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+</header>

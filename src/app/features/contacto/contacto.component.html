@@ -1,0 +1,90 @@
+<div class="contenedor">
+  <app-page-heading
+    titulo="Contacto & Atención Ciudadana"
+    subtitulo="Ubicación, canales telefónicos y formulario PQRS"
+    [etiqueta]="'Atención ' + institucion.horarioAtencion"
+  />
+
+  <div class="rejilla">
+    <section class="tarjeta sede" aria-labelledby="titulo-sede">
+      <h2 id="titulo-sede">Sede Principal Torices</h2>
+      <address>
+        <p><mat-icon aria-hidden="true">location_on</mat-icon>{{ institucion.direccion }}</p>
+        <p><mat-icon aria-hidden="true">call</mat-icon>{{ institucion.telefonos }}</p>
+        <p>
+          <mat-icon aria-hidden="true">mail</mat-icon>
+          <a [href]="'mailto:' + institucion.correo">{{ institucion.correo }}</a>
+        </p>
+      </address>
+    </section>
+
+    <section class="tarjeta-franja franja-amarilla pqrs" aria-labelledby="titulo-pqrs">
+      <h2 id="titulo-pqrs">Envíanos un Mensaje (PQRS)</h2>
+
+      @if (radicada(); as r) {
+        <div class="confirmacion" role="status">
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
+          <div>
+            <p><strong>Su solicitud fue radicada.</strong></p>
+            <p>Número de radicado: <strong>{{ r.radicado }}</strong>. Guárdelo para hacer seguimiento.</p>
+            <button mat-button type="button" (click)="nuevaSolicitud()">Enviar otra solicitud</button>
+          </div>
+        </div>
+      } @else {
+        <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+          <mat-form-field>
+            <mat-label>Nombre completo</mat-label>
+            <input matInput formControlName="nombreCompleto" autocomplete="name" />
+            @if (formulario.controls.nombreCompleto.hasError('required')) {
+              <mat-error>El nombre es obligatorio.</mat-error>
+            } @else if (formulario.controls.nombreCompleto.hasError('servidor')) {
+              <mat-error>{{ formulario.controls.nombreCompleto.getError('servidor') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Correo electrónico</mat-label>
+            <input matInput type="email" formControlName="correo" autocomplete="email" />
+            @if (formulario.controls.correo.hasError('required')) {
+              <mat-error>El correo es obligatorio.</mat-error>
+            } @else if (formulario.controls.correo.hasError('email')) {
+              <mat-error>Escriba un correo válido.</mat-error>
+            } @else if (formulario.controls.correo.hasError('servidor')) {
+              <mat-error>{{ formulario.controls.correo.getError('servidor') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Tipo de solicitud</mat-label>
+            <mat-select formControlName="tipo">
+              @for (tipo of tipos; track tipo.valor) {
+                <mat-option [value]="tipo.valor">{{ tipo.etiqueta }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Escriba su consulta o mensaje aquí</mat-label>
+            <textarea matInput formControlName="mensaje" rows="4" maxlength="2000"></textarea>
+            <mat-hint align="end">{{ formulario.controls.mensaje.value.length }} / 2000</mat-hint>
+            @if (formulario.controls.mensaje.hasError('required')) {
+              <mat-error>Escriba su mensaje.</mat-error>
+            } @else if (formulario.controls.mensaje.hasError('minlength')) {
+              <mat-error>El mensaje debe tener al menos 10 caracteres.</mat-error>
+            } @else if (formulario.controls.mensaje.hasError('servidor')) {
+              <mat-error>{{ formulario.controls.mensaje.getError('servidor') }}</mat-error>
+            }
+          </mat-form-field>
+
+          @if (error()) {
+            <p class="error" role="alert">{{ error() }}</p>
+          }
+
+          <button mat-flat-button class="boton-azul enviar" type="submit" [disabled]="enviando()">
+            {{ enviando() ? 'Enviando...' : 'Enviar mensaje' }}
+          </button>
+        </form>
+      }
+    </section>
+  </div>
+</div>
