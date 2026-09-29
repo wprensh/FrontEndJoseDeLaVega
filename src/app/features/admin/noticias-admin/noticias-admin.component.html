@@ -201,9 +201,9 @@
         </div>
 
         <mat-form-field>
-          <mat-label>URL de la imagen (opcional)</mat-label>
-          <input matInput type="text" formControlName="imagenUrl" placeholder="/img/noticias/foto.png o https://..." />
-          <mat-hint>Imágenes del sitio: guárdelas en public/img/noticias/ y escriba /img/noticias/nombre.png</mat-hint>
+          <mat-label>Imagen o video de YouTube (opcional)</mat-label>
+          <input matInput type="text" formControlName="imagenUrl" placeholder="/img/noticias/foto.png, https://... o enlace de YouTube" />
+          <mat-hint>Imagen: /img/noticias/nombre.png o una URL directa. Video: pegue el enlace de YouTube (también Shorts).</mat-hint>
           @if (formulario.controls.imagenUrl.hasError('pattern')) {
             <mat-error>Use una dirección http(s):// o una ruta del sitio que empiece por /</mat-error>
           } @else if (formulario.controls.imagenUrl.hasError('servidor')) {

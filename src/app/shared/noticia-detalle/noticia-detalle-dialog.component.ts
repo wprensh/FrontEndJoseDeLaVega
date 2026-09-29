@@ -3,10 +3,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { EstiloCategoria, Noticia, estiloDeCategoria } from '../../core/models/noticia.model';
 import { desdeFechaIso } from '../../core/utils/fechas';
 import { resolverUrlRecurso } from '../../core/utils/url-recurso';
+import { analizarYoutube, urlReproductorYoutube } from '../../core/utils/youtube';
 
 /** Parámetros del modal. Solo `noticia` es obligatoria; el resto permite personalizarlo. */
 export interface NoticiaDetalleData {
@@ -59,8 +61,17 @@ export class NoticiaDetalleDialogComponent {
    */
   protected readonly estadoImagen = signal<'cargando' | 'cargada' | 'error'>('cargando');
 
-  /** Solo se intenta mostrar imagen si la noticia la tiene y no se pidió ocultarla. */
-  protected readonly tieneImagen = !!this.noticia.imagenUrl?.trim() && !this.data.ocultarImagen;
+  /**
+   * Si el enlace es un video de YouTube se muestra el reproductor en lugar de una imagen.
+   * La URL del reproductor se arma con un id validado (11 caracteres), por eso es seguro marcarla como confiable.
+   */
+  protected readonly video = this.data.ocultarImagen ? null : analizarYoutube(this.noticia.imagenUrl);
+  protected readonly urlVideo: SafeResourceUrl | null = this.video
+    ? inject(DomSanitizer).bypassSecurityTrustResourceUrl(urlReproductorYoutube(this.video))
+    : null;
+
+  /** Solo se intenta mostrar imagen si la noticia la tiene, no es un video y no se pidió ocultarla. */
+  protected readonly tieneImagen = !!this.noticia.imagenUrl?.trim() && !this.video && !this.data.ocultarImagen;
   /** Rutas del sitio ("/img/...") se resuelven contra la base de la app (necesario en GitHub Pages). */
   protected readonly urlImagen = this.tieneImagen ? resolverUrlRecurso(this.noticia.imagenUrl!.trim()) : '';
   protected readonly mostrarImagen = computed(() => this.tieneImagen && this.estadoImagen() !== 'error');

@@ -16,6 +16,20 @@
     <time [attr.datetime]="noticia.fechaPublicacion">{{ fecha | date: 'fullDate' }}</time>
   </p>
 
+  <!-- Video de YouTube (normal o Short): reproductor incrustado. -->
+  @if (video && urlVideo) {
+    <div class="marco-video" [class.vertical]="video.vertical">
+      <iframe
+        [src]="urlVideo"
+        [title]="'Video: ' + noticia.titulo"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+      ></iframe>
+    </div>
+  }
+
   <!-- La imagen solo aparece si la noticia tiene imagenUrl y el enlace carga una imagen real. -->
   @if (mostrarImagen()) {
     <figure class="marco-imagen" [class.cargando]="estadoImagen() === 'cargando'">

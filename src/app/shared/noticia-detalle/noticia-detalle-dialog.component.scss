@@ -84,6 +84,28 @@ h2[mat-dialog-title] {
   transition: opacity 200ms ease;
 }
 
+// Reproductor de YouTube: 16:9 para videos normales, 9:16 (centrado y más angosto) para Shorts.
+.marco-video {
+  margin: 0 0 1rem;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 16 / 9;
+
+  &.vertical {
+    aspect-ratio: 9 / 16;
+    inline-size: min(100%, 320px);
+    margin-inline: auto;
+  }
+
+  iframe {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+  }
+}
+
 @keyframes brillo {
   to {
     background-position: -200% 0;
