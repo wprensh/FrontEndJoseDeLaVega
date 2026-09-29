@@ -50,11 +50,17 @@ export class NoticiaDetalleDialogComponent {
 
   protected readonly fecha = desdeFechaIso(this.noticia.fechaPublicacion);
 
-  /** Si la imagen no carga (URL rota), se oculta en lugar de mostrar un icono roto. */
-  protected readonly imagenFallida = signal(false);
-  protected readonly mostrarImagen = computed(
-    () => !!this.noticia.imagenUrl && !this.data.ocultarImagen && !this.imagenFallida(),
-  );
+  /**
+   * Estado de la imagen:
+   * - 'cargando': se muestra un marcador del mismo tamaño para que el texto no salte.
+   * - 'cargada':  se muestra la imagen.
+   * - 'error':    la URL no es una imagen (p. ej. un enlace de OneDrive o Drive) y se oculta todo.
+   */
+  protected readonly estadoImagen = signal<'cargando' | 'cargada' | 'error'>('cargando');
+
+  /** Solo se intenta mostrar imagen si la noticia la tiene y no se pidió ocultarla. */
+  protected readonly tieneImagen = !!this.noticia.imagenUrl?.trim() && !this.data.ocultarImagen;
+  protected readonly mostrarImagen = computed(() => this.tieneImagen && this.estadoImagen() !== 'error');
 
   /** El contenido completo; si la noticia no lo tiene, se muestra el resumen. */
   protected readonly parrafos = (this.noticia.contenido?.trim() || this.noticia.resumen)

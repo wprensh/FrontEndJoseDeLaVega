@@ -175,9 +175,10 @@
 
         <mat-form-field>
           <mat-label>URL de la imagen (opcional)</mat-label>
-          <input matInput type="url" formControlName="imagenUrl" placeholder="https://..." />
+          <input matInput type="text" formControlName="imagenUrl" placeholder="/img/noticias/foto.png o https://..." />
+          <mat-hint>Imágenes del sitio: guárdelas en public/img/noticias/ y escriba /img/noticias/nombre.png</mat-hint>
           @if (formulario.controls.imagenUrl.hasError('pattern')) {
-            <mat-error>Escriba una dirección que empiece por http:// o https://</mat-error>
+            <mat-error>Use una dirección http(s):// o una ruta del sitio que empiece por /</mat-error>
           } @else if (formulario.controls.imagenUrl.hasError('servidor')) {
             <mat-error>{{ formulario.controls.imagenUrl.getError('servidor') }}</mat-error>
           }

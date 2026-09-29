@@ -55,12 +55,39 @@ h2[mat-dialog-title] {
   }
 }
 
-.imagen {
-  inline-size: 100%;
-  max-block-size: 320px;
-  object-fit: cover;
+.marco-imagen {
+  margin: 0 0 1rem;
   border-radius: 6px;
-  margin-block-end: 1rem;
+  overflow: hidden;
+  background: var(--jv-superficie-suave);
+
+  // Mientras carga: marcador animado con la proporción típica de una foto.
+  &.cargando {
+    aspect-ratio: 16 / 9;
+    max-block-size: 320px;
+    background: linear-gradient(90deg, #eef1f6 25%, #f7f9fc 50%, #eef1f6 75%) 0 0 / 200% 100%;
+    animation: brillo 1.2s linear infinite;
+
+    .imagen {
+      opacity: 0;
+    }
+  }
+}
+
+// `contain` muestra la imagen completa sin recortarla: sirve para fotos horizontales
+// y también para afiches o infografías verticales.
+.imagen {
+  display: block;
+  inline-size: 100%;
+  max-block-size: min(60dvh, 520px);
+  object-fit: contain;
+  transition: opacity 200ms ease;
+}
+
+@keyframes brillo {
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .resumen {

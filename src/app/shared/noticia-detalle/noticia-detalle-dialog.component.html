@@ -16,14 +16,18 @@
     <time [attr.datetime]="noticia.fechaPublicacion">{{ fecha | date: 'fullDate' }}</time>
   </p>
 
+  <!-- La imagen solo aparece si la noticia tiene imagenUrl y el enlace carga una imagen real. -->
   @if (mostrarImagen()) {
-    <img
-      class="imagen"
-      [src]="noticia.imagenUrl"
-      [alt]="noticia.titulo"
-      loading="lazy"
-      (error)="imagenFallida.set(true)"
-    />
+    <figure class="marco-imagen" [class.cargando]="estadoImagen() === 'cargando'">
+      <img
+        class="imagen"
+        [src]="noticia.imagenUrl"
+        [alt]="noticia.titulo"
+        referrerpolicy="no-referrer"
+        (load)="estadoImagen.set('cargada')"
+        (error)="estadoImagen.set('error')"
+      />
+    </figure>
   }
 
   <p class="resumen">{{ noticia.resumen }}</p>

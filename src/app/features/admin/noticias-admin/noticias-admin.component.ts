@@ -24,8 +24,11 @@ import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/ht
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 
-/** Acepta URLs http(s) absolutas; el backend aplica la misma regla. */
-const PATRON_URL = /^https?:\/\/\S+$/i;
+/**
+ * Acepta URLs http(s) absolutas o rutas del propio sitio ("/img/noticias/foto.png"),
+ * sin "//" inicial ni "..". El backend aplica la misma regla.
+ */
+const PATRON_URL = /^(https?:\/\/\S+|\/(?!\/)(?!.*\.\.)\S+)$/i;
 
 /**
  * Panel administrativo de noticias (CRUD completo).
