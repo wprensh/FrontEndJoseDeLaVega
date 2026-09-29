@@ -1,0 +1,42 @@
+<article class="tarjeta-noticia">
+  <!-- La miniatura también abre la noticia; el botón "Ver" es el acceso para teclado y lectores de pantalla. -->
+  <button type="button" class="miniatura" tabindex="-1" aria-hidden="true" (click)="ver.emit(noticia())">
+    @if (miniatura() && !miniaturaFallida()) {
+      <img
+        [src]="miniatura()"
+        alt=""
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        (error)="miniaturaFallida.set(true)"
+      />
+    } @else {
+      <mat-icon class="icono-categoria">{{ estilo().icono }}</mat-icon>
+    }
+    @if (video()) {
+      <span class="reproducir"><mat-icon>play_arrow</mat-icon></span>
+    }
+  </button>
+
+  <div class="cuerpo">
+    <span class="chip">
+      <mat-icon aria-hidden="true">{{ estilo().icono }}</mat-icon>
+      {{ estilo().etiqueta }}
+    </span>
+    <h3>{{ noticia().titulo }}</h3>
+    <p class="resumen">{{ noticia().resumen }}</p>
+
+    <footer>
+      <time [attr.datetime]="noticia().fechaPublicacion">{{ fecha() | date: 'longDate' }}</time>
+      <button
+        mat-stroked-button
+        type="button"
+        class="boton-ver"
+        [attr.aria-label]="'Ver noticia: ' + noticia().titulo"
+        (click)="ver.emit(noticia())"
+      >
+        <mat-icon aria-hidden="true">{{ video() ? 'play_circle' : 'visibility' }}</mat-icon>
+        Ver
+      </button>
+    </footer>
+  </div>
+</article>

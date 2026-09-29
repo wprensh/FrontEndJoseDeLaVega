@@ -1,4 +1,4 @@
-import { analizarYoutube, urlReproductorYoutube } from './youtube';
+import { analizarYoutube, urlMiniaturaYoutube, urlReproductorYoutube } from './youtube';
 
 describe('analizarYoutube', () => {
   it('reconoce un Short con parámetros de seguimiento', () => {
@@ -34,9 +34,15 @@ describe('analizarYoutube', () => {
     }
   });
 
-  it('arma la URL del reproductor sin cookies', () => {
-    expect(urlReproductorYoutube({ id: 'ILmomuQ9Zlk', vertical: true })).toBe(
-      'https://www.youtube-nocookie.com/embed/ILmomuQ9Zlk?rel=0',
+  it('arma la URL del reproductor sin cookies, con y sin reproducción automática', () => {
+    const video = { id: 'ILmomuQ9Zlk', vertical: true };
+    expect(urlReproductorYoutube(video)).toBe('https://www.youtube-nocookie.com/embed/ILmomuQ9Zlk?rel=0&playsinline=1');
+    expect(urlReproductorYoutube(video, { autoplay: true })).toBe(
+      'https://www.youtube-nocookie.com/embed/ILmomuQ9Zlk?rel=0&playsinline=1&autoplay=1',
     );
+  });
+
+  it('arma la URL de la miniatura', () => {
+    expect(urlMiniaturaYoutube({ id: 'ILmomuQ9Zlk', vertical: true })).toBe('https://i.ytimg.com/vi/ILmomuQ9Zlk/hqdefault.jpg');
   });
 });

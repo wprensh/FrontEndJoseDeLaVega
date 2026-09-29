@@ -45,7 +45,19 @@ export function analizarYoutube(enlace: string | null | undefined): VideoYoutube
   return id && ID_VALIDO.test(id) ? { id, vertical } : null;
 }
 
-/** URL del reproductor en modo de privacidad mejorada (no guarda cookies hasta que se reproduce). */
-export function urlReproductorYoutube(video: VideoYoutube): string {
-  return `https://www.youtube-nocookie.com/embed/${video.id}?rel=0`;
+/**
+ * URL del reproductor en modo de privacidad mejorada (no guarda cookies hasta que se reproduce).
+ * `autoplay`: inicia solo al abrirse; `playsinline` evita que el celular lo pase a pantalla completa.
+ */
+export function urlReproductorYoutube(video: VideoYoutube, opciones: { autoplay?: boolean } = {}): string {
+  const params = new URLSearchParams({ rel: '0', playsinline: '1' });
+  if (opciones.autoplay) {
+    params.set('autoplay', '1');
+  }
+  return `https://www.youtube-nocookie.com/embed/${video.id}?${params}`;
+}
+
+/** Miniatura del video (480×360) para mostrar en las tarjetas sin cargar el reproductor. */
+export function urlMiniaturaYoutube(video: VideoYoutube): string {
+  return `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
 }

@@ -19,6 +19,8 @@ export interface NoticiaDetalleData {
   readonly textoCerrar?: string;
   /** Oculta la imagen aunque la noticia tenga una. */
   readonly ocultarImagen?: boolean;
+  /** Si la noticia tiene video de YouTube, empieza a reproducirse al abrir el modal. Por defecto true. */
+  readonly reproducirAutomaticamente?: boolean;
 }
 
 /**
@@ -67,7 +69,9 @@ export class NoticiaDetalleDialogComponent {
    */
   protected readonly video = this.data.ocultarImagen ? null : analizarYoutube(this.noticia.imagenUrl);
   protected readonly urlVideo: SafeResourceUrl | null = this.video
-    ? inject(DomSanitizer).bypassSecurityTrustResourceUrl(urlReproductorYoutube(this.video))
+    ? inject(DomSanitizer).bypassSecurityTrustResourceUrl(
+        urlReproductorYoutube(this.video, { autoplay: this.data.reproducirAutomaticamente ?? true }),
+      )
     : null;
 
   /** Solo se intenta mostrar imagen si la noticia la tiene, no es un video y no se pidió ocultarla. */

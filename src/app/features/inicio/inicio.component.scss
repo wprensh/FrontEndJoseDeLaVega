@@ -87,11 +87,11 @@
 // ---- Noticias y eventos ----
 .bloques {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
   gap: 1.5rem;
   align-items: start;
 
-  @media (max-width: 900px) {
+  @media (max-width: 1000px) {
     grid-template-columns: 1fr;
   }
 
@@ -102,48 +102,53 @@
   }
 }
 
-.lista-noticias {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.9rem;
-}
-
-.noticia {
-  background: var(--jv-superficie-suave);
-  border-radius: 6px;
-  padding: 0.75rem 0.9rem;
-
-  h3 {
-    font-size: 0.95rem;
-    margin: 0 0 0.2rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--jv-texto-suave);
-    font-size: 0.9rem;
-  }
-
-  time {
-    font-size: 0.78rem;
-    color: var(--jv-texto-suave);
-  }
-}
-
-.noticia-pie {
+.encabezado-noticias {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-block-start: 0.5rem;
+  gap: 1rem;
+
+  .conteo {
+    font-size: 0.85rem;
+    color: var(--jv-texto-suave);
+  }
 }
 
-.boton-ver {
-  --mdc-outlined-button-label-text-color: var(--jv-azul);
-  --mdc-outlined-button-outline-color: var(--jv-azul);
-  --mdc-outlined-button-container-height: 32px;
-  font-family: var(--jv-fuente-titulos);
-  font-weight: 700;
+// Tres columnas en pantallas grandes (6 noticias = 2 filas), dos en tabletas y una en celulares.
+.rejilla-noticias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+  transition: opacity 150ms ease;
+
+  &.atenuada {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+}
+
+.marcador {
+  block-size: 330px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eef1f6 25%, #f7f9fc 50%, #eef1f6 75%) 0 0 / 200% 100%;
+  animation: brillo 1.2s linear infinite;
+}
+
+@keyframes brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+mat-progress-bar {
+  margin-block-end: 0.75rem;
+}
+
+.paginador {
+  margin-block-start: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--jv-borde);
+  --mat-paginator-container-background-color: var(--jv-superficie);
 }
 
 .eventos {

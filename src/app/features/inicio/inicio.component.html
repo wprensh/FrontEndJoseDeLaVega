@@ -29,41 +29,56 @@
   </section>
 
   <div class="bloques">
-    <!-- Noticias recientes (desde la API) -->
-    <section class="tarjeta noticias" aria-labelledby="titulo-noticias" [attr.aria-busy]="cargando()">
-      <h2 id="titulo-noticias">Noticias recientes</h2>
+    <!-- Noticias recientes: 6 por página, las más nuevas primero (paginación en la API) -->
+    <section
+      #seccionNoticias
+      class="noticias"
+      aria-labelledby="titulo-noticias"
+      [attr.aria-busy]="cargandoNoticias()"
+    >
+      <div class="encabezado-noticias">
+        <h2 id="titulo-noticias">Noticias recientes</h2>
+        @if (paginaNoticias().total > 0) {
+          <span class="conteo">{{ paginaNoticias().total }} {{ paginaNoticias().total === 1 ? 'noticia' : 'noticias' }}</span>
+        }
+      </div>
 
-      @if (cargando()) {
-        <mat-progress-bar mode="indeterminate" aria-label="Cargando noticias" />
-      } @else if (error()) {
-        <div class="aviso" role="alert">
-          <p>{{ error() }}</p>
-          <button mat-button type="button" (click)="cargarNoticias()">Reintentar</button>
+      @if (errorNoticias()) {
+        <div class="tarjeta aviso" role="alert">
+          <p>{{ errorNoticias() }}</p>
+          <button mat-button type="button" (click)="cargarNoticias(paginaNoticias().pagina)">Reintentar</button>
+        </div>
+      } @else if (primeraCarga()) {
+        <!-- Primera carga: marcadores con la forma de las tarjetas -->
+        <div class="rejilla-noticias" aria-hidden="true">
+          @for (m of marcadores; track m) {
+            <div class="marcador"></div>
+          }
         </div>
       } @else {
-        <div class="lista-noticias">
+        @if (cargandoNoticias()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Cargando noticias" />
+        }
+        <div class="rejilla-noticias" [class.atenuada]="cargandoNoticias()">
           @for (noticia of noticias(); track noticia.id) {
-            <article class="noticia">
-              <h3>{{ noticia.titulo }}</h3>
-              <p>{{ noticia.resumen }}</p>
-              <footer class="noticia-pie">
-                <time [attr.datetime]="noticia.fechaPublicacion">{{ aFecha(noticia.fechaPublicacion) | date: 'longDate' }}</time>
-                <button
-                  mat-stroked-button
-                  type="button"
-                  class="boton-ver"
-                  [attr.aria-label]="'Ver noticia: ' + noticia.titulo"
-                  (click)="verNoticia(noticia)"
-                >
-                  <mat-icon aria-hidden="true">visibility</mat-icon>
-                  Ver
-                </button>
-              </footer>
-            </article>
+            <app-noticia-card [noticia]="noticia" (ver)="verNoticia($event)" />
           } @empty {
             <p class="vacio">Aún no hay noticias publicadas.</p>
           }
         </div>
+
+        @if (paginaNoticias().total > noticiasPorPagina) {
+          <mat-paginator
+            class="paginador"
+            [length]="paginaNoticias().total"
+            [pageSize]="noticiasPorPagina"
+            [pageIndex]="paginaNoticias().pagina - 1"
+            [hidePageSize]="true"
+            [showFirstLastButtons]="true"
+            (page)="cambiarPagina($event)"
+            aria-label="Páginas de noticias"
+          />
+        }
       }
     </section>
 
@@ -80,7 +95,7 @@
             </button>
           </li>
         } @empty {
-          @if (!cargando() && !error()) {
+          @if (!cargandoEventos()) {
             <li class="vacio">No hay eventos programados.</li>
           }
         }

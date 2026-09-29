@@ -16,15 +16,18 @@
     <time [attr.datetime]="noticia.fechaPublicacion">{{ fecha | date: 'fullDate' }}</time>
   </p>
 
-  <!-- Video de YouTube (normal o Short): reproductor incrustado. -->
+  <!--
+    Video de YouTube (normal o Short): reproductor incrustado.
+    "autoplay" en allow delega el permiso de reproducción automática: el clic en "Ver" cuenta como interacción.
+    Se carga de inmediato (sin loading="lazy") para que empiece al abrirse el modal.
+  -->
   @if (video && urlVideo) {
     <div class="marco-video" [class.vertical]="video.vertical">
       <iframe
         [src]="urlVideo"
         [title]="'Video: ' + noticia.titulo"
-        loading="lazy"
         referrerpolicy="strict-origin-when-cross-origin"
-        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen
       ></iframe>
     </div>
