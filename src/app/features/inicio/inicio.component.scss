@@ -125,11 +125,25 @@
   }
 
   time {
-    display: block;
-    margin-block-start: 0.35rem;
     font-size: 0.78rem;
     color: var(--jv-texto-suave);
   }
+}
+
+.noticia-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-block-start: 0.5rem;
+}
+
+.boton-ver {
+  --mdc-outlined-button-label-text-color: var(--jv-azul);
+  --mdc-outlined-button-outline-color: var(--jv-azul);
+  --mdc-outlined-button-container-height: 32px;
+  font-family: var(--jv-fuente-titulos);
+  font-weight: 700;
 }
 
 .eventos {
@@ -141,6 +155,22 @@
     padding: 0;
     color: var(--jv-texto-suave);
     font-size: 0.9rem;
+  }
+}
+
+// Cada evento abre el mismo modal de detalle.
+.enlace-evento {
+  background: none;
+  border: 0;
+  padding: 0.2rem 0.4rem;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+
+  &:hover {
+    color: var(--jv-azul);
+    text-decoration: underline;
   }
 }
 

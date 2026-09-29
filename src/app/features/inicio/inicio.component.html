@@ -46,7 +46,19 @@
             <article class="noticia">
               <h3>{{ noticia.titulo }}</h3>
               <p>{{ noticia.resumen }}</p>
-              <time [attr.datetime]="noticia.fechaPublicacion">{{ aFecha(noticia.fechaPublicacion) | date: 'longDate' }}</time>
+              <footer class="noticia-pie">
+                <time [attr.datetime]="noticia.fechaPublicacion">{{ aFecha(noticia.fechaPublicacion) | date: 'longDate' }}</time>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="boton-ver"
+                  [attr.aria-label]="'Ver noticia: ' + noticia.titulo"
+                  (click)="verNoticia(noticia)"
+                >
+                  <mat-icon aria-hidden="true">visibility</mat-icon>
+                  Ver
+                </button>
+              </footer>
             </article>
           } @empty {
             <p class="vacio">Aún no hay noticias publicadas.</p>
@@ -62,8 +74,10 @@
       <ul>
         @for (evento of eventos(); track evento.id) {
           <li>
-            <time [attr.datetime]="evento.fechaPublicacion">{{ aFecha(evento.fechaPublicacion) | date: "d 'de' MMMM" }}</time>
-            - {{ evento.titulo }}
+            <button type="button" class="enlace-evento" (click)="verNoticia(evento)">
+              <time [attr.datetime]="evento.fechaPublicacion">{{ aFecha(evento.fechaPublicacion) | date: "d 'de' MMMM" }}</time>
+              - {{ evento.titulo }}
+            </button>
           </li>
         } @empty {
           @if (!cargando() && !error()) {

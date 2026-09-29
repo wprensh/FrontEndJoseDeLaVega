@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
@@ -10,6 +11,7 @@ import { Noticia } from '../../core/models/noticia.model';
 import { NoticiasService } from '../../core/services/noticias.service';
 import { desdeFechaIso } from '../../core/utils/fechas';
 import { mensajeDeError } from '../../core/utils/http-error';
+import { NoticiaDetalleDialogComponent } from '../../shared/noticia-detalle/noticia-detalle-dialog.component';
 
 interface Valor {
   readonly nombre: string;
@@ -27,6 +29,7 @@ interface Valor {
 })
 export class InicioComponent implements OnInit {
   readonly #noticiasService = inject(NoticiasService);
+  readonly #dialog = inject(MatDialog);
 
   protected readonly institucion = INSTITUCION;
 
@@ -66,5 +69,10 @@ export class InicioComponent implements OnInit {
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  /** Abre el detalle en el modal; el estilo se ajusta según la categoría de la noticia. */
+  protected verNoticia(noticia: Noticia): void {
+    NoticiaDetalleDialogComponent.abrir(this.#dialog, noticia);
   }
 }

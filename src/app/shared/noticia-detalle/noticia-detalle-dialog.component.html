@@ -1,0 +1,40 @@
+<header class="encabezado">
+  <span class="chip">
+    <mat-icon aria-hidden="true">{{ estilo().icono }}</mat-icon>
+    {{ estilo().etiqueta }}
+  </span>
+  <button mat-icon-button type="button" class="cerrar-x" aria-label="Cerrar" (click)="cerrar()">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<h2 mat-dialog-title [id]="'noticia-' + noticia.id + '-titulo'">{{ noticia.titulo }}</h2>
+
+<mat-dialog-content>
+  <p class="meta">
+    <mat-icon aria-hidden="true">calendar_today</mat-icon>
+    <time [attr.datetime]="noticia.fechaPublicacion">{{ fecha | date: 'fullDate' }}</time>
+  </p>
+
+  @if (mostrarImagen()) {
+    <img
+      class="imagen"
+      [src]="noticia.imagenUrl"
+      [alt]="noticia.titulo"
+      loading="lazy"
+      (error)="imagenFallida.set(true)"
+    />
+  }
+
+  <p class="resumen">{{ noticia.resumen }}</p>
+
+  @for (parrafo of parrafos; track $index) {
+    <p>{{ parrafo }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button class="boton-azul" type="button" (click)="cerrar()">
+    {{ data.textoCerrar ?? 'Cerrar' }}
+  </button>
+</mat-dialog-actions>
