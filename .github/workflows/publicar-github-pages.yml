@@ -1,0 +1,56 @@
+# Compila el sitio Angular y lo publica en GitHub Pages en cada push a main.
+# Dirección: https://wprensh.github.io/FrontEndJoseDeLaVega/
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una sola publicación a la vez; no se cancela una que ya esté en curso.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar (producción)
+        # El sitio vive en /FrontEndJoseDeLaVega/, no en la raíz del dominio.
+        run: npx ng build --configuration production --base-href /FrontEndJoseDeLaVega/
+
+      - name: Soporte de rutas de Angular
+        # GitHub Pages no conoce rutas como /nosotros: 404.html sirve la app y el router resuelve la ruta.
+        run: cp dist/front-end-jose-de-la-vega/browser/index.html dist/front-end-jose-de-la-vega/browser/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/front-end-jose-de-la-vega/browser
+
+  publicar:
+    needs: compilar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4
