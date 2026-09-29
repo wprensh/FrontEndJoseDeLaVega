@@ -5,11 +5,38 @@
     etiqueta="Panel administrativo"
   />
 
+  @if (!sesion.activa()) {
+    <!-- ================= Acceso ================= -->
+    <section class="tarjeta-franja franja-amarilla acceso" aria-labelledby="titulo-acceso">
+      <mat-icon class="candado" aria-hidden="true">lock</mat-icon>
+      <h2 id="titulo-acceso">Acceso restringido</h2>
+      <p>Escriba la clave de administración para publicar y editar noticias.</p>
+      <form [formGroup]="formularioAcceso" (ngSubmit)="ingresar()" novalidate>
+        <mat-form-field>
+          <mat-label>Clave de administración</mat-label>
+          <input matInput type="password" formControlName="clave" autocomplete="current-password" />
+          @if (campoClave.hasError('required')) {
+            <mat-error>Escriba la clave.</mat-error>
+          }
+        </mat-form-field>
+        @if (errorClave()) {
+          <p class="aviso-error" role="alert">{{ errorClave() }}</p>
+        }
+        <button mat-flat-button class="boton-azul" type="submit" [disabled]="verificandoClave()">
+          {{ verificandoClave() ? 'Verificando...' : 'Ingresar' }}
+        </button>
+      </form>
+    </section>
+  } @else {
   <div class="rejilla">
     <!-- ================= Listado ================= -->
     <section class="tarjeta listado" aria-labelledby="titulo-listado">
       <div class="barra">
         <h2 id="titulo-listado">Noticias</h2>
+        <button mat-button type="button" class="salir" (click)="salir()">
+          <mat-icon aria-hidden="true">logout</mat-icon>
+          Salir
+        </button>
         <mat-form-field class="buscador">
           <mat-label>Buscar por título o resumen</mat-label>
           <input
@@ -201,4 +228,5 @@
       </form>
     </section>
   </div>
+  }
 </div>

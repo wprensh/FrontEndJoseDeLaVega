@@ -19,6 +19,8 @@ import { firstValueFrom } from 'rxjs';
 import { CATEGORIAS_NOTICIA, CategoriaNoticia, GuardarNoticia, Noticia } from '../../../core/models/noticia.model';
 import { paginadorEnEspanol } from '../../../core/paginador-intl';
 import { NoticiasService } from '../../../core/services/noticias.service';
+import { PqrsService } from '../../../core/services/pqrs.service';
+import { SesionAdminService } from '../../../core/services/sesion-admin.service';
 import { aFechaIso, desdeFechaIso } from '../../../core/utils/fechas';
 import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/http-error';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
@@ -65,7 +67,15 @@ export class NoticiasAdminComponent implements OnInit {
   readonly #fb = inject(NonNullableFormBuilder);
   readonly #dialog = inject(MatDialog);
   readonly #snackBar = inject(MatSnackBar);
+  readonly #pqrs = inject(PqrsService);
   protected readonly servicio = inject(NoticiasService);
+  protected readonly sesion = inject(SesionAdminService);
+
+  // ---- Acceso con la clave de administración ----
+  protected readonly formularioAcceso = this.#fb.group({ clave: ['', Validators.required] });
+  protected readonly campoClave = this.formularioAcceso.controls.clave;
+  protected readonly verificandoClave = signal(false);
+  protected readonly errorClave = signal<string | null>(null);
 
   protected readonly categorias = CATEGORIAS_NOTICIA;
   protected readonly columnas = ['titulo', 'categoria', 'fechaPublicacion', 'publicada', 'acciones'] as const;
@@ -97,7 +107,42 @@ export class NoticiasAdminComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    void this.recargar();
+    if (this.sesion.activa()) {
+      void this.recargar();
+    }
+  }
+
+  // ---------------- Acceso ----------------
+
+  protected async ingresar(): Promise<void> {
+    if (this.campoClave.invalid) {
+      this.campoClave.markAsTouched();
+      return;
+    }
+
+    this.verificandoClave.set(true);
+    this.errorClave.set(null);
+    this.sesion.iniciar(this.campoClave.value);
+
+    try {
+      if (await this.#pqrs.verificarAccesoAdmin()) {
+        this.campoClave.reset();
+        await this.recargar();
+      } else {
+        this.sesion.cerrar();
+        this.errorClave.set('La clave no es correcta.');
+      }
+    } catch (error) {
+      this.sesion.cerrar();
+      this.errorClave.set(mensajeDeError(error));
+    } finally {
+      this.verificandoClave.set(false);
+    }
+  }
+
+  protected salir(): void {
+    this.sesion.cerrar();
+    this.cancelarEdicion();
   }
 
   // ---------------- Listado ----------------

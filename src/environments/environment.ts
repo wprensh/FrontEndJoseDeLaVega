@@ -1,8 +1,9 @@
 /**
- * Configuración de producción.
- * La API se publica bajo el mismo dominio (proxy inverso), por eso la URL es relativa.
+ * Configuración de producción (GitHub Pages).
+ * La API se publica en Render; el nombre sale de render.yaml del backend (servicio "josedelavega-api").
+ * Si Render asigna otra dirección, o cuando el colegio use su dominio propio, se cambia aquí.
  */
 export const environment = {
   production: true,
-  apiBaseUrl: '/api',
+  apiBaseUrl: 'https://josedelavega-api.onrender.com/api',
 };

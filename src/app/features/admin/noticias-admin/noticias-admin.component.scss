@@ -132,3 +132,29 @@ form {
   justify-content: flex-end;
   gap: 0.5rem;
 }
+
+// ---- Acceso con la clave de administración ----
+.acceso {
+  max-inline-size: 440px;
+  margin-inline: auto;
+  text-align: center;
+
+  form {
+    text-align: start;
+  }
+
+  p {
+    color: var(--jv-texto-suave);
+  }
+}
+
+.candado {
+  color: var(--jv-amarillo);
+  font-size: 36px;
+  inline-size: 36px;
+  block-size: 36px;
+}
+
+.salir {
+  margin-inline-start: auto;
+}

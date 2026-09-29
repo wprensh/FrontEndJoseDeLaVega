@@ -1,5 +1,5 @@
 import { registerLocaleData } from '@angular/common';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import localeEsCo from '@angular/common/locales/es-CO';
 import { ApplicationConfig, LOCALE_ID, provideZoneChangeDetection } from '@angular/core';
 import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -15,6 +15,7 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
+import { claveAdminInterceptor } from './core/http/clave-admin.interceptor';
 import { TituloPaginaStrategy } from './core/titulo-pagina.strategy';
 
 // Formatos de fecha y número en español de Colombia (p. ej. "21 de septiembre de 2026").
@@ -33,8 +34,8 @@ export const appConfig: ApplicationConfig = {
     ),
     { provide: TitleStrategy, useClass: TituloPaginaStrategy },
 
-    // ---- HttpClient sobre la API Fetch nativa del navegador ----
-    provideHttpClient(withFetch()),
+    // ---- HttpClient sobre la API Fetch nativa del navegador + clave del panel administrativo ----
+    provideHttpClient(withFetch(), withInterceptors([claveAdminInterceptor])),
 
     // ---- Angular Material: animaciones cargadas de forma diferida + opciones globales ----
     provideAnimationsAsync(),

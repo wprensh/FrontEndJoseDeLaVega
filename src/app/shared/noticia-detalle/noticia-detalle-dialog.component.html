@@ -21,7 +21,7 @@
     <figure class="marco-imagen" [class.cargando]="estadoImagen() === 'cargando'">
       <img
         class="imagen"
-        [src]="noticia.imagenUrl"
+        [src]="urlImagen"
         [alt]="noticia.titulo"
         referrerpolicy="no-referrer"
         (load)="estadoImagen.set('cargada')"

@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { EstiloCategoria, Noticia, estiloDeCategoria } from '../../core/models/noticia.model';
 import { desdeFechaIso } from '../../core/utils/fechas';
+import { resolverUrlRecurso } from '../../core/utils/url-recurso';
 
 /** Parámetros del modal. Solo `noticia` es obligatoria; el resto permite personalizarlo. */
 export interface NoticiaDetalleData {
@@ -60,6 +61,8 @@ export class NoticiaDetalleDialogComponent {
 
   /** Solo se intenta mostrar imagen si la noticia la tiene y no se pidió ocultarla. */
   protected readonly tieneImagen = !!this.noticia.imagenUrl?.trim() && !this.data.ocultarImagen;
+  /** Rutas del sitio ("/img/...") se resuelven contra la base de la app (necesario en GitHub Pages). */
+  protected readonly urlImagen = this.tieneImagen ? resolverUrlRecurso(this.noticia.imagenUrl!.trim()) : '';
   protected readonly mostrarImagen = computed(() => this.tieneImagen && this.estadoImagen() !== 'error');
 
   /** El contenido completo; si la noticia no lo tiene, se muestra el resumen. */
