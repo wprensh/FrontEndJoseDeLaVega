@@ -1,6 +1,18 @@
+<!-- Barra superior (propuesta 1a): lema + accesos rápidos -->
+<div class="barra-superior">
+  <div class="barra-superior-contenido">
+    <span>{{ institucion.ciudad }} · “{{ institucion.lema }}”</span>
+    <nav aria-label="Accesos rápidos">
+      @for (acceso of accesos; track acceso.ruta) {
+        <a [routerLink]="acceso.ruta" (click)="cerrarMenu()">{{ acceso.etiqueta }}</a>
+      }
+    </nav>
+  </div>
+</div>
+
 <header class="cabecera">
   <a class="marca" routerLink="/inicio" (click)="cerrarMenu()">
-    <app-escudo [tamano]="62" />
+    <app-escudo [tamano]="68" />
     <span class="marca-texto">
       <span class="marca-nombre">{{ institucion.nombre }}</span>
       <span class="marca-ciudad">{{ institucion.ciudad }}</span>

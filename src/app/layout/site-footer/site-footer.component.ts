@@ -4,7 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { INSTITUCION, NAVEGACION } from '../../core/institucion';
 
-/** Pie de página: navegación secundaria, redes sociales y franja del lema institucional. */
+/** Pie de página (propuesta 1a): franja amarilla, navegación, redes, contacto y lema. */
 @Component({
   selector: 'app-site-footer',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,19 +29,23 @@ import { INSTITUCION, NAVEGACION } from '../../core/institucion';
           <mat-icon>smart_display</mat-icon>
         </a>
       </div>
+
+      <p class="datos">
+        © {{ anio }} {{ institucion.nombreCorto }} · {{ institucion.direccion }} · {{ institucion.telefonos }}
+      </p>
     </div>
     <p class="lema">{{ institucion.lema }}</p>
   `,
   styles: `
-    :host { display: block; background: var(--jv-azul); color: #fff; }
+    :host { display: block; background: var(--jv-azul); color: #fff; border-top: 5px solid var(--jv-amarillo); }
     .pie {
       max-inline-size: var(--jv-ancho-maximo);
       margin-inline: auto;
-      padding: 0.6rem var(--jv-margen);
+      padding: 1.4rem var(--jv-margen) 1.1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 0.9rem 1.5rem;
       flex-wrap: wrap;
     }
     nav { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; }
@@ -54,6 +58,14 @@ import { INSTITUCION, NAVEGACION } from '../../core/institucion';
     a:hover, a.activo { color: var(--jv-amarillo); }
     .redes { display: flex; gap: 0.6rem; }
     .redes a { color: var(--jv-amarillo); display: inline-flex; }
+    .datos {
+      flex-basis: 100%;
+      margin: 0;
+      padding-block-start: 0.9rem;
+      border-top: 1px solid rgb(255 255 255 / 15%);
+      color: #c9d4e6;
+      font-size: 0.82rem;
+    }
     .lema {
       margin: 0;
       background: var(--jv-amarillo);
@@ -67,6 +79,7 @@ import { INSTITUCION, NAVEGACION } from '../../core/institucion';
 })
 export class SiteFooterComponent {
   protected readonly institucion = INSTITUCION;
+  protected readonly anio = new Date().getFullYear();
   /** El pie no repite "Campus Virtual", igual que en la plantilla. */
   protected readonly enlaces = NAVEGACION.filter((e) => e.ruta !== '/campus');
 }

@@ -4,10 +4,42 @@
   color: #fff;
 }
 
+// ---- Barra superior (propuesta 1a) ----
+.barra-superior {
+  background: var(--jv-azul-oscuro);
+  color: #c9d4e6;
+  font-size: 0.8rem;
+}
+
+.barra-superior-contenido {
+  max-inline-size: var(--jv-ancho-maximo);
+  margin-inline: auto;
+  padding: 0.45rem var(--jv-margen);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  flex-wrap: wrap;
+
+  nav {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--jv-amarillo);
+    }
+  }
+}
+
 .cabecera {
   max-inline-size: var(--jv-ancho-maximo);
   margin-inline: auto;
-  padding: 0.7rem var(--jv-margen) 0;
+  padding: 1.1rem var(--jv-margen) 0;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
@@ -21,7 +53,7 @@
   gap: 1.25rem;
   color: inherit;
   text-decoration: none;
-  padding-block-end: 0.7rem;
+  padding-block-end: 1.1rem;
 }
 
 .marca-texto {
@@ -50,20 +82,23 @@
   grid-column: 1 / -1;
   background: var(--jv-azul-oscuro);
   border-top: 2px solid #fff;
+  // Fondo a todo el ancho aunque la cabecera esté centrada.
+  box-shadow: 0 0 0 100vmax var(--jv-azul-oscuro);
+  clip-path: inset(0 -100vmax);
 
   ul {
     list-style: none;
     margin: 0;
-    padding: 0.2rem 0;
+    padding: 0.25rem 0;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 0.25rem 1rem;
+    gap: 0.25rem 0.75rem;
   }
 
   a {
     display: block;
-    padding: 0.55rem 1.1rem;
+    padding: 0.7rem 1.1rem;
     border-radius: 3px;
     color: #fff;
     font: 700 0.85rem / 1.2 var(--jv-fuente-titulos);
@@ -89,6 +124,14 @@
 
 // ---- Pantallas pequeñas: menú desplegable ----
 @media (max-width: 860px) {
+  .barra-superior-contenido > span {
+    display: none;
+  }
+
+  .barra-superior-contenido {
+    justify-content: flex-end;
+  }
+
   .cabecera {
     padding-block-end: 0.7rem;
   }
@@ -112,6 +155,8 @@
   .navegacion {
     display: none;
     margin-block-start: 0.7rem;
+    box-shadow: none;
+    clip-path: none;
 
     &.abierta {
       display: block;
