@@ -1,8 +1,12 @@
-<!-- Portada -->
+<!-- Portada (propuesta 1a · Institucional clásico) -->
 <section class="portada" aria-labelledby="titulo-portada">
   <div class="portada-texto">
-    <h1 id="titulo-portada">Forjamos futuros con <span>{{ institucion.lema }}</span></h1>
-    <a mat-flat-button class="boton-institucional" routerLink="/nosotros">Conoce más</a>
+    <h1 id="titulo-portada">Formamos con <span class="lema">{{ institucion.lema }}</span> para <span class="resaltado">el Caribe</span></h1>
+    <p class="portada-descripcion">Preescolar, básica y media con enfoque en valores, ciencia y comunidad.</p>
+    <div class="portada-acciones">
+      <a mat-flat-button class="boton-institucional" routerLink="/admisiones">Inscripción de cupos</a>
+      <a mat-stroked-button class="boton-contorno" routerLink="/nosotros">Conócenos</a>
+    </div>
   </div>
   <div class="portada-franjas" aria-hidden="true"></div>
   <!--
@@ -49,7 +53,6 @@
           <button mat-button type="button" (click)="cargarNoticias(paginaNoticias().pagina)">Reintentar</button>
         </div>
       } @else if (primeraCarga()) {
-        <!-- Primera carga: marcadores con la forma de las tarjetas -->
         <div class="rejilla-noticias" aria-hidden="true">
           @for (m of marcadores; track m) {
             <div class="marcador"></div>
@@ -84,14 +87,13 @@
 
     <!-- Eventos próximos -->
     <section class="tarjeta eventos" aria-labelledby="titulo-eventos">
-      <h2 id="titulo-eventos">Eventos próximos</h2>
-      <p class="calendario">Calendario académico</p>
+      <h2 id="titulo-eventos" class="calendario">Próximos eventos</h2>
       <ul>
         @for (evento of eventos(); track evento.id) {
           <li>
             <button type="button" class="enlace-evento" (click)="verNoticia(evento)">
               <time [attr.datetime]="evento.fechaPublicacion">{{ aFecha(evento.fechaPublicacion) | date: "d 'de' MMMM" }}</time>
-              - {{ evento.titulo }}
+              <span>{{ evento.titulo }}</span>
             </button>
           </li>
         } @empty {
