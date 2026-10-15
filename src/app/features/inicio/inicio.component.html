@@ -10,10 +10,17 @@
   </div>
   <div class="portada-franjas" aria-hidden="true"></div>
   <!--
-    Imagen de portada: copie una foto propia en public/img/portada.jpg y defina en styles.scss
-    la variable CSS jv-foto-portada con url("/img/portada.jpg"). Mientras tanto se ve un fondo ilustrado.
+    Foto de portada: public/img/portada.jpg (fachada de la sede y presentación folclórica en la cancha).
+    La ruta es relativa a propósito: el sitio se publica en /FrontEndJoseDeLaVega/ (GitHub Pages) y
+    "img/…" se resuelve con el <base href>; una ruta "/img/…" buscaría la foto fuera del sitio.
+    Si la foto no carga, se ve el fondo ilustrado de .portada-imagen.
   -->
-  <div class="portada-imagen" role="img" aria-label="Fotografía de la sede de la institución en Cartagena de Indias"></div>
+  <div
+    class="portada-imagen"
+    style="--jv-foto-portada: url('img/portada.jpg')"
+    role="img"
+    aria-label="Fachada de la sede de la Institución Educativa José de la Vega durante una presentación folclórica de los estudiantes"
+  ></div>
 </section>
 
 <div class="contenedor">
