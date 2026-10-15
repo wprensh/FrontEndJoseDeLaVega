@@ -1,10 +1,11 @@
 /**
- * Configuración de producción (Vercel).
- * La API se llama con una ruta relativa: Vercel reenvía /api/* a la API en Render (ver vercel.json).
- * Así el navegador habla con un solo dominio (sin CORS) y no importa qué dirección asigne Vercel
- * ni si luego el colegio usa un dominio propio. Si la API cambia de dirección, se cambia en vercel.json.
+ * Configuración de producción (GitHub Pages: https://wprensh.github.io/FrontEndJoseDeLaVega/).
+ * GitHub Pages solo sirve archivos estáticos y no reenvía /api, así que se usa la URL completa de la API
+ * en Render. La API acepta peticiones de https://wprensh.github.io (Cors__OrigenesPermitidos en render.yaml).
+ * Si el sitio se publica en Vercel, también funciona con esta URL siempre que su dominio se agregue al CORS
+ * de la API; o se puede volver a '/api' para usar el reenvío de vercel.json.
  */
 export const environment = {
   production: true,
-  apiBaseUrl: '/api',
+  apiBaseUrl: 'https://josedelavega-api.onrender.com/api',
 };

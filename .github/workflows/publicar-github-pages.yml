@@ -1,11 +1,12 @@
-# Compila el sitio Angular y lo publica en GitHub Pages. SOLO MANUAL (Actions > Run workflow):
-# el repositorio es privado y, en el plan gratuito de GitHub, Pages no publica repositorios privados.
-# El sitio se publica en Vercel (ver vercel.json). Úsalo solo si el repositorio vuelve a ser público
-# o la cuenta pasa a GitHub Pro. Dirección de Pages: https://wprensh.github.io/FrontEndJoseDeLaVega/
-# Ojo: Pages no reenvía /api. Para volver a Pages, apiBaseUrl de environment.ts debe ser la URL completa de la API.
+# Compila el sitio Angular y lo publica en GitHub Pages en cada push a main.
+# Dirección: https://wprensh.github.io/FrontEndJoseDeLaVega/
+# Requiere que el repositorio sea público (en el plan gratuito, Pages no publica repositorios privados).
+# La API se llama con la URL completa de Render (environment.ts): Pages no reenvía /api.
 name: Publicar en GitHub Pages
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
