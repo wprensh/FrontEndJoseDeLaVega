@@ -20,8 +20,8 @@ export const INSTITUCION = {
    */
   membrete: {
     resolucionAprobacion: '', // p. ej. 'Aprobada por Resolución No. 0000 de 0000 de la Secretaría de Educación Distrital'
-    codigoDane: '',
-    nit: '',
+    codigoDane: '113001001816',
+    nit: '806.012.497-2',
   },
   redes: {
     facebook: 'https://www.facebook.com/',
