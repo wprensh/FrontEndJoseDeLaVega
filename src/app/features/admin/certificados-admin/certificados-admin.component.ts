@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { INSTITUCION } from '../../../core/institucion';
 import {
   Certificado,
   DocumentoCertificado,
@@ -123,8 +124,8 @@ export class CertificadosAdminComponent implements OnInit {
     anioLectivo: [new Date().getFullYear() as number | null, [Validators.min(1950), Validators.max(2100)]],
     contenido: ['', [Validators.required, Validators.maxLength(5000)]],
     fechaExpedicion: [new Date(), Validators.required],
-    firmanteNombre: ['', [Validators.required, Validators.maxLength(120)]],
-    firmanteCargo: ['Rector(a)', [Validators.required, Validators.maxLength(80)]],
+    firmanteNombre: [INSTITUCION.rectoria.nombre as string, [Validators.required, Validators.maxLength(120)]],
+    firmanteCargo: [INSTITUCION.rectoria.cargo as string, [Validators.required, Validators.maxLength(80)]],
   });
 
   /** Directiva del formulario: permite reiniciar su estado "enviado" para que no queden errores en rojo. */
