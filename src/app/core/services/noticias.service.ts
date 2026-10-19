@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { PagedResult, paginaVacia } from '../models/api.models';
-import { GuardarNoticia, Noticia, NoticiaFiltro } from '../models/noticia.model';
+import { ArchivoMes, GuardarNoticia, Noticia, NoticiaFiltro } from '../models/noticia.model';
 import { mensajeDeError } from '../utils/http-error';
 
 /**
@@ -59,6 +59,11 @@ export class NoticiasService {
   /** Consulta sin modificar el estado compartido (útil para bloques como "Noticias recientes"). */
   buscar(filtro: NoticiaFiltro = {}): Promise<PagedResult<Noticia>> {
     return firstValueFrom(this.#http.get<PagedResult<Noticia>>(this.#url, { params: aParams(filtro) }));
+  }
+
+  /** Meses que tienen noticias, del más reciente al más antiguo, con su cantidad. */
+  archivo(): Promise<readonly ArchivoMes[]> {
+    return firstValueFrom(this.#http.get<readonly ArchivoMes[]>(`${this.#url}/archivo`));
   }
 
   crear(datos: GuardarNoticia): Promise<Noticia> {

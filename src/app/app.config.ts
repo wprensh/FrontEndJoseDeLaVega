@@ -2,7 +2,7 @@ import { registerLocaleData } from '@angular/common';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import localeEsCo from '@angular/common/locales/es-CO';
 import { ApplicationConfig, LOCALE_ID, provideZoneChangeDetection } from '@angular/core';
-import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -15,6 +15,7 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
+import { AdaptadorFechaColombia } from './core/adaptador-fecha';
 import { claveAdminInterceptor } from './core/http/clave-admin.interceptor';
 import { TituloPaginaStrategy } from './core/titulo-pagina.strategy';
 
@@ -40,6 +41,7 @@ export const appConfig: ApplicationConfig = {
     // ---- Angular Material: animaciones cargadas de forma diferida + opciones globales ----
     provideAnimationsAsync(),
     provideNativeDateAdapter(),
+    { provide: DateAdapter, useClass: AdaptadorFechaColombia },
     { provide: MAT_DATE_LOCALE, useValue: 'es-CO' },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline', subscriptSizing: 'dynamic' } },
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000, horizontalPosition: 'center' } },
