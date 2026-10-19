@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -44,6 +44,7 @@ type Resultado =
 export class VerificarComponent implements OnInit {
   readonly #servicio = inject(CertificadosService);
   readonly #router = inject(Router);
+  readonly #location = inject(Location);
 
   /** Código desde la URL (/verificar/CERT-2026-0A1B2C), así funciona el enlace del QR. */
   readonly codigo = input<string>();
@@ -71,8 +72,8 @@ export class VerificarComponent implements OnInit {
       return;
     }
     const codigo = this.campoCodigo.value.trim().toUpperCase();
-    // La URL queda con el código para poder compartir el resultado.
-    void this.#router.navigate(['/verificar', codigo], { replaceUrl: true });
+    // La URL queda con el código para poder compartir el resultado, sin volver a crear la página.
+    this.#location.replaceState(this.#router.serializeUrl(this.#router.createUrlTree(['/verificar', codigo])));
     void this.consultar(codigo);
   }
 

@@ -13,7 +13,8 @@
         Escanee el código QR del certificado o escriba el código que aparece al pie del documento
         (por ejemplo, <strong>CERT-2026-0A1B2C</strong>).
       </p>
-      <form (ngSubmit)="enviar()" novalidate>
+      <!-- Sin [formGroup] el formulario no emite ngSubmit: se escucha submit y se evita que recargue la página. -->
+      <form (submit)="$event.preventDefault(); enviar()" novalidate>
         <mat-form-field>
           <mat-label>Código</mat-label>
           <input
