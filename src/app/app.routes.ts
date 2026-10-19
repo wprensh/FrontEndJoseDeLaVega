@@ -49,5 +49,25 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/admin/noticias-admin/noticias-admin.component').then((m) => m.NoticiasAdminComponent),
   },
+  {
+    // Panel de certificaciones (misma clave de administración que el de noticias).
+    path: 'admin/certificados',
+    title: 'Certificaciones',
+    loadComponent: () =>
+      import('./features/admin/certificados-admin/certificados-admin.component').then(
+        (m) => m.CertificadosAdminComponent,
+      ),
+  },
+  {
+    // Verificación pública; el QR de cada certificado apunta a /verificar/{codigo}.
+    path: 'verificar/:codigo',
+    title: 'Verificar certificado',
+    loadComponent: () => import('./features/verificar/verificar.component').then((m) => m.VerificarComponent),
+  },
+  {
+    path: 'verificar',
+    title: 'Verificar certificado',
+    loadComponent: () => import('./features/verificar/verificar.component').then((m) => m.VerificarComponent),
+  },
   { path: '**', redirectTo: 'inicio' },
 ];

@@ -1,0 +1,85 @@
+<article class="hoja" [class.anulado]="certificado().anulado" [attr.aria-label]="certificado().titulo">
+  <!-- Escudo de fondo como marca de agua -->
+  <img class="marca-agua" src="img/escudo.png" alt="" aria-hidden="true" />
+
+  @if (certificado().anulado) {
+    <span class="sello sello-anulado" aria-hidden="true">ANULADO</span>
+  } @else if (!certificado().codigo) {
+    <span class="sello" aria-hidden="true">VISTA PREVIA</span>
+  }
+
+  <!-- ===== Membrete ===== -->
+  <header class="membrete">
+    <app-escudo class="escudo" [tamano]="96" />
+    <div class="membrete-texto">
+      <p class="nombre">{{ institucion.nombre }}</p>
+      @if (institucion.membrete.resolucionAprobacion) {
+        <p>{{ institucion.membrete.resolucionAprobacion }}</p>
+      }
+      @if (institucion.membrete.codigoDane || institucion.membrete.nit) {
+        <p>
+          @if (institucion.membrete.codigoDane) {
+            <span>DANE {{ institucion.membrete.codigoDane }}</span>
+          }
+          @if (institucion.membrete.codigoDane && institucion.membrete.nit) {
+            <span> · </span>
+          }
+          @if (institucion.membrete.nit) {
+            <span>NIT {{ institucion.membrete.nit }}</span>
+          }
+        </p>
+      }
+      <p>{{ institucion.ciudad }} – {{ institucion.departamento }}</p>
+      <p class="lema">“{{ institucion.lema }}”</p>
+    </div>
+  </header>
+  <div class="filete" aria-hidden="true"></div>
+
+  <!-- ===== Cuerpo ===== -->
+  <section class="cuerpo">
+    <p class="encabezado-firmante">
+      {{ certificado().firmanteCargo || '[Cargo]' }} de la {{ institucion.nombre }}
+    </p>
+    <h1 class="titulo">{{ certificado().titulo || 'CERTIFICADO' }}</h1>
+    <p class="verbo">{{ verbo() }}:</p>
+
+    @for (parrafo of parrafos(); track $index) {
+      <!-- En una sola línea: los saltos de línea entre fragmentos dejarían espacios antes de las comas. -->
+      <p class="parrafo">@for (f of parrafo; track $index) {@if (f.resaltado) {<strong>{{ f.texto }}</strong>} @else {{{ f.texto }}}}</p>
+    }
+
+    <p class="parrafo">{{ cierre() }}</p>
+  </section>
+
+  <!-- ===== Firma ===== -->
+  <section class="firma">
+    <div class="linea" aria-hidden="true"></div>
+    <p class="firmante">{{ certificado().firmanteNombre || '[Nombre de quien firma]' }}</p>
+    <p>{{ certificado().firmanteCargo || '[Cargo]' }}</p>
+  </section>
+
+  <!-- ===== Pie: verificación y datos de contacto ===== -->
+  <footer class="pie">
+    <div class="verificacion">
+      @if (qr(); as imagen) {
+        <img class="qr" [src]="imagen" alt="Código QR para verificar el certificado" />
+      } @else {
+        <div class="qr qr-vacio" aria-hidden="true"></div>
+      }
+      <div>
+        <p class="codigo">Código de verificación: <strong>{{ certificado().codigo ?? 'se asigna al expedir' }}</strong></p>
+        <p>
+          Verifique la autenticidad de este documento escaneando el código QR
+          @if (urlVerificacion(); as url) {
+            o en <span class="url">{{ url }}</span>
+          }
+        </p>
+        <p>Beneficiario: {{ sigla() }} {{ certificado().numeroDocumento || '—' }}</p>
+      </div>
+    </div>
+    <p class="contacto">
+      {{ institucion.direccion }} · Tel. {{ institucion.telefonos }} · {{ institucion.correo }}
+    </p>
+  </footer>
+  <div class="franjas" aria-hidden="true"><span></span><span></span></div>
+</article>

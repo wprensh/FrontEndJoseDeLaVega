@@ -170,6 +170,21 @@ img {
   white-space: nowrap;
 }
 
+// ---- Impresión de certificados: solo la hoja con membrete (ver CertificadosAdminComponent.imprimir) ----
+@media print {
+  body.imprimiendo-certificado {
+    background: #fff;
+
+    app-site-header,
+    app-site-footer,
+    .saltar-contenido,
+    .cdk-overlay-container,
+    .no-imprimir {
+      display: none !important;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

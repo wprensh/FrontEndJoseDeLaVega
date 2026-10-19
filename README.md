@@ -19,6 +19,8 @@ Basadas en el documento *Plantillas Web I.E. José de la Vega*, con la misma nav
 | `/contacto` | 5. Contacto & Atención Ciudadana (formulario PQRS) | API (`POST /api/pqrs`) |
 | `/campus` | 6. Campus Virtual & Plataforma Académica | Solo interfaz (sin autenticación aún) |
 | `/admin/noticias` | Panel administrativo: tabla Material + formulario reactivo (CRUD) | API (CRUD `/api/noticias`) |
+| `/admin/certificados` | Certificaciones: expedición con membrete y escudo, vista previa, impresión/PDF, registro y anulación | API (`/api/certificados`) |
+| `/verificar/:codigo` | Verificación pública de certificados (destino del QR impreso) | API (`GET /api/certificados/verificar/{codigo}`) |
 
 ## Estructura
 
@@ -91,3 +93,11 @@ npm test             # Karma + Jasmine
 - **Redes sociales**: URLs en `src/app/core/institucion.ts`.
 - **Seguridad**: proteger `/admin/noticias` con un guard de autenticación y el Campus Virtual con el
   proveedor de identidad que se elija (el backend todavía no tiene autenticación).
+
+## Certificaciones
+
+- Tipos incluidos: estudios, matrícula, conducta, paz y salvo, asistencia, mención de honor, laboral y texto libre.
+  El texto sugerido de cada tipo está en `src/app/core/models/certificado.model.ts`.
+- Los datos legales del membrete (resolución de aprobación, código DANE y NIT) se configuran en
+  `INSTITUCION.membrete` de `src/app/core/institucion.ts`; solo se imprimen si tienen valor.
+- La hoja es tamaño carta. "Imprimir / PDF" abre el diálogo del navegador, donde también se puede guardar como PDF.

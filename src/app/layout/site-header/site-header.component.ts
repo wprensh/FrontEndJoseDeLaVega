@@ -23,6 +23,7 @@ export class SiteHeaderComponent {
     { ruta: '/contacto', etiqueta: 'PQRS' },
     { ruta: '/admisiones', etiqueta: 'Inscripción de cupos' },
     { ruta: '/campus', etiqueta: 'Campus virtual' },
+    { ruta: '/verificar', etiqueta: 'Verificar certificado' },
   ];
 
   /** Menú desplegable en pantallas pequeñas. */
