@@ -54,8 +54,9 @@
   <!-- ===== Firma ===== -->
   <section class="firma">
     <div class="linea" aria-hidden="true"></div>
-    <p class="firmante">{{ certificado().firmanteNombre || '[Nombre de quien firma]' }}</p>
-    <p>{{ certificado().firmanteCargo || '[Cargo]' }}</p>
+    <p class="firmante">
+      {{ certificado().firmanteCargo || '[Cargo]' }}: {{ certificado().firmanteNombre || '[Nombre de quien firma]' }}
+    </p>
   </section>
 
   <!-- ===== Pie: verificación y datos de contacto ===== -->

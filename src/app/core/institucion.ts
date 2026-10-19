@@ -12,6 +12,8 @@ export const INSTITUCION = {
   correo: 'iejosedelavega@hotmail.com',
   horarioAtencion: '7:00 a.m. - 3:00 p.m.',
   departamento: 'Bolívar',
+  /** Firmante por defecto de los certificados. */
+  rectoria: { nombre: 'Yolima Luz Escorcia Vasquez', cargo: 'Rector(a)' },
   /**
    * Datos legales del membrete de los certificados. Solo se imprimen si tienen valor:
    * complételos con los datos oficiales de la institución.
