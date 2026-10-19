@@ -1,0 +1,80 @@
+:host {
+  display: block;
+  margin-block-end: 1rem;
+}
+
+.filtro {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: var(--jv-superficie);
+  border: 1px solid var(--jv-borde);
+  border-radius: var(--jv-radio);
+  box-shadow: var(--jv-sombra);
+}
+
+.fila-principal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+// Chips con los colores institucionales: el activo en azul con texto amarillo.
+.atajos {
+  --mdc-chip-container-shape-radius: 999px;
+  --mdc-chip-outline-color: var(--jv-borde);
+  --mdc-chip-label-text-color: var(--jv-azul);
+  --mdc-chip-label-text-weight: 600;
+  --mdc-chip-elevated-selected-container-color: var(--jv-azul);
+  --mdc-chip-selected-label-text-color: var(--jv-amarillo);
+}
+
+.selectores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.campo-archivo {
+  inline-size: 15rem;
+}
+
+.campo-orden {
+  inline-size: 12rem;
+}
+
+.campo-rango {
+  inline-size: min(100%, 22rem);
+}
+
+// Las opciones del archivo muestran la cantidad de noticias del mes a la derecha.
+.mes {
+  display: inline-block;
+}
+
+.mes::first-letter {
+  text-transform: uppercase;
+}
+
+.cantidad {
+  margin-inline-start: 0.5rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--jv-superficie-suave);
+  color: var(--jv-texto-suave);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 600px) {
+  .selectores,
+  .campo-archivo,
+  .campo-orden {
+    inline-size: 100%;
+  }
+
+  .selectores mat-form-field {
+    flex: 1 1 10rem;
+  }
+}

@@ -1,0 +1,55 @@
+<div class="filtro" role="search" aria-label="Filtrar noticias por fecha">
+  <div class="fila-principal">
+    <mat-chip-listbox
+      class="atajos"
+      aria-label="Periodo de publicación"
+      [value]="atajoActivo()"
+      [hideSingleSelectionIndicator]="true"
+      (change)="elegirAtajo($event)"
+    >
+      @for (atajo of atajos; track atajo.valor) {
+        <mat-chip-option [value]="atajo.valor">{{ atajo.etiqueta }}</mat-chip-option>
+      }
+    </mat-chip-listbox>
+
+    <div class="selectores">
+      @if (meses().length > 0) {
+        <mat-form-field class="campo-archivo">
+          <mat-label>Archivo</mat-label>
+          <mat-icon matIconPrefix aria-hidden="true">inventory_2</mat-icon>
+          <mat-select [value]="mesActivo()" (selectionChange)="elegirMes($event.value)" panelWidth="">
+            <mat-option [value]="null">Todos los meses</mat-option>
+            @for (mes of meses(); track mes.clave) {
+              <mat-option [value]="mes.clave">
+                <span class="mes">{{ mes.fecha | date: "MMMM 'de' y" }}</span>
+                <span class="cantidad">{{ mes.total }}</span>
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <mat-form-field class="campo-orden">
+        <mat-label>Orden</mat-label>
+        <mat-icon matIconPrefix aria-hidden="true">swap_vert</mat-icon>
+        <mat-select [value]="filtro().orden" (selectionChange)="elegirOrden($event.value)">
+          <mat-option value="Recientes">Más recientes</mat-option>
+          <mat-option value="Antiguas">Más antiguas</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  @if (filtro().periodo === 'personalizado') {
+    <mat-form-field class="campo-rango">
+      <mat-label>Rango de fechas</mat-label>
+      <mat-date-range-input [formGroup]="rango" [rangePicker]="selectorRango" [min]="fechaMinima()">
+        <input matStartDate formControlName="desde" placeholder="Desde" (dateChange)="aplicarRango()" />
+        <input matEndDate formControlName="hasta" placeholder="Hasta" (dateChange)="aplicarRango()" />
+      </mat-date-range-input>
+      <mat-hint>dd/mm/aaaa – dd/mm/aaaa</mat-hint>
+      <mat-datepicker-toggle matIconSuffix [for]="selectorRango" />
+      <mat-date-range-picker #selectorRango />
+    </mat-form-field>
+  }
+</div>
