@@ -151,6 +151,54 @@
   }
 }
 
+.resumen-filtro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin: 0 0 0.9rem;
+  color: var(--jv-texto-suave);
+  font-size: 0.9rem;
+
+  > mat-icon {
+    color: var(--jv-azul-medio);
+    font-size: 20px;
+    inline-size: 20px;
+    block-size: 20px;
+  }
+
+  strong {
+    color: var(--jv-azul);
+  }
+
+  .quitar-filtro {
+    margin-inline-start: auto;
+  }
+}
+
+.vacio-filtro {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border: 1px dashed var(--jv-borde);
+  border-radius: var(--jv-radio);
+  background: var(--jv-superficie);
+
+  > mat-icon {
+    font-size: 40px;
+    inline-size: 40px;
+    block-size: 40px;
+    color: var(--jv-azul-medio);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
 .rejilla-noticias {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));

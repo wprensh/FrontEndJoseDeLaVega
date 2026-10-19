@@ -60,10 +60,26 @@ export interface GuardarNoticia {
   publicada: boolean;
 }
 
+/** Orden del listado por fecha de publicación (enum OrdenNoticias del backend). */
+export type OrdenNoticias = 'Recientes' | 'Antiguas';
+
 export interface NoticiaFiltro {
   buscar?: string;
   categoria?: CategoriaNoticia;
   soloPublicadas?: boolean;
+  /** Fecha ISO "yyyy-MM-dd", inclusiva. */
+  desde?: string;
+  /** Fecha ISO "yyyy-MM-dd", inclusiva. */
+  hasta?: string;
+  orden?: OrdenNoticias;
   pagina?: number;
   tamanoPagina?: number;
+}
+
+/** Cantidad de noticias de un mes (GET /api/noticias/archivo). */
+export interface ArchivoMes {
+  readonly anio: number;
+  /** 1 = enero … 12 = diciembre. */
+  readonly mes: number;
+  readonly total: number;
 }

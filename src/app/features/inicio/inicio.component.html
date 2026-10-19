@@ -40,7 +40,7 @@
   </section>
 
   <div class="bloques">
-    <!-- Noticias recientes: 6 por página, las más nuevas primero (paginación en la API) -->
+    <!-- Noticias recientes: 6 por página, filtrables por fecha (filtro y paginación en la API) -->
     <section
       #seccionNoticias
       class="noticias"
@@ -53,6 +53,22 @@
           <span class="conteo">{{ paginaNoticias().total }} {{ paginaNoticias().total === 1 ? 'noticia' : 'noticias' }}</span>
         }
       </div>
+
+      <app-filtro-fechas-noticias [filtro]="filtro()" [archivo]="archivo()" (cambiar)="cambiarFiltro($event)" />
+
+      @if (hayFiltroDeFechas() && !primeraCarga() && !errorNoticias() && paginaNoticias().total > 0) {
+        <p class="resumen-filtro" aria-live="polite">
+          <mat-icon aria-hidden="true">filter_alt</mat-icon>
+          <span>
+            {{ paginaNoticias().total }} {{ paginaNoticias().total === 1 ? 'noticia publicada' : 'noticias publicadas' }}
+            <strong>{{ descripcionPeriodo() }}</strong>
+          </span>
+          <button mat-button type="button" class="quitar-filtro" (click)="quitarFiltro()">
+            <mat-icon>close</mat-icon>
+            Quitar filtro
+          </button>
+        </p>
+      }
 
       @if (errorNoticias()) {
         <div class="tarjeta aviso" role="alert">
@@ -73,7 +89,15 @@
           @for (noticia of noticias(); track noticia.id) {
             <app-noticia-card [noticia]="noticia" (ver)="verNoticia($event)" />
           } @empty {
-            <p class="vacio">Aún no hay noticias publicadas.</p>
+            @if (hayFiltroDeFechas()) {
+              <div class="vacio vacio-filtro">
+                <mat-icon aria-hidden="true">event_busy</mat-icon>
+                <p>No hay noticias publicadas {{ descripcionPeriodo() }}.</p>
+                <button mat-stroked-button type="button" (click)="quitarFiltro()">Ver todas las noticias</button>
+              </div>
+            } @else {
+              <p class="vacio">Aún no hay noticias publicadas.</p>
+            }
           }
         </div>
 
