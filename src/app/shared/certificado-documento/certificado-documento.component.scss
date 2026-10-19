@@ -1,0 +1,231 @@
+// La hoja mide 8,5 × 11 pulgadas (carta). En pantalla 1em = ancho/51 (≈16 px a tamaño real),
+// así todo el documento se escala de forma proporcional al ancho del contenedor.
+:host {
+  display: block;
+  container-type: inline-size;
+}
+
+.hoja {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  aspect-ratio: 8.5 / 11;
+  font-size: calc(100cqi / 51);
+  padding: 2.6em 3.6em 0;
+  background: #fff;
+  color: #1b2a41;
+  box-shadow: 0 2px 10px rgb(10 38 71 / 18%);
+  page: certificado;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.marca-agua {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  inline-size: 26em;
+  translate: -50% -42%;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.sello {
+  position: absolute;
+  inset: 45% 0 auto;
+  text-align: center;
+  rotate: -28deg;
+  font: 700 5.2em / 1 var(--jv-fuente-titulos);
+  letter-spacing: 0.08em;
+  color: rgb(10 38 71 / 7%);
+  pointer-events: none;
+}
+
+.sello-anulado {
+  color: rgb(215 38 61 / 30%);
+  border-block: 0.06em solid rgb(215 38 61 / 30%);
+}
+
+// ---- Membrete ----
+.membrete {
+  display: flex;
+  align-items: center;
+  gap: 1.4em;
+
+  .escudo {
+    inline-size: 6em !important;
+    block-size: 6em !important;
+    padding: 0;
+  }
+}
+
+.membrete-texto {
+  flex: 1;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 0.72em;
+    line-height: 1.45;
+    color: #3b4a61;
+  }
+
+  .nombre {
+    font: 700 1.5em / 1.2 var(--jv-fuente-titulos);
+    color: var(--jv-azul);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-block-end: 0.25em;
+  }
+
+  .lema {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--jv-azul-medio);
+  }
+}
+
+.filete {
+  margin-block: 1em 0;
+  block-size: 0.38em;
+  border-block: 0.22em solid var(--jv-azul);
+  border-block-end: 0.1em solid var(--jv-amarillo);
+}
+
+// ---- Cuerpo ----
+.cuerpo {
+  flex: 1;
+  padding-block: 2em 1em;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.encabezado-firmante,
+.verbo {
+  margin: 0;
+  text-align: center;
+  font: 700 0.85em / 1.4 var(--jv-fuente-titulos);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--jv-azul);
+}
+
+.titulo {
+  margin: 1.1em 0 1.2em;
+  text-align: center;
+  font: 700 1.55em / 1.2 var(--jv-fuente-titulos);
+  letter-spacing: 0.14em;
+  color: var(--jv-azul);
+}
+
+.verbo {
+  margin-block-end: 1.4em;
+}
+
+.parrafo {
+  margin: 0 0 1.1em;
+  font-size: 1em;
+  line-height: 1.75;
+  text-align: justify;
+  white-space: pre-line;
+  hyphens: auto;
+}
+
+// ---- Firma ----
+.firma {
+  margin-block: 1em 1.6em;
+  text-align: center;
+
+  // Espacio para la firma manuscrita y el sello.
+  .linea {
+    inline-size: 17em;
+    margin: 4.5em auto 0.4em;
+    border-block-end: 0.07em solid #1b2a41;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85em;
+  }
+
+  .firmante {
+    font: 700 0.95em / 1.4 var(--jv-fuente-titulos);
+    text-transform: uppercase;
+    color: var(--jv-azul);
+  }
+}
+
+// ---- Pie ----
+.pie {
+  border-block-start: 0.06em solid #c9d2e0;
+  padding-block: 0.9em 0.8em;
+  font-size: 0.66em;
+  color: #4a566b;
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.verificacion {
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+}
+
+.qr {
+  inline-size: 7.2em;
+  block-size: 7.2em;
+  flex: none;
+}
+
+.qr-vacio {
+  border: 0.12em dashed #c9d2e0;
+}
+
+.codigo strong {
+  color: var(--jv-azul);
+  letter-spacing: 0.05em;
+}
+
+.url {
+  color: var(--jv-azul-medio);
+  word-break: break-all;
+}
+
+.contacto {
+  margin-block-start: 0.7em !important;
+  text-align: center;
+}
+
+.franjas {
+  margin-inline: -3.6em;
+
+  span {
+    display: block;
+    block-size: 0.55em;
+    background: var(--jv-azul);
+  }
+
+  span + span {
+    block-size: 0.3em;
+    background: var(--jv-amarillo);
+  }
+}
+
+// ---- Impresión: una hoja carta exacta, sin sombra ----
+@page certificado {
+  size: letter;
+  margin: 0;
+}
+
+@media print {
+  .hoja {
+    inline-size: 8.5in;
+    block-size: 11in;
+    aspect-ratio: auto;
+    font-size: 16px;
+    box-shadow: none;
+  }
+}

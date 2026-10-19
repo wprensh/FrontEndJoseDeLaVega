@@ -15,7 +15,9 @@ import { INSTITUCION, NAVEGACION } from '../../core/institucion';
         @for (enlace of enlaces; track enlace.ruta) {
           <a [routerLink]="enlace.ruta" routerLinkActive="activo">{{ enlace.etiqueta }}</a>
         }
+        <a routerLink="/verificar" routerLinkActive="activo">Verificar certificado</a>
         <a routerLink="/admin/noticias" routerLinkActive="activo">Administrar</a>
+        <a routerLink="/admin/certificados" routerLinkActive="activo">Certificaciones</a>
       </nav>
 
       <div class="redes">

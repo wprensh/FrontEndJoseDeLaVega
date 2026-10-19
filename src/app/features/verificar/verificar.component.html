@@ -1,0 +1,100 @@
+<div class="contenedor">
+  <app-page-heading
+    titulo="Verificar certificado"
+    subtitulo="Confirme que un certificado expedido por la institución es auténtico y está vigente"
+    etiqueta="Servicio en línea"
+  />
+
+  <div class="rejilla">
+    <section class="tarjeta-franja franja-amarilla consulta" aria-labelledby="titulo-consulta">
+      <mat-icon class="icono" aria-hidden="true">qr_code_scanner</mat-icon>
+      <h2 id="titulo-consulta">Código de verificación</h2>
+      <p>
+        Escanee el código QR del certificado o escriba el código que aparece al pie del documento
+        (por ejemplo, <strong>CERT-2026-0A1B2C</strong>).
+      </p>
+      <form (ngSubmit)="enviar()" novalidate>
+        <mat-form-field>
+          <mat-label>Código</mat-label>
+          <input
+            matInput
+            [formControl]="campoCodigo"
+            maxlength="20"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+          />
+          @if (campoCodigo.hasError('required')) {
+            <mat-error>Escriba el código.</mat-error>
+          }
+        </mat-form-field>
+        <button mat-flat-button class="boton-azul" type="submit" [disabled]="consultando()">
+          {{ consultando() ? 'Verificando...' : 'Verificar' }}
+        </button>
+      </form>
+      @if (consultando()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Verificando certificado" />
+      }
+    </section>
+
+    <section class="resultado" aria-live="polite">
+      @if (resultado(); as r) {
+        @if (r.estado === 'valido' || r.estado === 'anulado') {
+          <div class="tarjeta-lateral aviso" [class]="r.estado">
+            @if (r.estado === 'valido') {
+              <mat-icon aria-hidden="true">verified</mat-icon>
+              <div>
+                <h2>Certificado auténtico y vigente</h2>
+                <p>Fue expedido por la {{ institucion.nombre }}.</p>
+              </div>
+            } @else {
+              <mat-icon aria-hidden="true">block</mat-icon>
+              <div>
+                <h2>Certificado anulado</h2>
+                <p>Este documento fue expedido por la institución, pero ya no es válido.</p>
+              </div>
+            }
+          </div>
+          <dl class="tarjeta detalle">
+            <div><dt>Código</dt><dd class="codigo">{{ r.certificado.codigo }}</dd></div>
+            <div><dt>Documento</dt><dd>{{ r.certificado.titulo }}</dd></div>
+            <div><dt>Expedido a</dt><dd>{{ r.certificado.nombreBeneficiario }}</dd></div>
+            <div><dt>Documento de identidad</dt><dd>{{ r.certificado.documentoParcial }}</dd></div>
+            <div>
+              <dt>Fecha de expedición</dt>
+              <dd>{{ aFecha(r.certificado.fechaExpedicion) | date: 'longDate' }}</dd>
+            </div>
+          </dl>
+        } @else if (r.estado === 'inexistente') {
+          <div class="tarjeta-lateral aviso inexistente">
+            <mat-icon aria-hidden="true">help_outline</mat-icon>
+            <div>
+              <h2>Código no encontrado</h2>
+              <p>
+                No hay ningún certificado con el código {{ r.codigo }}. Revise que lo haya escrito igual que en el
+                documento; si el problema continúa, comuníquese con la institución: {{ institucion.telefonos }} ·
+                {{ institucion.correo }}.
+              </p>
+            </div>
+          </div>
+        } @else if (r.estado === 'error') {
+          <div class="tarjeta-lateral aviso inexistente" role="alert">
+            <mat-icon aria-hidden="true">cloud_off</mat-icon>
+            <div>
+              <h2>No se pudo verificar</h2>
+              <p>{{ r.mensaje }}</p>
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="tarjeta vacio">
+          <mat-icon aria-hidden="true">workspace_premium</mat-icon>
+          <p>
+            Todos los certificados de la institución llevan un código único y un QR. Aquí verá su tipo, a quién se
+            expidió y si sigue vigente.
+          </p>
+        </div>
+      }
+    </section>
+  </div>
+</div>
