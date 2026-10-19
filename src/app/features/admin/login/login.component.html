@@ -1,0 +1,142 @@
+<div class="contenedor">
+  <section class="tarjeta-franja franja-amarilla acceso" aria-labelledby="titulo-acceso">
+    <app-escudo class="escudo-acceso" [tamano]="72" />
+    <p class="institucion">{{ institucion.nombreCorto }}</p>
+
+    @switch (modo()) {
+      @case ('cargando') {
+        <h1 id="titulo-acceso">Panel administrativo</h1>
+        <mat-progress-bar mode="indeterminate" aria-label="Conectando con el servidor" />
+        <p class="nota">Conectando con el servidor...</p>
+      }
+
+      @case ('ingreso') {
+        <h1 id="titulo-acceso">Iniciar sesión</h1>
+        <p class="nota">Panel administrativo: noticias, certificaciones y demás módulos.</p>
+
+        <form [formGroup]="formIngreso" (ngSubmit)="ingresar()" novalidate>
+          <mat-form-field>
+            <mat-label>Usuario</mat-label>
+            <mat-icon matPrefix aria-hidden="true">person</mat-icon>
+            <input matInput formControlName="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" />
+            @if (formIngreso.controls.usuario.hasError('required')) {
+              <mat-error>Escriba su usuario.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Contraseña</mat-label>
+            <mat-icon matPrefix aria-hidden="true">lock</mat-icon>
+            <input
+              matInput
+              [type]="verClave() ? 'text' : 'password'"
+              formControlName="clave"
+              autocomplete="current-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              (click)="verClave.set(!verClave())"
+            >
+              <mat-icon>{{ verClave() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (formIngreso.controls.clave.hasError('required')) {
+              <mat-error>Escriba su contraseña.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-checkbox formControlName="recordar">Mantener la sesión iniciada en este equipo</mat-checkbox>
+
+          @if (error()) {
+            <p class="aviso-error" role="alert">{{ error() }}</p>
+          }
+
+          <button mat-flat-button class="boton-azul" type="submit" [disabled]="enviando()">
+            {{ enviando() ? 'Ingresando...' : 'Ingresar' }}
+          </button>
+        </form>
+        <p class="nota pie">¿Olvidó su contraseña? Pídale al administrador del panel que se la restablezca.</p>
+      }
+
+      @case ('configuracion') {
+        <h1 id="titulo-acceso">Configuración inicial</h1>
+        <p class="nota">
+          Aún no hay usuarios. Cree el superadministrador, que tendrá todos los permisos y podrá crear a los demás.
+          Se pide una sola vez la clave de administración del servidor (Render → Environment → Administracion__ClaveApi).
+        </p>
+
+        <form [formGroup]="formConfiguracion" (ngSubmit)="configurar()" novalidate>
+          <mat-form-field>
+            <mat-label>Clave de administración del servidor</mat-label>
+            <mat-icon matPrefix aria-hidden="true">vpn_key</mat-icon>
+            <input matInput type="password" formControlName="claveAdministracion" autocomplete="off" />
+            @if (formConfiguracion.controls.claveAdministracion.hasError('required')) {
+              <mat-error>Escriba la clave de administración.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Nombre completo</mat-label>
+            <input matInput formControlName="nombreCompleto" autocomplete="name" />
+            @if (formConfiguracion.controls.nombreCompleto.hasError('required')) {
+              <mat-error>Escriba su nombre.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Correo (opcional)</mat-label>
+            <input matInput type="email" formControlName="correo" autocomplete="email" />
+            @if (formConfiguracion.controls.correo.invalid) {
+              <mat-error>{{ formConfiguracion.controls.correo.getError('servidor') ?? 'El correo no es válido.' }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Usuario</mat-label>
+            <input matInput formControlName="nombreUsuario" autocomplete="username" autocapitalize="none" spellcheck="false" />
+            <mat-hint>Con este nombre iniciará sesión, p. ej. rectoria.</mat-hint>
+            @if (formConfiguracion.controls.nombreUsuario.invalid) {
+              <mat-error>
+                {{ formConfiguracion.controls.nombreUsuario.getError('servidor') ?? 'De 3 a 50 letras sin tildes, números, puntos o guiones.' }}
+              </mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Contraseña</mat-label>
+            <input matInput type="password" formControlName="clave" autocomplete="new-password" />
+            <mat-hint>Mínimo 8 caracteres, con letras y números.</mat-hint>
+            @if (formConfiguracion.controls.clave.invalid) {
+              <mat-error>
+                {{ formConfiguracion.controls.clave.getError('servidor') ?? 'Mínimo 8 caracteres, con letras y números.' }}
+              </mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Repita la contraseña</mat-label>
+            <input matInput type="password" formControlName="confirmacion" autocomplete="new-password" />
+            @if (formConfiguracion.controls.confirmacion.hasError('noCoincide')) {
+              <mat-error>Las contraseñas no coinciden.</mat-error>
+            }
+          </mat-form-field>
+
+          @if (error()) {
+            <p class="aviso-error" role="alert">{{ error() }}</p>
+          }
+
+          <button mat-flat-button class="boton-azul" type="submit" [disabled]="enviando()">
+            {{ enviando() ? 'Creando...' : 'Crear superadministrador e ingresar' }}
+          </button>
+        </form>
+      }
+    }
+
+    <a mat-button routerLink="/inicio" class="volver">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Volver al sitio
+    </a>
+  </section>
+</div>

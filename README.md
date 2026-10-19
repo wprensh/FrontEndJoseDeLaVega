@@ -18,6 +18,9 @@ Basadas en el documento *Plantillas Web I.E. José de la Vega*, con la misma nav
 | `/servicios` | 4. Servicios Institucionales & Bienestar | Estático |
 | `/contacto` | 5. Contacto & Atención Ciudadana (formulario PQRS) | API (`POST /api/pqrs`) |
 | `/campus` | 6. Campus Virtual & Plataforma Académica | Solo interfaz (sin autenticación aún) |
+| `/admin/login` | Inicio de sesión del panel (y configuración inicial del primer superadministrador) | API (`/api/auth`) |
+| `/admin` | Panel: los módulos que el usuario puede usar | API (`GET /api/auth/perfil`) |
+| `/admin/usuarios` | Usuarios del panel y sus permisos Ver/Crear/Editar/Eliminar por módulo | API (`/api/usuarios`) |
 | `/admin/noticias` | Panel administrativo: tabla Material + formulario reactivo (CRUD) | API (CRUD `/api/noticias`) |
 | `/admin/certificados` | Certificaciones: expedición con membrete y escudo, vista previa, impresión/PDF, registro y anulación | API (`/api/certificados`) |
 | `/verificar/:codigo` | Verificación pública de certificados (destino del QR impreso) | API (`GET /api/certificados/verificar/{codigo}`) |
@@ -38,7 +41,7 @@ src/
 │   ├── shared/                     # Componentes reutilizables (escudo, encabezado de sección, diálogo)
 │   ├── features/                   # Una carpeta por sección, cargada de forma perezosa
 │   │   ├── inicio/  nosotros/  academico/  admisiones/  servicios/  contacto/  campus/
-│   │   └── admin/noticias-admin/   #   CRUD con MatTable + formulario reactivo
+│   │   └── admin/                  #   login, panel, noticias-admin, certificados-admin, usuarios-admin
 │   ├── app.component.ts            # Shell: header + <router-outlet> + footer
 │   ├── app.config.ts               # Providers: router, HttpClient, Material, locale es-CO
 │   └── app.routes.ts               # Rutas con loadComponent (lazy loading)
@@ -91,8 +94,21 @@ npm test             # Karma + Jasmine
   (Las imágenes del documento de plantillas provienen de YouTube e iStock y no deben publicarse sin licencia).
 - **Documentos**: `public/docs/pei.pdf` y `public/docs/requisitos-admision.pdf`.
 - **Redes sociales**: URLs en `src/app/core/institucion.ts`.
-- **Seguridad**: proteger `/admin/noticias` con un guard de autenticación y el Campus Virtual con el
-  proveedor de identidad que se elija (el backend todavía no tiene autenticación).
+- **Seguridad**: el Campus Virtual sigue sin autenticación; el panel administrativo ya usa usuarios y permisos.
+
+## Panel administrativo: usuarios y permisos
+
+- Se entra por `/admin/login` (o el enlace *Acceso administrativo* del pie de página). La primera vez, sin usuarios
+  creados, la página pide la clave de administración del servidor (Render → *Environment* →
+  `Administracion__ClaveApi`) para crear el superadministrador.
+- Cada usuario tiene, por módulo, los permisos **Ver**, **Crear**, **Editar** y **Eliminar** (en certificaciones,
+  *Crear* es expedir y *Eliminar* es anular). Las rutas usan `requierePermiso('Modulo')` y los botones se muestran
+  según `SesionService.puede(modulo, accion)`; la API vuelve a validar cada acción.
+- La sesión dura 8 horas. Por defecto termina al cerrar la pestaña; con *Mantener la sesión iniciada* se conserva
+  en el equipo. Si un administrador desactiva al usuario o le restablece la contraseña, la sesión se cierra sola.
+- **Agregar un módulo nuevo**: un valor en `ModuloSistema` (API), una entrada en `MODULOS`
+  (`core/models/usuario.model.ts`) y la ruta con `canActivate: [requierePermiso('NuevoModulo')]`. Aparece solo en la
+  matriz de permisos, el panel y la barra del panel.
 
 ## Certificaciones
 

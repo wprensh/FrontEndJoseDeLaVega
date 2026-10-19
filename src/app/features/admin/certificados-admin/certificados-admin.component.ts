@@ -15,7 +15,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { INSTITUCION } from '../../../core/institucion';
@@ -34,10 +33,10 @@ import {
 } from '../../../core/models/certificado.model';
 import { paginadorEnEspanol } from '../../../core/paginador-intl';
 import { CertificadosService } from '../../../core/services/certificados.service';
-import { PqrsService } from '../../../core/services/pqrs.service';
-import { SesionAdminService } from '../../../core/services/sesion-admin.service';
+import { SesionService } from '../../../core/services/sesion.service';
 import { aFechaIso, desdeFechaIso } from '../../../core/utils/fechas';
 import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/http-error';
+import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { CertificadoDocumentoComponent } from '../../../shared/certificado-documento/certificado-documento.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { AnularCertificadoDialogComponent } from './anular-certificado-dialog.component';
@@ -58,7 +57,6 @@ const CLASE_IMPRESION = 'imprimiendo-certificado';
   imports: [
     DatePipe,
     ReactiveFormsModule,
-    RouterLink,
     MatAutocompleteModule,
     MatButtonModule,
     MatDatepickerModule,
@@ -71,6 +69,7 @@ const CLASE_IMPRESION = 'imprimiendo-certificado';
     MatTableModule,
     MatTooltipModule,
     CertificadoDocumentoComponent,
+    BarraAdminComponent,
     PageHeadingComponent,
   ],
   providers: [{ provide: MatPaginatorIntl, useFactory: paginadorEnEspanol }],
@@ -81,16 +80,13 @@ export class CertificadosAdminComponent implements OnInit {
   readonly #fb = inject(NonNullableFormBuilder);
   readonly #dialog = inject(MatDialog);
   readonly #snackBar = inject(MatSnackBar);
-  readonly #pqrs = inject(PqrsService);
   readonly #destroyRef = inject(DestroyRef);
+  readonly #sesion = inject(SesionService);
   protected readonly servicio = inject(CertificadosService);
-  protected readonly sesion = inject(SesionAdminService);
 
-  // ---- Acceso con la clave de administración ----
-  protected readonly formularioAcceso = this.#fb.group({ clave: ['', Validators.required] });
-  protected readonly campoClave = this.formularioAcceso.controls.clave;
-  protected readonly verificandoClave = signal(false);
-  protected readonly errorClave = signal<string | null>(null);
+  // ---- Permisos del usuario en el módulo: "Crear" es expedir y "Eliminar" es anular ----
+  protected readonly puedeExpedir = computed(() => this.#tiene('Crear'));
+  protected readonly puedeAnular = computed(() => this.#tiene('Eliminar'));
 
   protected readonly tipos = TIPOS_CERTIFICADO;
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
@@ -183,42 +179,12 @@ export class CertificadosAdminComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.sesion.activa()) {
-      void this.recargar();
-    }
+    void this.recargar();
   }
 
-  // ---------------- Acceso ----------------
-
-  protected async ingresar(): Promise<void> {
-    if (this.campoClave.invalid) {
-      this.campoClave.markAsTouched();
-      return;
-    }
-
-    this.verificandoClave.set(true);
-    this.errorClave.set(null);
-    this.sesion.iniciar(this.campoClave.value);
-
-    try {
-      if (await this.#pqrs.verificarAccesoAdmin()) {
-        this.campoClave.reset();
-        await this.recargar();
-      } else {
-        this.sesion.cerrar();
-        this.errorClave.set('La clave no es correcta.');
-      }
-    } catch (error) {
-      this.sesion.cerrar();
-      this.errorClave.set(mensajeDeError(error));
-    } finally {
-      this.verificandoClave.set(false);
-    }
-  }
-
-  protected salir(): void {
-    this.sesion.cerrar();
-    this.seleccionado.set(null);
+  #tiene(accion: 'Crear' | 'Eliminar'): boolean {
+    this.#sesion.usuario(); // Dependencia: cambia con los permisos de la sesión.
+    return this.#sesion.puede('Certificados', accion);
   }
 
   // ---------------- Listado ----------------

@@ -16,7 +16,7 @@ import {
 
 import { routes } from './app.routes';
 import { AdaptadorFechaColombia } from './core/adaptador-fecha';
-import { claveAdminInterceptor } from './core/http/clave-admin.interceptor';
+import { autenticacionInterceptor } from './core/http/autenticacion.interceptor';
 import { TituloPaginaStrategy } from './core/titulo-pagina.strategy';
 
 // Formatos de fecha y número en español de Colombia (p. ej. "21 de septiembre de 2026").
@@ -35,8 +35,8 @@ export const appConfig: ApplicationConfig = {
     ),
     { provide: TitleStrategy, useClass: TituloPaginaStrategy },
 
-    // ---- HttpClient sobre la API Fetch nativa del navegador + clave del panel administrativo ----
-    provideHttpClient(withFetch(), withInterceptors([claveAdminInterceptor])),
+    // ---- HttpClient sobre la API Fetch nativa del navegador + token de la sesión administrativa ----
+    provideHttpClient(withFetch(), withInterceptors([autenticacionInterceptor])),
 
     // ---- Angular Material: animaciones cargadas de forma diferida + opciones globales ----
     provideAnimationsAsync(),
