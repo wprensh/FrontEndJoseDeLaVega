@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 
+import { requierePermiso, requiereSesion } from './core/guards/permiso.guard';
+
 /**
  * Cada sección se carga de forma perezosa (lazy loading) con `loadComponent`:
  * el navegador solo descarga el código de la plantilla que el usuario visita.
@@ -41,22 +43,41 @@ export const routes: Routes = [
     title: 'Campus Virtual',
     loadComponent: () => import('./features/campus/campus.component').then((m) => m.CampusComponent),
   },
+  // ---- Panel administrativo: inicio de sesión y un módulo por ruta, según los permisos del usuario ----
   {
-    // Panel administrativo del CRUD de noticias.
-    // IMPORTANTE: protegerlo con un guard de autenticación cuando exista el inicio de sesión.
+    path: 'admin/login',
+    title: 'Iniciar sesión',
+    loadComponent: () => import('./features/admin/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'admin',
+    pathMatch: 'full',
+    title: 'Panel administrativo',
+    canActivate: [requiereSesion],
+    loadComponent: () => import('./features/admin/panel/panel.component').then((m) => m.PanelComponent),
+  },
+  {
     path: 'admin/noticias',
     title: 'Administrar noticias',
+    canActivate: [requierePermiso('Noticias')],
     loadComponent: () =>
       import('./features/admin/noticias-admin/noticias-admin.component').then((m) => m.NoticiasAdminComponent),
   },
   {
-    // Panel de certificaciones (misma clave de administración que el de noticias).
     path: 'admin/certificados',
     title: 'Certificaciones',
+    canActivate: [requierePermiso('Certificados')],
     loadComponent: () =>
       import('./features/admin/certificados-admin/certificados-admin.component').then(
         (m) => m.CertificadosAdminComponent,
       ),
+  },
+  {
+    path: 'admin/usuarios',
+    title: 'Usuarios',
+    canActivate: [requierePermiso('Usuarios')],
+    loadComponent: () =>
+      import('./features/admin/usuarios-admin/usuarios-admin.component').then((m) => m.UsuariosAdminComponent),
   },
   {
     // Verificación pública; el QR de cada certificado apunta a /verificar/{codigo}.

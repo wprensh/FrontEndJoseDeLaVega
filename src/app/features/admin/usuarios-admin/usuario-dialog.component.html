@@ -1,0 +1,134 @@
+<h2 mat-dialog-title>{{ editando ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+<form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+  <mat-dialog-content>
+    <div class="datos">
+      <mat-form-field>
+        <mat-label>Nombre completo</mat-label>
+        <input matInput formControlName="nombreCompleto" maxlength="120" />
+        @if (formulario.controls.nombreCompleto.hasError('required')) {
+          <mat-error>El nombre es obligatorio.</mat-error>
+        } @else if (formulario.controls.nombreCompleto.hasError('servidor')) {
+          <mat-error>{{ formulario.controls.nombreCompleto.getError('servidor') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Correo (opcional)</mat-label>
+        <input matInput type="email" formControlName="correo" maxlength="150" />
+        @if (formulario.controls.correo.invalid) {
+          <mat-error>{{ formulario.controls.correo.getError('servidor') ?? 'El correo no es válido.' }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="nombreUsuario" maxlength="50" autocomplete="off" autocapitalize="none" spellcheck="false" />
+        @if (editando) {
+          <mat-hint>El nombre de usuario no se puede cambiar.</mat-hint>
+        } @else {
+          <mat-hint>Con este nombre inicia sesión, p. ej. secretaria.</mat-hint>
+        }
+        @if (formulario.controls.nombreUsuario.invalid) {
+          <mat-error>
+            {{ formulario.controls.nombreUsuario.getError('servidor') ?? 'De 3 a 50 letras sin tildes, números, puntos o guiones.' }}
+          </mat-error>
+        }
+      </mat-form-field>
+
+      @if (!editando) {
+        <mat-form-field>
+          <mat-label>Contraseña inicial</mat-label>
+          <input matInput type="password" formControlName="clave" autocomplete="new-password" />
+          <mat-hint>Mínimo 8 caracteres, con letras y números.</mat-hint>
+          @if (formulario.controls.clave.invalid) {
+            <mat-error>{{ formulario.controls.clave.getError('servidor') ?? 'Mínimo 8 caracteres, con letras y números.' }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Repita la contraseña</mat-label>
+          <input matInput type="password" formControlName="confirmacion" autocomplete="new-password" />
+          @if (formulario.controls.confirmacion.hasError('noCoincide')) {
+            <mat-error>Las contraseñas no coinciden.</mat-error>
+          }
+        </mat-form-field>
+      }
+    </div>
+
+    <div class="interruptores">
+      <mat-slide-toggle formControlName="esSuperAdministrador">
+        Superadministrador
+        <small>Todos los permisos en todos los módulos, incluidos los futuros.</small>
+      </mat-slide-toggle>
+      @if (editando) {
+        <mat-slide-toggle formControlName="activo">
+          Usuario activo
+          <small>{{ esUnoMismo ? 'No puede desactivar su propio usuario.' : 'Si se desactiva, no puede iniciar sesión.' }}</small>
+        </mat-slide-toggle>
+      }
+    </div>
+
+    <fieldset class="permisos" [disabled]="esSuper()">
+      <legend>Permisos por módulo</legend>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Módulo</th>
+            @for (accion of acciones; track accion) {
+              <th scope="col">{{ accion }}</th>
+            }
+            <th scope="col">Todos</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (modulo of modulos; track modulo.modulo) {
+            <tr>
+              <th scope="row">
+                <mat-icon aria-hidden="true">{{ modulo.icono }}</mat-icon>
+                {{ modulo.etiqueta }}
+              </th>
+              @for (accion of acciones; track accion) {
+                <td [attr.data-accion]="accion">
+                  <mat-checkbox
+                    [checked]="tiene(modulo, accion)"
+                    [disabled]="esSuper()"
+                    (change)="alternar(modulo, accion, $event.checked)"
+                    [aria-label]="modulo.acciones[accion] + ' en ' + modulo.etiqueta"
+                  >
+                    @if (modulo.acciones[accion] !== accion) {
+                      <small>{{ modulo.acciones[accion] }}</small>
+                    }
+                  </mat-checkbox>
+                </td>
+              }
+              <td>
+                <mat-checkbox
+                  [checked]="todas(modulo)"
+                  [indeterminate]="algunas(modulo)"
+                  [disabled]="esSuper()"
+                  (change)="alternarModulo(modulo, $event.checked)"
+                  [aria-label]="'Todos los permisos en ' + modulo.etiqueta"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <p class="nota">Crear, editar o eliminar incluyen ver. En Certificaciones, “Eliminar” es anular un certificado.</p>
+    </fieldset>
+
+    @if (sinPermisos()) {
+      <p class="aviso">Sin permisos el usuario podrá iniciar sesión, pero no verá ningún módulo.</p>
+    }
+    @if (error()) {
+      <p class="aviso-error" role="alert">{{ error() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button class="boton-azul" type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : editando ? 'Guardar cambios' : 'Crear usuario' }}
+    </button>
+  </mat-dialog-actions>
+</form>

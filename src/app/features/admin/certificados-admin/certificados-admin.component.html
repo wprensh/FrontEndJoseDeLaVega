@@ -6,46 +6,12 @@
     etiqueta="Panel administrativo"
   />
 
-  @if (!sesion.activa()) {
-    <!-- ================= Acceso ================= -->
-    <section class="tarjeta-franja franja-amarilla acceso" aria-labelledby="titulo-acceso">
-      <mat-icon class="candado" aria-hidden="true">lock</mat-icon>
-      <h2 id="titulo-acceso">Acceso restringido</h2>
-      <p>Escriba la clave de administración para expedir y consultar certificados.</p>
-      <form [formGroup]="formularioAcceso" (ngSubmit)="ingresar()" novalidate>
-        <mat-form-field>
-          <mat-label>Clave de administración</mat-label>
-          <input matInput type="password" formControlName="clave" autocomplete="current-password" />
-          @if (campoClave.hasError('required')) {
-            <mat-error>Escriba la clave.</mat-error>
-          }
-        </mat-form-field>
-        @if (errorClave()) {
-          <p class="aviso-error" role="alert">{{ errorClave() }}</p>
-        }
-        <button mat-flat-button class="boton-azul" type="submit" [disabled]="verificandoClave()">
-          {{ verificandoClave() ? 'Verificando...' : 'Ingresar' }}
-        </button>
-      </form>
-    </section>
-  } @else {
-    <nav class="accesos no-imprimir" aria-label="Paneles administrativos">
-      <a mat-button routerLink="/admin/noticias">
-        <mat-icon aria-hidden="true">newspaper</mat-icon>
-        Noticias
-      </a>
-      <a mat-button routerLink="/verificar">
-        <mat-icon aria-hidden="true">qr_code_scanner</mat-icon>
-        Página pública de verificación
-      </a>
-      <button mat-button type="button" class="salir" (click)="salir()">
-        <mat-icon aria-hidden="true">logout</mat-icon>
-        Salir
-      </button>
-    </nav>
+  <app-barra-admin class="no-imprimir" />
 
-    <div class="rejilla">
+  @if (puedeExpedir() || seleccionado()) {
+    <div class="rejilla" [class.sin-formulario]="!puedeExpedir()">
       <!-- ================= Formulario ================= -->
+      @if (puedeExpedir()) {
       <section class="tarjeta-franja franja-amarilla formulario no-imprimir" aria-labelledby="titulo-formulario">
         <h2 id="titulo-formulario">Nuevo certificado</h2>
 
@@ -204,6 +170,7 @@
           </div>
         </form>
       </section>
+      }
 
       <!-- ================= Vista previa / documento ================= -->
       <section id="vista-previa" class="vista-previa" aria-labelledby="titulo-vista">
@@ -219,10 +186,17 @@
             }
           </h2>
           @if (seleccionado(); as certificado) {
-            <button mat-button type="button" (click)="volverAlFormulario()">
-              <mat-icon aria-hidden="true">edit_document</mat-icon>
-              Ver borrador
-            </button>
+            @if (puedeExpedir()) {
+              <button mat-button type="button" (click)="volverAlFormulario()">
+                <mat-icon aria-hidden="true">edit_document</mat-icon>
+                Ver borrador
+              </button>
+            } @else {
+              <button mat-button type="button" (click)="volverAlFormulario()">
+                <mat-icon aria-hidden="true">close</mat-icon>
+                Cerrar
+              </button>
+            }
             @if (!certificado.anulado) {
               <button mat-flat-button class="boton-institucional" type="button" (click)="imprimir()">
                 <mat-icon aria-hidden="true">print</mat-icon>
@@ -241,6 +215,7 @@
         <app-certificado-documento [certificado]="documento()" />
       </section>
     </div>
+  }
 
     <!-- ================= Registro de certificados ================= -->
     <section class="tarjeta listado no-imprimir" aria-labelledby="titulo-listado">
@@ -330,16 +305,18 @@
               <button mat-icon-button type="button" matTooltip="Ver e imprimir" [attr.aria-label]="'Ver ' + c.codigo" (click)="ver(c)">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Usar como base de uno nuevo"
-                [attr.aria-label]="'Duplicar ' + c.codigo"
-                (click)="duplicar(c)"
-              >
-                <mat-icon>content_copy</mat-icon>
-              </button>
-              @if (!c.anulado) {
+              @if (puedeExpedir()) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Usar como base de uno nuevo"
+                  [attr.aria-label]="'Duplicar ' + c.codigo"
+                  (click)="duplicar(c)"
+                >
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              }
+              @if (!c.anulado && puedeAnular()) {
                 <button
                   mat-icon-button
                   type="button"
@@ -376,5 +353,4 @@
         aria-label="Seleccionar página de certificados"
       />
     </section>
-  }
 </div>

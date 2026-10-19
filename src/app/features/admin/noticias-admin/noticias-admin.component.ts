@@ -19,10 +19,10 @@ import { firstValueFrom } from 'rxjs';
 import { CATEGORIAS_NOTICIA, CategoriaNoticia, GuardarNoticia, Noticia } from '../../../core/models/noticia.model';
 import { paginadorEnEspanol } from '../../../core/paginador-intl';
 import { NoticiasService } from '../../../core/services/noticias.service';
-import { PqrsService } from '../../../core/services/pqrs.service';
-import { SesionAdminService } from '../../../core/services/sesion-admin.service';
+import { SesionService } from '../../../core/services/sesion.service';
 import { aFechaIso, desdeFechaIso } from '../../../core/utils/fechas';
 import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/http-error';
+import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 
@@ -34,6 +34,7 @@ const PATRON_URL = /^(https?:\/\/\S+|\/(?!\/)(?!.*\.\.)\S+)$/i;
 
 /**
  * Panel administrativo de noticias (CRUD completo).
+ * Los botones de crear, editar y eliminar aparecen según los permisos del usuario en el módulo Noticias.
  *
  * - Tabla de Angular Material alimentada por los Signals de `NoticiasService`.
  * - Formulario reactivo tipado para crear y editar.
@@ -56,6 +57,7 @@ const PATRON_URL = /^(https?:\/\/\S+|\/(?!\/)(?!.*\.\.)\S+)$/i;
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    BarraAdminComponent,
     PageHeadingComponent,
   ],
   // Textos del paginador en español (se provee aquí para no cargar el paginador en el bundle inicial).
@@ -67,15 +69,15 @@ export class NoticiasAdminComponent implements OnInit {
   readonly #fb = inject(NonNullableFormBuilder);
   readonly #dialog = inject(MatDialog);
   readonly #snackBar = inject(MatSnackBar);
-  readonly #pqrs = inject(PqrsService);
   protected readonly servicio = inject(NoticiasService);
-  protected readonly sesion = inject(SesionAdminService);
+  readonly #sesion = inject(SesionService);
 
-  // ---- Acceso con la clave de administración ----
-  protected readonly formularioAcceso = this.#fb.group({ clave: ['', Validators.required] });
-  protected readonly campoClave = this.formularioAcceso.controls.clave;
-  protected readonly verificandoClave = signal(false);
-  protected readonly errorClave = signal<string | null>(null);
+  // ---- Permisos del usuario en el módulo ----
+  protected readonly puedeCrear = computed(() => this.#tiene('Crear'));
+  protected readonly puedeEditar = computed(() => this.#tiene('Editar'));
+  protected readonly puedeEliminar = computed(() => this.#tiene('Eliminar'));
+  /** El formulario se muestra si puede crear, o mientras edita una noticia. */
+  protected readonly muestraFormulario = computed(() => this.puedeCrear() || this.editando() !== null);
 
   protected readonly categorias = CATEGORIAS_NOTICIA;
   protected readonly columnas = ['titulo', 'categoria', 'fechaPublicacion', 'publicada', 'acciones'] as const;
@@ -107,42 +109,12 @@ export class NoticiasAdminComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    if (this.sesion.activa()) {
-      void this.recargar();
-    }
+    void this.recargar();
   }
 
-  // ---------------- Acceso ----------------
-
-  protected async ingresar(): Promise<void> {
-    if (this.campoClave.invalid) {
-      this.campoClave.markAsTouched();
-      return;
-    }
-
-    this.verificandoClave.set(true);
-    this.errorClave.set(null);
-    this.sesion.iniciar(this.campoClave.value);
-
-    try {
-      if (await this.#pqrs.verificarAccesoAdmin()) {
-        this.campoClave.reset();
-        await this.recargar();
-      } else {
-        this.sesion.cerrar();
-        this.errorClave.set('La clave no es correcta.');
-      }
-    } catch (error) {
-      this.sesion.cerrar();
-      this.errorClave.set(mensajeDeError(error));
-    } finally {
-      this.verificandoClave.set(false);
-    }
-  }
-
-  protected salir(): void {
-    this.sesion.cerrar();
-    this.cancelarEdicion();
+  #tiene(accion: 'Crear' | 'Editar' | 'Eliminar'): boolean {
+    this.#sesion.usuario(); // Dependencia: cambia con los permisos de la sesión.
+    return this.#sesion.puede('Noticias', accion);
   }
 
   // ---------------- Listado ----------------
