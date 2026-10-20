@@ -1,0 +1,168 @@
+<div class="contenedor">
+  @if (votado()) {
+    <section class="tarjeta gracias" role="status" aria-live="polite">
+      <mat-icon class="icono" aria-hidden="true">task_alt</mat-icon>
+      <h1>¡Gracias por votar!</h1>
+      <p>Su voto quedó registrado y es secreto: nadie puede saber por quién votó.</p>
+      <p class="salida">La sesión se cerrará en {{ cuentaRegresiva() }} segundos para el siguiente estudiante.</p>
+      <button mat-flat-button class="boton-institucional" type="button" (click)="salir()">Salir ahora</button>
+    </section>
+  } @else {
+    <app-page-heading
+      [titulo]="tarjeton()?.nombre ?? 'Elecciones escolares'"
+      [subtitulo]="tarjeton()?.puedeVotar ? 'Marque una opción en cada cargo y confirme su voto al final.' : 'Candidatos inscritos y sus propuestas'"
+      etiqueta="Tarjetón electoral"
+    />
+
+    <a mat-button routerLink="/campus" class="volver">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Volver al campus
+    </a>
+
+    @if (error(); as e) {
+      <p class="aviso-error" role="alert">{{ e }}</p>
+    }
+
+    @if (tarjeton(); as t) {
+      @if (!t.puedeVotar) {
+        <p class="nota" role="note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          @if (t.yaVoto) {
+            Usted ya votó en esta elección.
+          } @else if (t.estado === 'Programada') {
+            La votación abre el {{ t.inicio | date: "EEEE d 'de' MMMM 'a las' h:mm a" }}. Mientras tanto, conozca a los candidatos.
+          } @else if (t.estado === 'Cerrada') {
+            La votación ya cerró.
+          } @else if (t.yaVoto === null) {
+            Los docentes pueden ver a los candidatos; solo los estudiantes votan.
+          } @else {
+            No hay candidatos inscritos para su grado en esta elección.
+          }
+        </p>
+      } @else {
+        <p class="nota abierta" role="note">
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          Votación abierta hasta las {{ t.fin | date: 'h:mm a' }} Su voto es secreto y solo se puede votar una vez.
+        </p>
+      }
+
+      @for (c of t.contiendas; track c.cargo + c.ambito) {
+        <section class="contienda" [attr.aria-labelledby]="'cargo-' + c.cargo">
+          <header>
+            <mat-icon aria-hidden="true">{{ icono(c.cargo) }}</mat-icon>
+            <div>
+              <h2 [id]="'cargo-' + c.cargo">{{ c.nombreCargo }}</h2>
+              <p>{{ c.nombreAmbito }}</p>
+            </div>
+            @if (t.puedeVotar) {
+              <span class="estado-marca" [class.lista]="marcas()[c.cargo]">
+                {{ marcas()[c.cargo] ? 'Marcado' : 'Sin marcar' }}
+              </span>
+            }
+          </header>
+
+          <div class="opciones" [attr.role]="t.puedeVotar ? 'radiogroup' : 'list'" [attr.aria-labelledby]="'cargo-' + c.cargo">
+            @for (cand of c.candidatos; track cand.id) {
+              <div
+                class="opcion"
+                [class.marcada]="marcas()[c.cargo] === cand.id"
+                [class.seleccionable]="t.puedeVotar"
+                [attr.role]="t.puedeVotar ? 'radio' : 'listitem'"
+                [attr.aria-checked]="t.puedeVotar ? marcas()[c.cargo] === cand.id : null"
+                [attr.tabindex]="t.puedeVotar ? 0 : null"
+                (click)="marcar(c.cargo, cand.id)"
+                (keydown.enter)="marcar(c.cargo, cand.id)"
+                (keydown.space)="$event.preventDefault(); marcar(c.cargo, cand.id)"
+              >
+                <span class="numero">{{ cand.numero }}</span>
+                <app-foto-candidato [nombre]="cand.nombreCompleto" [fotoUrl]="cand.fotoUrl" style="--tamano: 96px" />
+                <strong>{{ cand.nombreCompleto }}</strong>
+                <span class="curso">{{ curso(cand) }}</span>
+                @if (cand.lema) {
+                  <q>{{ cand.lema }}</q>
+                }
+                @if (cand.propuestas) {
+                  <button
+                    mat-button
+                    type="button"
+                    class="ver-propuestas"
+                    [attr.aria-expanded]="abierto() === cand.id"
+                    (click)="$event.stopPropagation(); alternarPropuestas(cand.id)"
+                  >
+                    {{ abierto() === cand.id ? 'Ocultar propuestas' : 'Ver propuestas' }}
+                  </button>
+                  @if (abierto() === cand.id) {
+                    <p class="propuestas">{{ cand.propuestas }}</p>
+                  }
+                }
+                @if (marcas()[c.cargo] === cand.id) {
+                  <mat-icon class="check" aria-hidden="true">check_circle</mat-icon>
+                }
+              </div>
+            }
+            @if (t.puedeVotar) {
+              <div
+                class="opcion blanco seleccionable"
+                [class.marcada]="marcas()[c.cargo] === blanco"
+                role="radio"
+                [attr.aria-checked]="marcas()[c.cargo] === blanco"
+                tabindex="0"
+                (click)="marcar(c.cargo, blanco)"
+                (keydown.enter)="marcar(c.cargo, blanco)"
+                (keydown.space)="$event.preventDefault(); marcar(c.cargo, blanco)"
+              >
+                <span class="cuadro" aria-hidden="true"></span>
+                <strong>Voto en blanco</strong>
+                <span class="curso">Ninguno de los candidatos</span>
+                @if (marcas()[c.cargo] === blanco) {
+                  <mat-icon class="check" aria-hidden="true">check_circle</mat-icon>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      } @empty {
+        <p class="nota">Aún no hay candidatos inscritos.</p>
+      }
+
+      @if (t.puedeVotar) {
+        <section id="revision" class="tarjeta-franja franja-amarilla revision" aria-labelledby="titulo-revision">
+          @if (revisando() && completo()) {
+            <h2 id="titulo-revision">Revise su voto</h2>
+            <dl>
+              @for (r of resumen(); track r.cargo) {
+                <dt>{{ r.cargo }}</dt>
+                <dd>{{ r.eleccion }}</dd>
+              }
+            </dl>
+            <p>Al confirmar, su voto no se puede cambiar.</p>
+            @if (errorVoto()) {
+              <p class="aviso-error" role="alert">{{ errorVoto() }}</p>
+            }
+            <div class="botones">
+              <button mat-button type="button" [disabled]="enviando()" (click)="revisando.set(false)">Cambiar algo</button>
+              <button mat-flat-button class="boton-institucional" type="button" [disabled]="enviando()" (click)="confirmar()">
+                <mat-icon aria-hidden="true">how_to_vote</mat-icon>
+                {{ enviando() ? 'Registrando...' : 'Confirmar mi voto' }}
+              </button>
+            </div>
+          } @else {
+            <h2 id="titulo-revision" class="visualmente-oculto">Enviar el voto</h2>
+            <p>
+              @if (completo()) {
+                Ya marcó una opción en todos los cargos.
+              } @else {
+                Marque una opción en cada cargo (puede ser el voto en blanco) para continuar.
+              }
+            </p>
+            <button mat-flat-button class="boton-institucional" type="button" [disabled]="!completo()" (click)="revisar()">
+              Revisar mi voto
+            </button>
+          }
+        </section>
+      }
+    } @else if (!error()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Cargando el tarjetón" />
+    }
+  }
+</div>

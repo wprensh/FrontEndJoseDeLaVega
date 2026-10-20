@@ -172,7 +172,8 @@ img {
 
 // ---- Impresión de certificados: solo la hoja con membrete (ver CertificadosAdminComponent.imprimir) ----
 @media print {
-  body.imprimiendo-certificado {
+  body.imprimiendo-certificado,
+  body.imprimiendo-claves {
     background: #fff;
 
     app-site-header,

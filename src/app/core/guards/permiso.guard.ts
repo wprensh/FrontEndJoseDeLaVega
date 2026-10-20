@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
 import { Modulo } from '../models/usuario.model';
+import { CampusService } from '../services/campus.service';
 import { SesionService } from '../services/sesion.service';
 
 /** Exige una sesión iniciada; si no la hay, lleva al inicio de sesión y luego regresa. */
@@ -24,3 +25,7 @@ export function requierePermiso(modulo: Modulo): CanActivateFn {
     return sesion.puede(modulo, 'Ver') || router.createUrlTree(['/admin'], { queryParams: { sinPermiso: modulo } });
   };
 }
+
+/** Páginas del campus que exigen haber ingresado como estudiante o docente. */
+export const requiereSesionCampus: CanActivateFn = () =>
+  inject(CampusService).activa() || inject(Router).createUrlTree(['/campus']);

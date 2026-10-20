@@ -1,0 +1,143 @@
+<div class="contenedor">
+  <app-page-heading
+    [titulo]="eleccion()?.nombre ?? 'Elección'"
+    subtitulo="Candidatos inscritos por cargo y resultados de la votación"
+    etiqueta="Elecciones escolares"
+  />
+  <app-barra-admin />
+
+  @if (cargando() && !eleccion()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando la elección" />
+  }
+  @if (error(); as e) {
+    <p class="aviso-error" role="alert">{{ e }} <button mat-button type="button" (click)="cargar()">Reintentar</button></p>
+  }
+
+  @if (eleccion(); as e) {
+    <section class="tarjeta resumen">
+      <a mat-button routerLink="/admin/elecciones" class="volver">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        Todas las elecciones
+      </a>
+      <div class="datos">
+        <span class="estado" [attr.data-estado]="e.estado">{{ estados[e.estado] }}</span>
+        <p>
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          Votación del {{ e.inicio | date: "EEEE d 'de' MMMM y, h:mm a" }} al {{ e.fin | date: "EEEE d 'de' MMMM, h:mm a" }}
+        </p>
+        <p>
+          <mat-icon aria-hidden="true">groups</mat-icon>
+          {{ e.totalCandidatos }} candidatos · {{ e.totalVotantes }} estudiantes han votado
+        </p>
+        @if (e.descripcion) {
+          <p class="descripcion">{{ e.descripcion }}</p>
+        }
+      </div>
+      <div class="botones">
+        @if (sesion.puede('Elecciones', 'Editar')) {
+          <button mat-stroked-button type="button" (click)="editar()">
+            <mat-icon aria-hidden="true">edit</mat-icon>
+            Editar
+          </button>
+        }
+        @if (sesion.puede('Elecciones', 'Eliminar') && !bloqueada()) {
+          <button mat-stroked-button type="button" class="eliminar" (click)="eliminar()">
+            <mat-icon aria-hidden="true">delete</mat-icon>
+            Eliminar
+          </button>
+        }
+      </div>
+    </section>
+
+    <mat-tab-group [selectedIndex]="pestana()" (selectedIndexChange)="cambiarPestana($event)" animationDuration="0ms">
+      <mat-tab label="Candidatos">
+        @if (bloqueada()) {
+          <p class="nota" role="note">
+            <mat-icon aria-hidden="true">lock</mat-icon>
+            Ya hay votos: los candidatos no se pueden agregar ni retirar. Sí puede corregir su lema, propuestas y foto.
+          </p>
+        }
+        @for (s of secciones(); track s.info.cargo) {
+          <section class="cargo" [attr.aria-labelledby]="'cargo-' + s.info.cargo">
+            <header>
+              <mat-icon aria-hidden="true">{{ s.info.icono }}</mat-icon>
+              <div>
+                <h2 [id]="'cargo-' + s.info.cargo">{{ s.info.nombre }}</h2>
+                <p>Candidatos: {{ s.info.quienes }}. Votan: {{ s.info.votan.toLowerCase() }}.</p>
+              </div>
+              @if (sesion.puede('Elecciones', 'Crear') && !bloqueada()) {
+                <button mat-flat-button class="boton-azul" type="button" (click)="inscribir(s.info.cargo)">
+                  <mat-icon aria-hidden="true">person_add</mat-icon>
+                  Inscribir candidato
+                </button>
+              }
+            </header>
+
+            @for (contienda of s.contiendas; track contienda.ambito) {
+              @if (s.contiendas.length > 1 || contienda.ambito !== 'Toda la institución') {
+                <h3 class="contienda">{{ contienda.ambito }}</h3>
+              }
+              <ul class="candidatos">
+                @for (c of contienda.candidatos; track c.id) {
+                  <li class="tarjeta candidato">
+                    <app-foto-candidato [nombre]="c.nombreCompleto" [fotoUrl]="c.fotoUrl" />
+                    <div class="info">
+                      <span class="numero">N.° {{ c.numero }}</span>
+                      <strong>{{ c.nombreCompleto }}</strong>
+                      <span class="curso">{{ curso(c) }}</span>
+                      @if (c.lema) {
+                        <q>{{ c.lema }}</q>
+                      }
+                      @if (c.propuestas) {
+                        <p class="propuestas">{{ c.propuestas }}</p>
+                      } @else {
+                        <p class="sin-propuestas">Sin propuestas todavía.</p>
+                      }
+                    </div>
+                    <div class="acciones">
+                      @if (sesion.puede('Elecciones', 'Editar')) {
+                        <button mat-icon-button type="button" matTooltip="Editar perfil" [attr.aria-label]="'Editar perfil de ' + c.nombreCompleto" (click)="editarCandidato(c)">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                      }
+                      @if (sesion.puede('Elecciones', 'Eliminar') && !bloqueada()) {
+                        <button mat-icon-button type="button" class="eliminar" matTooltip="Retirar" [attr.aria-label]="'Retirar a ' + c.nombreCompleto" (click)="retirar(c)">
+                          <mat-icon>person_remove</mat-icon>
+                        </button>
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @empty {
+              <p class="vacio">Aún no hay candidatos para este cargo.</p>
+            }
+          </section>
+        }
+      </mat-tab>
+
+      <mat-tab label="Resultados">
+        <div class="barra-resultados">
+          <p>
+            @if (e.estado === 'Abierta') {
+              Conteo en vivo: se actualiza solo cada 30 segundos. Los estudiantes lo verán cuando cierre la votación.
+            } @else if (e.estado === 'Programada') {
+              La votación aún no empieza.
+            } @else {
+              Resultados finales. También están publicados en el campus virtual.
+            }
+          </p>
+          <button mat-stroked-button type="button" (click)="cargarResultados()">
+            <mat-icon aria-hidden="true">refresh</mat-icon>
+            Actualizar
+          </button>
+        </div>
+        @if (resultados(); as r) {
+          <app-resultados-eleccion [resultados]="r" />
+        } @else {
+          <mat-progress-bar mode="indeterminate" aria-label="Cargando resultados" />
+        }
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

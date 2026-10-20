@@ -1,0 +1,212 @@
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.acceso {
+  background: var(--jv-azul);
+  color: #fff;
+  border-radius: var(--jv-radio);
+  padding: 1.75rem;
+  text-align: center;
+
+  /* Campos oscuros sobre el fondo azul */
+  --mdc-outlined-text-field-input-text-color: #fff;
+  --mdc-outlined-text-field-label-text-color: #c9d4e5;
+  --mdc-outlined-text-field-focus-label-text-color: var(--jv-amarillo);
+  --mdc-outlined-text-field-outline-color: #3b557a;
+  --mdc-outlined-text-field-hover-outline-color: #c9d4e5;
+  --mdc-outlined-text-field-focus-outline-color: var(--jv-amarillo);
+  --mdc-outlined-text-field-caret-color: var(--jv-amarillo);
+  --mdc-outlined-text-field-input-text-placeholder-color: #8ea3c2;
+  --mat-form-field-error-text-color: #ffb4b4;
+  --mdc-outlined-text-field-error-outline-color: #ffb4b4;
+  --mdc-outlined-text-field-error-label-text-color: #ffb4b4;
+}
+
+.candado {
+  color: var(--jv-amarillo);
+  font-size: 40px;
+  inline-size: 40px;
+  block-size: 40px;
+}
+
+.acceso h2 {
+  color: #fff;
+  margin: 0.25rem 0;
+  font-size: 1.3rem;
+}
+
+.acceso > p {
+  color: #c9d4e5;
+  margin: 0 0 1rem;
+}
+
+form {
+  display: grid;
+  gap: 0.6rem;
+  max-inline-size: 340px;
+  margin-inline: auto;
+}
+
+.aviso {
+  margin: 0;
+  color: var(--jv-amarillo);
+  font-size: 0.9rem;
+}
+
+.acceso > .ayuda {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+}
+
+.recursos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+
+  li {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+  }
+
+  mat-icon {
+    color: var(--jv-azul);
+    flex: none;
+  }
+
+  mat-icon.naranja {
+    color: var(--jv-naranja);
+  }
+
+  h3 {
+    margin: 0 0 0.15rem;
+    font-size: 1rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--jv-texto-suave);
+    font-size: 0.9rem;
+  }
+}
+
+.bienvenida {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-block-end: 1.5rem;
+
+  .icono {
+    color: var(--jv-azul-medio);
+    font-size: 40px;
+    inline-size: 40px;
+    block-size: 40px;
+  }
+
+  div {
+    flex: 1;
+    min-inline-size: 200px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--jv-texto-suave);
+  }
+}
+
+.seccion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+}
+
+.elecciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.eleccion {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+
+  h3 {
+    margin: 0;
+    color: var(--jv-azul);
+    font-size: 1.15rem;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .fechas {
+    color: var(--jv-texto-suave);
+    font-size: 0.9rem;
+  }
+
+  .descripcion {
+    font-size: 0.92rem;
+  }
+}
+
+.estado {
+  justify-self: start;
+  padding: 0.1rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #e7edf7;
+  color: var(--jv-azul);
+
+  &[data-estado='Abierta'] {
+    background: #dcf5e3;
+    color: #1e7a3c;
+  }
+
+  &[data-estado='Cerrada'] {
+    background: #eceff3;
+    color: var(--jv-texto-suave);
+  }
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-start: 0.5rem;
+}
+
+.ya-voto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #1e7a3c;
+  font-weight: 700;
+}
+
+.vacio {
+  color: var(--jv-texto-suave);
+}
+
+.aviso-error {
+  color: var(--jv-rojo);
+}

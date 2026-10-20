@@ -1,0 +1,132 @@
+<div class="contenedor">
+  <app-page-heading
+    titulo="Campus Virtual & Plataforma Académica"
+    subtitulo="Ingreso de estudiantes y docentes: elecciones escolares, calificaciones y guías"
+    etiqueta="Acceso seguro"
+  />
+
+  @if (campus.perfil(); as perfil) {
+    <section class="tarjeta bienvenida" aria-labelledby="titulo-bienvenida">
+      <mat-icon class="icono" aria-hidden="true">{{ perfil.rol === 'Docente' ? 'co_present' : 'school' }}</mat-icon>
+      <div>
+        <h2 id="titulo-bienvenida">Hola, {{ perfil.nombreCompleto }}</h2>
+        <p>{{ perfil.rol === 'Docente' ? 'Docente' : 'Estudiante de ' + cursoDe(perfil) }} · Documento {{ perfil.documento }}</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="salir()">
+        <mat-icon aria-hidden="true">logout</mat-icon>
+        Salir
+      </button>
+    </section>
+
+    <section aria-labelledby="titulo-elecciones">
+      <h2 id="titulo-elecciones" class="seccion">
+        <mat-icon aria-hidden="true">how_to_vote</mat-icon>
+        Elecciones escolares
+      </h2>
+
+      @if (errorElecciones(); as e) {
+        <p class="aviso-error" role="alert">{{ e }} <button mat-button type="button" (click)="cargarElecciones()">Reintentar</button></p>
+      }
+
+      @if (elecciones(); as lista) {
+        <ul class="elecciones">
+          @for (e of lista; track e.id) {
+            <li class="tarjeta-franja franja-amarilla eleccion">
+              <span class="estado" [attr.data-estado]="e.estado">{{ estados[e.estado] }}</span>
+              <h3>{{ e.nombre }}</h3>
+              <p class="fechas">
+                {{ e.inicio | date: "EEEE d 'de' MMMM, h:mm a" }} a {{ e.fin | date: 'h:mm a' }}
+              </p>
+              @if (e.descripcion) {
+                <p class="descripcion">{{ e.descripcion }}</p>
+              }
+
+              <div class="acciones">
+                @if (e.yaVoto) {
+                  <span class="ya-voto"><mat-icon aria-hidden="true">verified</mat-icon> Usted ya votó</span>
+                }
+                @if (e.estado === 'Abierta' && e.yaVoto === false) {
+                  <a mat-flat-button class="boton-institucional" [routerLink]="['/campus/elecciones', e.id]">
+                    <mat-icon aria-hidden="true">how_to_vote</mat-icon>
+                    Votar ahora
+                  </a>
+                } @else if (e.estado !== 'Cerrada') {
+                  <a mat-stroked-button [routerLink]="['/campus/elecciones', e.id]">Conocer a los candidatos</a>
+                }
+                @if (e.estado === 'Cerrada' || (perfil.rol === 'Docente' && e.estado === 'Abierta')) {
+                  <a mat-stroked-button [routerLink]="['/campus/elecciones', e.id, 'resultados']">
+                    {{ e.estado === 'Cerrada' ? 'Ver resultados' : 'Ver participación' }}
+                  </a>
+                }
+              </div>
+            </li>
+          } @empty {
+            <li class="tarjeta vacio">No hay elecciones programadas por ahora.</li>
+          }
+        </ul>
+      } @else if (!errorElecciones()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Cargando elecciones" />
+      }
+    </section>
+  } @else {
+    <div class="rejilla">
+      <section class="acceso" aria-labelledby="titulo-acceso">
+        <mat-icon class="candado" aria-hidden="true">lock</mat-icon>
+        <h2 id="titulo-acceso">Ingreso de estudiantes y docentes</h2>
+        <p>Escriba su número de documento y la clave de acceso que le entregó el colegio.</p>
+
+        @if (motivo() === 'vencida') {
+          <p class="aviso" role="status">Su sesión terminó. Ingrese de nuevo.</p>
+        }
+
+        <form [formGroup]="formulario" (ngSubmit)="ingresar()" novalidate>
+          <mat-form-field>
+            <mat-label>Número de documento</mat-label>
+            <input matInput formControlName="documento" autocomplete="username" inputmode="numeric" />
+            @if (formulario.controls.documento.hasError('required')) {
+              <mat-error>Escriba su número de documento.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Clave de acceso</mat-label>
+            <input matInput type="password" formControlName="clave" autocomplete="current-password" placeholder="ABCD-2345" />
+            @if (formulario.controls.clave.hasError('required')) {
+              <mat-error>Escriba su clave de acceso.</mat-error>
+            }
+          </mat-form-field>
+          @if (errorIngreso()) {
+            <p class="aviso" role="alert">{{ errorIngreso() }}</p>
+          }
+          <button mat-flat-button class="boton-institucional" type="submit" [disabled]="ingresando()">
+            {{ ingresando() ? 'Ingresando...' : 'Ingresar al campus' }}
+          </button>
+        </form>
+        <p class="ayuda">¿No tiene clave o la perdió? Pídala a su director de grupo o en la secretaría.</p>
+      </section>
+
+      <ul class="recursos">
+        <li class="tarjeta-lateral franja-amarilla">
+          <mat-icon aria-hidden="true" class="naranja">how_to_vote</mat-icon>
+          <div>
+            <h3>Elecciones escolares</h3>
+            <p>Conozca a los candidatos a personero, contralor y voceros, y vote desde la sala de informática.</p>
+          </div>
+        </li>
+        <li class="tarjeta-lateral franja-azul">
+          <mat-icon aria-hidden="true">description</mat-icon>
+          <div>
+            <h3>Consulta de Boletines</h3>
+            <p>Próximamente: calificaciones de cada periodo lectivo.</p>
+          </div>
+        </li>
+        <li class="tarjeta-lateral franja-azul">
+          <mat-icon aria-hidden="true">auto_stories</mat-icon>
+          <div>
+            <h3>Guías de Aprendizaje</h3>
+            <p>Próximamente: material de apoyo por asignatura para primaria y secundaria.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  }
+</div>
