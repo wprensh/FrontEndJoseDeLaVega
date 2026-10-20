@@ -1,5 +1,5 @@
 /** Módulos del panel administrativo (mismos nombres que el enum ModuloSistema de la API). */
-export type Modulo = 'Noticias' | 'Certificados' | 'Pqrs' | 'Usuarios';
+export type Modulo = 'Noticias' | 'Certificados' | 'Pqrs' | 'Usuarios' | 'Elecciones' | 'Campus';
 
 /** Nivel de acción sobre los registros de un módulo. */
 export type Accion = 'Ver' | 'Crear' | 'Editar' | 'Eliminar';
@@ -56,6 +56,22 @@ export const MODULOS: readonly InfoModulo[] = [
     icono: 'manage_accounts',
     ruta: '/admin/usuarios',
     acciones: ACCIONES_GENERICAS,
+  },
+  {
+    modulo: 'Elecciones',
+    etiqueta: 'Elecciones',
+    descripcion: 'Gobierno escolar: jornadas de votación, candidatos con su perfil y resultados.',
+    icono: 'how_to_vote',
+    ruta: '/admin/elecciones',
+    acciones: ACCIONES_GENERICAS,
+  },
+  {
+    modulo: 'Campus',
+    etiqueta: 'Estudiantes y docentes',
+    descripcion: 'Quiénes entran al campus virtual y sus claves de acceso.',
+    icono: 'school',
+    ruta: '/admin/comunidad',
+    acciones: { Ver: 'Ver', Crear: 'Registrar', Editar: 'Editar y generar claves', Eliminar: 'Eliminar' },
   },
 ];
 

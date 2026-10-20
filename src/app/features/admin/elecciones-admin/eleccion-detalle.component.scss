@@ -1,0 +1,205 @@
+.resumen {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 1rem;
+  margin-block-end: 1rem;
+
+  .volver {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .datos {
+    display: grid;
+    gap: 0.35rem;
+
+    p {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0;
+      color: var(--jv-texto-suave);
+    }
+
+    mat-icon {
+      font-size: 18px;
+      inline-size: 18px;
+      block-size: 18px;
+    }
+
+    .descripcion {
+      color: var(--jv-texto);
+    }
+  }
+
+  .botones {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+.estado {
+  justify-self: start;
+  padding: 0.1rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #e7edf7;
+  color: var(--jv-azul);
+
+  &[data-estado='Abierta'] {
+    background: #dcf5e3;
+    color: #1e7a3c;
+  }
+
+  &[data-estado='Cerrada'] {
+    background: #eceff3;
+    color: var(--jv-texto-suave);
+  }
+}
+
+.eliminar {
+  color: var(--jv-rojo);
+}
+
+.nota {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  color: var(--jv-texto-suave);
+}
+
+.cargo {
+  margin-block: 1.5rem;
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-block-end: 0.75rem;
+
+    > mat-icon {
+      color: var(--jv-azul-medio);
+    }
+
+    div {
+      flex: 1;
+      min-inline-size: 220px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--jv-texto-suave);
+      font-size: 0.88rem;
+    }
+  }
+}
+
+.contienda {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--jv-azul-medio);
+}
+
+.candidatos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.candidato {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  align-items: start;
+
+  .info {
+    display: grid;
+    gap: 0.15rem;
+    min-inline-size: 0;
+  }
+
+  .numero {
+    justify-self: start;
+    padding: 0 0.5rem;
+    border-radius: 6px;
+    background: var(--jv-azul);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+
+  strong {
+    color: var(--jv-azul);
+  }
+
+  .curso {
+    color: var(--jv-texto-suave);
+    font-size: 0.85rem;
+  }
+
+  q {
+    font-style: italic;
+  }
+
+  .propuestas {
+    margin: 0.35rem 0 0;
+    white-space: pre-line;
+    font-size: 0.88rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .sin-propuestas {
+    margin: 0.35rem 0 0;
+    color: var(--jv-texto-suave);
+    font-style: italic;
+    font-size: 0.85rem;
+  }
+
+  .acciones {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.vacio {
+  color: var(--jv-texto-suave);
+}
+
+.barra-resultados {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+
+  p {
+    margin: 0;
+    color: var(--jv-texto-suave);
+  }
+}
+
+.aviso-error {
+  color: var(--jv-rojo);
+}
+
+@media (max-width: 600px) {
+  .resumen {
+    grid-template-columns: 1fr;
+  }
+}

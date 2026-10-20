@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { requierePermiso, requiereSesion } from './core/guards/permiso.guard';
+import { requierePermiso, requiereSesion, requiereSesionCampus } from './core/guards/permiso.guard';
 
 /**
  * Cada sección se carga de forma perezosa (lazy loading) con `loadComponent`:
@@ -43,6 +43,19 @@ export const routes: Routes = [
     title: 'Campus Virtual',
     loadComponent: () => import('./features/campus/campus.component').then((m) => m.CampusComponent),
   },
+  {
+    path: 'campus/elecciones/:id',
+    title: 'Tarjetón electoral',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () => import('./features/campus/tarjeton.component').then((m) => m.TarjetonComponent),
+  },
+  {
+    path: 'campus/elecciones/:id/resultados',
+    title: 'Resultados de la elección',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () =>
+      import('./features/campus/resultados-campus.component').then((m) => m.ResultadosCampusComponent),
+  },
   // ---- Panel administrativo: inicio de sesión y un módulo por ruta, según los permisos del usuario ----
   {
     path: 'admin/login',
@@ -78,6 +91,27 @@ export const routes: Routes = [
     canActivate: [requierePermiso('Usuarios')],
     loadComponent: () =>
       import('./features/admin/usuarios-admin/usuarios-admin.component').then((m) => m.UsuariosAdminComponent),
+  },
+  {
+    path: 'admin/elecciones',
+    title: 'Elecciones escolares',
+    canActivate: [requierePermiso('Elecciones')],
+    loadComponent: () =>
+      import('./features/admin/elecciones-admin/elecciones-admin.component').then((m) => m.EleccionesAdminComponent),
+  },
+  {
+    path: 'admin/elecciones/:id',
+    title: 'Elección',
+    canActivate: [requierePermiso('Elecciones')],
+    loadComponent: () =>
+      import('./features/admin/elecciones-admin/eleccion-detalle.component').then((m) => m.EleccionDetalleComponent),
+  },
+  {
+    path: 'admin/comunidad',
+    title: 'Estudiantes y docentes',
+    canActivate: [requierePermiso('Campus')],
+    loadComponent: () =>
+      import('./features/admin/comunidad-admin/comunidad-admin.component').then((m) => m.ComunidadAdminComponent),
   },
   {
     // Verificación pública; el QR de cada certificado apunta a /verificar/{codigo}.
