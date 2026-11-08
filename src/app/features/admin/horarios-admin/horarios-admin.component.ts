@@ -17,6 +17,8 @@ import {
   BloqueHorario,
   DIAS_SEMANA,
   HORAS_SEMANALES_DOCENTE,
+  JORNADA_BACHILLERATO,
+  horasCubiertas,
   Horario,
   colorDe,
   horaLegible,
@@ -105,13 +107,10 @@ interface CursoOpcion {
 
         @if (puedeCrear()) {
           <mat-form-field subscriptSizing="dynamic" class="duracion">
-            <mat-label>Duración de la clase</mat-label>
-            <mat-select [(ngModel)]="duracion">
-              <mat-option [value]="45">45 minutos</mat-option>
-              <mat-option [value]="50">50 minutos</mat-option>
-              <mat-option [value]="55">55 minutos</mat-option>
-              <mat-option [value]="60">1 hora</mat-option>
-              <mat-option [value]="120">2 horas</mat-option>
+            <mat-label>Al soltar una clase</mat-label>
+            <mat-select [(ngModel)]="horasPorClase">
+              <mat-option [value]="1">1 hora de clase (50 min)</mat-option>
+              <mat-option [value]="2">2 horas seguidas (bloque)</mat-option>
             </mat-select>
           </mat-form-field>
         }
@@ -135,7 +134,7 @@ interface CursoOpcion {
           <aside class="tarjeta clases no-imprimir" aria-labelledby="titulo-clases">
             <h2 id="titulo-clases">Carga {{ vista() === 'docente' ? 'del docente' : 'del curso' }}</h2>
             <p class="total" [class.completo]="totalProgramado() >= totalMeta() && totalMeta() > 0">
-              <strong>{{ totalProgramado() | number: '1.0-1' }}</strong> de {{ totalMeta() }} h programadas
+              <strong>{{ totalProgramado() | number: '1.0-1' }}</strong> de {{ totalMeta() }} horas de clase ubicadas
             </p>
             @if (vista() === 'docente') {
               <p class="referencia">
@@ -143,6 +142,7 @@ interface CursoOpcion {
                 (Decreto 1850 de 2002).
               </p>
             }
+            <p class="referencia">Jornada: {{ jornada.nombre }}, de 1:00 a 6:30 p. m. con dos descansos.</p>
             @if (puedeCrear()) {
               <p class="ayuda"><mat-icon aria-hidden="true">drag_indicator</mat-icon> Arrastre una clase al día y la hora.</p>
             }
@@ -153,7 +153,7 @@ interface CursoOpcion {
                   <li
                     class="clase-pendiente"
                     [class.arrastrable]="puedeCrear()"
-                    [class.completa]="completa(a.asignacion, a.horasProgramadas)"
+                    [class.completa]="completa(a.asignacion, horasClase().get(a.asignacion.id) ?? 0)"
                     [attr.data-asignacion]="puedeCrear() ? a.asignacion.id : null"
                     [attr.data-titulo]="etiqueta(a.asignacion)"
                     [style.--color]="color(a.asignacion)"
@@ -161,7 +161,7 @@ interface CursoOpcion {
                     <span class="nombre">{{ etiqueta(a.asignacion) }}</span>
                     <span class="detalle">{{ detalle(a.asignacion) }}</span>
                     <span class="horas">
-                      {{ a.horasProgramadas | number: '1.0-1' }} / {{ a.asignacion.intensidadHoraria ?? '–' }} h
+                      {{ horasClase().get(a.asignacion.id) ?? 0 | number: '1.0-1' }} / {{ a.asignacion.intensidadHoraria ?? '–' }} h
                     </span>
                   </li>
                 }
@@ -181,9 +181,7 @@ interface CursoOpcion {
               [editable]="puedeEditar()"
               [puedeEliminar]="puedeEliminar()"
               [origenArrastre]="origen()"
-              [duracionMinutos]="duracion"
-              [primeraHora]="rango().desde"
-              [ultimaHora]="rango().hasta"
+              [horasPorClase]="horasPorClase"
               (soltar)="crear($event)"
               (mover)="mover($event)"
               (eliminar)="quitar($event)"
@@ -205,7 +203,7 @@ interface CursoOpcion {
 
       .anio { inline-size: 9rem; }
       .seleccion { flex: 1 1 18rem; }
-      .duracion { inline-size: 12rem; }
+      .duracion { inline-size: 15rem; }
     }
 
     .distribucion {
@@ -292,6 +290,7 @@ export class HorariosAdminComponent implements OnInit {
 
   protected readonly nombreCurso = nombreCurso;
   protected readonly horasDocente = HORAS_SEMANALES_DOCENTE;
+  protected readonly jornada = JORNADA_BACHILLERATO;
   protected readonly anios = [new Date().getFullYear() + 1, new Date().getFullYear(), new Date().getFullYear() - 1];
 
   protected readonly vista = signal<'docente' | 'curso'>('docente');
@@ -305,28 +304,35 @@ export class HorariosAdminComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   private readonly listaClases = viewChild<ElementRef<HTMLElement>>('origen');
   protected readonly origen = computed(() => this.listaClases()?.nativeElement ?? null);
-  protected duracion = 60;
+  protected horasPorClase = 2;
 
   protected readonly puedeCrear = computed(() => this.#sesion.puede('Academico', 'Crear'));
   protected readonly puedeEditar = computed(() => this.#sesion.puede('Academico', 'Editar') || this.puedeCrear());
   protected readonly puedeEliminar = computed(() => this.#sesion.puede('Academico', 'Eliminar'));
 
-  protected readonly totalProgramado = computed(() =>
-    (this.horario()?.asignaciones ?? []).reduce((s, a) => s + a.horasProgramadas, 0),
-  );
+  /** Horas de clase ubicadas por asignación: en la jornada cada hora de clase cuenta 1 aunque dure 50 minutos. */
+  protected readonly horasClase = computed(() => {
+    const mapa = new Map<string, number>();
+    for (const b of this.horario()?.bloques ?? []) {
+      const [inicio, fin] = [b.inicio.slice(0, 5), b.fin.slice(0, 5)];
+      const franjas = this.jornada.franjas;
+      const dentro = inicio >= franjas[0].inicio && fin <= franjas[franjas.length - 1].fin;
+      const horas = dentro ? horasCubiertas(this.jornada, inicio, fin) : 0;
+      mapa.set(b.asignacionId, (mapa.get(b.asignacionId) ?? 0) + horas);
+    }
+    for (const a of this.horario()?.asignaciones ?? []) {
+      // Clases por fuera de la jornada: se cuentan en horas de reloj, como las da el servidor.
+      if (!mapa.get(a.asignacion.id) && a.horasProgramadas) {
+        mapa.set(a.asignacion.id, a.horasProgramadas);
+      }
+    }
+    return mapa;
+  });
+
+  protected readonly totalProgramado = computed(() => [...this.horasClase().values()].reduce((s, h) => s + h, 0));
   protected readonly totalMeta = computed(() =>
     (this.horario()?.asignaciones ?? []).reduce((s, a) => s + (a.asignacion.intensidadHoraria ?? 0), 0),
   );
-
-  /** De 6:00 a. m. a 6:00 p. m., ampliado a la hora entera si hay clases más temprano o más tarde. */
-  protected readonly rango = computed(() => {
-    const bloques = this.horario()?.bloques ?? [];
-    const horas = (h: string) => Number(h.slice(0, 2)) + Number(h.slice(3, 5)) / 60;
-    const desde = Math.floor(Math.min(6, ...bloques.map((b) => horas(b.inicio))));
-    const hasta = Math.ceil(Math.max(18, ...bloques.map((b) => horas(b.fin))));
-    const hora = (h: number) => `${String(h).padStart(2, '0')}:00`;
-    return { desde: hora(desde), hasta: hora(hasta) };
-  });
 
   protected readonly tituloSeleccion = computed(() => {
     if (this.vista() === 'docente') {

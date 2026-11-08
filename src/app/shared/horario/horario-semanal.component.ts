@@ -5,7 +5,19 @@ import esLocale from '@fullcalendar/core/locales/es';
 import interactionPlugin, { DropArg, Draggable, EventResizeDoneArg } from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
 
-import { BloqueHorario, colorDe, diaYHora, fechaDelDia, horaLegible, nombreCurso } from '../../core/models/horario.model';
+import {
+  BloqueHorario,
+  JORNADA_BACHILLERATO,
+  Jornada,
+  colorDe,
+  diaYHora,
+  fechaDelDia,
+  franjaEnJornada,
+  horaLegible,
+  horasCubiertas,
+  nombreCurso,
+  rangoVisible,
+} from '../../core/models/horario.model';
 
 /** Cambio pedido desde el calendario: día (1–6) y franja "HH:mm". */
 export interface FranjaHorario {
@@ -61,7 +73,31 @@ export interface MoverClase extends FranjaHorario {
       }
 
       .fc-timegrid-slot {
-        block-size: 1.6rem;
+        block-size: 0.95rem;
+      }
+
+      .fc-timegrid-slot-minor {
+        border-block-start-style: none;
+      }
+
+      .fc-timegrid-slot-label-cushion {
+        line-height: 1.15;
+        text-align: end;
+      }
+
+      .franja-descanso {
+        background: repeating-linear-gradient(135deg, #e9ecf2 0 6px, #f3f5f9 6px 12px);
+        opacity: 1;
+      }
+
+      .descanso {
+        display: block;
+        padding: 1px 4px;
+        color: var(--jv-texto-suave);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
       }
 
       .fc-event {
@@ -102,10 +138,10 @@ export class HorarioSemanalComponent {
   readonly editable = input(false);
   readonly puedeEliminar = input(false);
   readonly origenArrastre = input<HTMLElement | null>(null);
-  /** Minutos de una clase nueva al soltarla. */
-  readonly duracionMinutos = input(60);
-  readonly primeraHora = input('06:00');
-  readonly ultimaHora = input('18:00');
+  /** Horas de clase y descansos: el calendario muestra esas franjas y ajusta cada clase a ellas. */
+  readonly jornada = input<Jornada>(JORNADA_BACHILLERATO);
+  /** Horas de clase seguidas que ocupa una clase nueva al soltarla (1 o 2). */
+  readonly horasPorClase = input(1);
 
   private readonly calendario = viewChild(FullCalendarComponent);
   readonly #anfitrion = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -123,20 +159,30 @@ export class HorarioSemanalComponent {
     hiddenDays: [0],
     allDaySlot: false,
     dayHeaderFormat: { weekday: 'long' },
-    slotMinTime: this.primeraHora(),
-    slotMaxTime: this.ultimaHora(),
-    slotDuration: '00:30:00',
-    snapDuration: '00:05:00',
-    slotLabelFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' },
+    slotMinTime: this.rango().desde,
+    slotMaxTime: this.rango().hasta,
+    slotDuration: '00:10:00',
+    slotLabelInterval: '00:10:00',
+    snapDuration: '00:10:00',
+    slotLabelContent: (arg) => {
+      const hora = diaYHora(arg.date).hora;
+      const franja = this.jornada().franjas.find((f) => f.inicio === hora && !f.descanso);
+      return franja ? { html: `<b>${franja.etiqueta}</b><br>${horaLegible(hora)}` } : '';
+    },
     expandRows: true,
     height: 'auto',
     nowIndicator: false,
     editable: this.editable(),
     droppable: this.editable(),
     eventDurationEditable: this.editable(),
-    eventOverlap: false,
-    events: this.eventos(),
+    // Una clase no puede quedar encima de otra; sí puede tocar un descanso mientras se arrastra,
+    // porque al soltarla se ajusta a la hora de clase que corresponde.
+    eventOverlap: (quieto) => quieto.display === 'background',
+    events: [...this.descansos(), ...this.eventos()],
     eventContent: (arg) => {
+      if (arg.event.display === 'background') {
+        return { html: `<span class="descanso">${arg.event.title}</span>` };
+      }
       const b = arg.event.extendedProps['bloque'] as BloqueHorario | undefined;
       if (!b) {
         // Vista previa mientras se arrastra una clase desde la lista.
@@ -148,7 +194,7 @@ export class HorarioSemanalComponent {
       nodo.className = 'clase';
       const lineas: [string, string][] = [
         ['strong', principal],
-        ['span', `${horaLegible(b.inicio)} – ${horaLegible(b.fin)}`],
+        ['span', `${horaLegible(b.inicio).split(' ')[0]} – ${horaLegible(b.fin).split(' ')[0]}`],
         ['span', secundario],
       ];
       for (const [etiqueta, texto] of lineas) {
@@ -167,14 +213,40 @@ export class HorarioSemanalComponent {
         (this.puedeEliminar() ? '\nClic para quitarla del horario' : '');
     },
     drop: (arg: DropArg) => this.#alSoltar(arg),
-    eventDrop: (arg: EventDropArg) => this.#alMover(arg.event.id, arg.event.start, arg.event.end, arg.revert),
-    eventResize: (arg: EventResizeDoneArg) => this.#alMover(arg.event.id, arg.event.start, arg.event.end, arg.revert),
+    eventDrop: (arg: EventDropArg) => {
+      // Al mover, la clase conserva cuántas horas de clase ocupaba.
+      const b = arg.oldEvent.extendedProps['bloque'] as BloqueHorario;
+      this.#alMover(arg.event.id, arg.event.start, horasCubiertas(this.jornada(), b.inicio, b.fin), arg.revert);
+    },
+    eventResize: (arg: EventResizeDoneArg) => {
+      const inicio = arg.event.start;
+      const fin = arg.event.end;
+      const horas = inicio && fin ? horasCubiertas(this.jornada(), diaYHora(inicio).hora, diaYHora(fin).hora) : 1;
+      this.#alMover(arg.event.id, inicio, horas, arg.revert);
+    },
     eventClick: (arg: EventClickArg) => {
       if (this.puedeEliminar()) {
         this.eliminar.emit(arg.event.extendedProps['bloque'] as BloqueHorario);
       }
     },
   }));
+
+  protected readonly rango = computed(() => rangoVisible(this.jornada(), this.bloques()));
+
+  /** Descansos como franjas grises: no se puede ubicar una clase encima. */
+  protected readonly descansos = computed<EventInput[]>(() =>
+    this.jornada()
+      .franjas.filter((f) => f.descanso)
+      .map((f) => ({
+        title: f.etiqueta,
+        daysOfWeek: [1, 2, 3, 4, 5, 6],
+        startTime: f.inicio,
+        endTime: f.fin,
+        display: 'background',
+        overlap: true,
+        classNames: ['franja-descanso'],
+      })),
+  );
 
   protected readonly eventos = computed<EventInput[]>(() =>
     this.bloques().map((b) => {
@@ -212,7 +284,7 @@ export class HorarioSemanalComponent {
         itemSelector: '.clase-pendiente',
         eventData: (el) => ({
           title: el.dataset['titulo'] ?? '',
-          duration: { minutes: this.duracionMinutos() },
+          duration: { minutes: 50 * this.horasPorClase() },
           create: false,
         }),
       });
@@ -225,23 +297,28 @@ export class HorarioSemanalComponent {
     if (!asignacionId) {
       return;
     }
-    const inicio = arg.date;
-    const fin = new Date(inicio.getTime() + this.duracionMinutos() * 60_000);
-    const a = diaYHora(inicio);
-    this.soltar.emit({ asignacionId, dia: a.dia, inicio: a.hora, fin: diaYHora(fin).hora });
+    const { dia, hora } = diaYHora(arg.date);
+    const franja = this.#ajustar(hora, this.horasPorClase());
+    this.soltar.emit({ asignacionId, dia, ...franja });
   }
 
-  #alMover(bloqueId: string, inicio: Date | null, fin: Date | null, deshacer: () => void): void {
-    if (!inicio || !fin) {
+  #alMover(bloqueId: string, inicio: Date | null, horas: number, deshacer: () => void): void {
+    if (!inicio) {
       deshacer();
       return;
     }
-    const a = diaYHora(inicio);
-    const b = diaYHora(fin);
-    if (a.dia !== b.dia) {
-      deshacer();
-      return;
+    const { dia, hora } = diaYHora(inicio);
+    this.mover.emit({ bloqueId, dia, ...this.#ajustar(hora, horas), deshacer });
+  }
+
+  /** Lleva la franja a las horas de clase de la jornada; por fuera de ella usa horas de 50 minutos. */
+  #ajustar(hora: string, horas: number): { inicio: string; fin: string } {
+    const enJornada = franjaEnJornada(this.jornada(), hora, horas);
+    if (enJornada) {
+      return enJornada;
     }
-    this.mover.emit({ bloqueId, dia: a.dia, inicio: a.hora, fin: b.hora, deshacer });
+    const [h, m] = hora.split(':').map(Number);
+    const fin = h * 60 + m + 50 * horas;
+    return { inicio: hora, fin: `${String(Math.floor(fin / 60) % 24).padStart(2, '0')}:${String(fin % 60).padStart(2, '0')}` };
   }
 }

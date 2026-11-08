@@ -75,3 +75,80 @@ export function colorDe(clave: string): string {
   }
   return COLORES[h % COLORES.length];
 }
+
+/** Hora de clase o descanso de la jornada. Horas en formato "HH:mm". */
+export interface FranjaJornada {
+  readonly etiqueta: string;
+  readonly inicio: string;
+  readonly fin: string;
+  readonly descanso: boolean;
+}
+
+export interface Jornada {
+  readonly nombre: string;
+  readonly franjas: readonly FranjaJornada[];
+}
+
+/** Horario de bachillerato JDV 2026: seis horas de 50 minutos con dos descansos, de 1:00 a 6:30 p. m. */
+export const JORNADA_BACHILLERATO: Jornada = {
+  nombre: 'Bachillerato JDV 2026',
+  franjas: [
+    { etiqueta: '1.ª hora', inicio: '13:00', fin: '13:50', descanso: false },
+    { etiqueta: '2.ª hora', inicio: '13:50', fin: '14:40', descanso: false },
+    { etiqueta: 'Descanso 1', inicio: '14:40', fin: '15:00', descanso: true },
+    { etiqueta: '3.ª hora', inicio: '15:00', fin: '15:50', descanso: false },
+    { etiqueta: '4.ª hora', inicio: '15:50', fin: '16:40', descanso: false },
+    { etiqueta: 'Descanso 2', inicio: '16:40', fin: '16:50', descanso: true },
+    { etiqueta: '5.ª hora', inicio: '16:50', fin: '17:40', descanso: false },
+    { etiqueta: '6.ª hora', inicio: '17:40', fin: '18:30', descanso: false },
+  ],
+};
+
+const minutos = (hora: string): number => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3, 5));
+const hhmm = (total: number): string =>
+  `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+
+/** Horas de clase (sin descansos), en orden. */
+export function horasDeClase(jornada: Jornada): FranjaJornada[] {
+  return jornada.franjas.filter((f) => !f.descanso);
+}
+
+/**
+ * Ajusta una franja a las horas de clase de la jornada: empieza al inicio de la hora de clase donde cae
+ * (o de la siguiente, si cae en un descanso) y ocupa `horas` horas seguidas sin atravesar un descanso.
+ * Devuelve null si cae después de la última hora.
+ */
+export function franjaEnJornada(jornada: Jornada, inicio: string, horas: number): { inicio: string; fin: string } | null {
+  const franjas = jornada.franjas;
+  const t = minutos(inicio);
+  let i = franjas.findIndex((f) => t < minutos(f.fin));
+  if (i < 0) {
+    return null;
+  }
+  while (i < franjas.length && franjas[i].descanso) {
+    i++;
+  }
+  if (i >= franjas.length) {
+    return null;
+  }
+  let j = i;
+  for (let n = 1; n < horas && j + 1 < franjas.length && !franjas[j + 1].descanso; n++) {
+    j++;
+  }
+  return { inicio: franjas[i].inicio, fin: franjas[j].fin };
+}
+
+/** Cuántas horas de clase de la jornada cubre una franja (al menos 1). */
+export function horasCubiertas(jornada: Jornada, inicio: string, fin: string): number {
+  const a = minutos(inicio);
+  const b = minutos(fin);
+  const n = horasDeClase(jornada).filter((f) => minutos(f.inicio) < b && a < minutos(f.fin)).length;
+  return Math.max(1, n);
+}
+
+/** Primera y última hora que debe mostrar el calendario: la jornada, ampliada si hay clases por fuera. */
+export function rangoVisible(jornada: Jornada, bloques: readonly { inicio: string; fin: string }[]): { desde: string; hasta: string } {
+  const desde = Math.min(minutos(jornada.franjas[0].inicio), ...bloques.map((b) => minutos(b.inicio)));
+  const hasta = Math.max(minutos(jornada.franjas[jornada.franjas.length - 1].fin), ...bloques.map((b) => minutos(b.fin)));
+  return { desde: hhmm(desde), hasta: hhmm(hasta) };
+}

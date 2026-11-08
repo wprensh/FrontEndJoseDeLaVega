@@ -36,7 +36,7 @@ import { SelectorEstudianteComponent, estudiantesVisibles } from '../compartido/
             <button mat-stroked-button type="button" (click)="imprimir()"><mat-icon>print</mat-icon> Imprimir</button>
           </div>
           <section class="tarjeta calendario" aria-label="Horario semanal">
-            <app-horario-semanal [bloques]="h.bloques" [vista]="esDocente() ? 'docente' : 'curso'" [primeraHora]="'06:00'" [ultimaHora]="ultimaHora()" />
+            <app-horario-semanal [bloques]="h.bloques" [vista]="esDocente() ? 'docente' : 'curso'" />
           </section>
 
           <!-- En el celular la lista por día se lee mejor que la cuadrícula. -->
@@ -99,11 +99,6 @@ export class HorarioCampusComponent {
     return [1, 2, 3, 4, 5, 6]
       .map((dia) => ({ dia, nombre: DIAS_SEMANA[dia], clases: bloques.filter((b) => b.dia === dia) }))
       .filter((d) => d.clases.length);
-  });
-
-  protected readonly ultimaHora = computed(() => {
-    const fin = (this.horario()?.bloques ?? []).reduce((m, b) => (b.fin > m ? b.fin : m), '13:00');
-    return `${String(Math.min(22, Number(fin.slice(0, 2)) + 1)).padStart(2, '0')}:00`;
   });
 
   constructor() {
