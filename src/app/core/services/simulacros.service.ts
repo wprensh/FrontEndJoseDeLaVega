@@ -1,10 +1,15 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  AgregadasDesdeBanco,
+  AgregarDesdeBanco,
+  FiltroBanco,
   GuardarPregunta,
+  GuardarPreguntaBanco,
+  PreguntaBanco,
   GuardarSimulacro,
   ResultadosSimulacro,
   Simulacro,
@@ -41,5 +46,37 @@ export class SimulacrosService {
 
   resultados(id: string): Promise<ResultadosSimulacro> {
     return firstValueFrom(this.#http.get<ResultadosSimulacro>(`${this.#url}/${id}/resultados`));
+  }
+
+  // ---------- Banco de preguntas ----------
+
+  banco(filtro: FiltroBanco = {}): Promise<PreguntaBanco[]> {
+    let params = new HttpParams();
+    for (const [clave, valor] of Object.entries(filtro)) {
+      if (valor !== null && valor !== undefined && valor !== '') {
+        params = params.set(clave, String(valor));
+      }
+    }
+    return firstValueFrom(this.#http.get<PreguntaBanco[]>(`${this.#url}/banco`, { params }));
+  }
+
+  guardarEnBanco(id: string | null, datos: GuardarPreguntaBanco): Promise<PreguntaBanco> {
+    return firstValueFrom(
+      id
+        ? this.#http.put<PreguntaBanco>(`${this.#url}/banco/${id}`, datos)
+        : this.#http.post<PreguntaBanco>(`${this.#url}/banco`, datos),
+    );
+  }
+
+  cargarLoteEnBanco(preguntas: GuardarPreguntaBanco[]): Promise<PreguntaBanco[]> {
+    return firstValueFrom(this.#http.post<PreguntaBanco[]>(`${this.#url}/banco/lote`, { preguntas }));
+  }
+
+  eliminarDelBanco(id: string): Promise<void> {
+    return firstValueFrom(this.#http.delete<void>(`${this.#url}/banco/${id}`));
+  }
+
+  agregarDesdeBanco(simulacroId: string, datos: AgregarDesdeBanco): Promise<AgregadasDesdeBanco> {
+    return firstValueFrom(this.#http.post<AgregadasDesdeBanco>(`${this.#url}/${simulacroId}/preguntas/banco`, datos));
   }
 }

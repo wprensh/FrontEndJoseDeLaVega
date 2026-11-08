@@ -16,6 +16,7 @@ export interface GrupoMenu {
 /** Pantallas que no son un módulo propio sino parte de uno (usan sus permisos). */
 const PANTALLAS_EXTRA: readonly (OpcionMenu & { despuesDe: Modulo })[] = [
   { etiqueta: 'Horarios', icono: 'schedule', ruta: '/admin/horarios', modulo: 'Academico', despuesDe: 'Academico' },
+  { etiqueta: 'Banco de preguntas', icono: 'inventory_2', ruta: '/admin/banco-preguntas', modulo: 'Simulacros', despuesDe: 'Simulacros' },
 ];
 
 /** Áreas del menú y los módulos de cada una, en orden. */

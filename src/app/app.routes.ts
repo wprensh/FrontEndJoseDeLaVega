@@ -245,6 +245,13 @@ export const routes: Routes = [
           import('./features/admin/simulacros-admin/simulacros-admin.component').then((m) => m.SimulacrosAdminComponent),
       },
       {
+        path: 'banco-preguntas',
+        title: 'Banco de preguntas',
+        canActivate: [requierePermiso('Simulacros')],
+        loadComponent: () =>
+          import('./features/admin/simulacros-admin/banco-preguntas.component').then((m) => m.BancoPreguntasComponent),
+      },
+      {
         path: 'simulacros/:id',
         title: 'Simulacro',
         canActivate: [requierePermiso('Simulacros')],

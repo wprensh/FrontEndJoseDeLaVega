@@ -95,6 +95,8 @@ export interface Pregunta {
   readonly opciones: readonly string[];
   readonly correcta: number;
   readonly explicacion: string | null;
+  /** Pregunta del banco de la que se copió (null si se escribió en el simulacro). */
+  readonly preguntaBancoId?: string | null;
 }
 
 export interface GuardarPregunta {
@@ -160,6 +162,76 @@ export interface ResultadosSimulacro {
     readonly porArea: readonly PuntajeArea[];
     readonly entregadoEn: string | null;
   }[];
+}
+
+// ---------- Banco de preguntas ----------
+
+export type DificultadPregunta = 'Baja' | 'Media' | 'Alta';
+
+export const DIFICULTADES: Readonly<Record<DificultadPregunta, string>> = {
+  Baja: 'Baja',
+  Media: 'Media',
+  Alta: 'Alta',
+};
+
+export interface PreguntaBanco {
+  readonly id: string;
+  readonly area: AreaEvaluada;
+  readonly competencia: string | null;
+  readonly contexto: string | null;
+  readonly enunciado: string;
+  readonly imagenUrl: string | null;
+  readonly opciones: readonly string[];
+  readonly correcta: number;
+  readonly explicacion: string | null;
+  readonly grados: readonly number[];
+  readonly dificultad: DificultadPregunta;
+  /** En cuántos simulacros se ha usado. */
+  readonly usos: number;
+  readonly creadoEn: string;
+}
+
+export interface GuardarPreguntaBanco {
+  area: AreaEvaluada;
+  competencia: string | null;
+  contexto: string | null;
+  enunciado: string;
+  imagenUrl: string | null;
+  opciones: string[];
+  correcta: number;
+  explicacion: string | null;
+  grados: number[];
+  dificultad: DificultadPregunta;
+}
+
+export interface FiltroBanco {
+  area?: AreaEvaluada | null;
+  grado?: number | null;
+  dificultad?: DificultadPregunta | null;
+  texto?: string | null;
+}
+
+/** Elegidas por id, o una cantidad al azar repartida entre las áreas (por defecto, las de la prueba). */
+export interface AgregarDesdeBanco {
+  preguntaIds?: string[] | null;
+  cantidad?: number | null;
+  areas?: AreaEvaluada[] | null;
+  dificultad?: DificultadPregunta | null;
+}
+
+export interface AgregadasDesdeBanco {
+  readonly agregadas: number;
+  readonly solicitadas: number;
+  readonly simulacro: SimulacroDetalle;
+}
+
+/** Texto corto para listas: «Saber 11 · 10° y 11°» etc. */
+export function textoGrados(grados: readonly number[], nombre: (g: number) => string): string {
+  if (!grados.length) {
+    return 'Todos los grados';
+  }
+  const nombres = grados.map(nombre);
+  return nombres.length === 1 ? nombres[0] : `${nombres.slice(0, -1).join(', ')} y ${nombres.at(-1)}`;
 }
 
 // ---------- Campus ----------

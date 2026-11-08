@@ -1,5 +1,5 @@
 import { enlaceWhatsApp } from './campus.model';
-import { leerPreguntas } from './simulacro.model';
+import { leerPreguntas, textoGrados } from './simulacro.model';
 
 describe('leerPreguntas', () => {
   it('lee área, opciones, la correcta y la explicación', () => {
@@ -38,5 +38,18 @@ describe('enlaceWhatsApp', () => {
 
   it('no arma enlace sin un número válido', () => {
     expect(enlaceWhatsApp('', 'Hola')).toBeNull();
+  });
+});
+
+describe('textoGrados', () => {
+  const nombre = (g: number) => `${g}°`;
+
+  it('une los grados con comas y «y»', () => {
+    expect(textoGrados([9, 10, 11], nombre)).toBe('9°, 10° y 11°');
+    expect(textoGrados([11], nombre)).toBe('11°');
+  });
+
+  it('sin grados sirve para todos', () => {
+    expect(textoGrados([], nombre)).toBe('Todos los grados');
   });
 });

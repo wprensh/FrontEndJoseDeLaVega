@@ -19,6 +19,7 @@ import { nombreGrado } from '../../../core/models/campus.model';
 import {
   AREAS,
   AREAS_PRUEBA,
+  AgregadasDesdeBanco,
   AreaEvaluada,
   ESTADOS_SIMULACRO,
   GuardarPregunta,
@@ -35,11 +36,14 @@ import { SimulacrosService } from '../../../core/services/simulacros.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { ResultadosSimulacroComponent } from '../../../shared/simulacros/resultados-simulacro.component';
+import { AgregarDesdeBancoData, AgregarDesdeBancoDialogComponent } from './agregar-desde-banco-dialog.component';
 import { SimulacroDialogComponent } from './simulacro-dialog.component';
 
 /** Pregunta en edición (las opciones se editan como lista mutable). */
 interface PreguntaEditable extends GuardarPregunta {
   clave: number;
+  /** Pregunta del banco de la que salió (solo informativo). */
+  preguntaBancoId?: string | null;
 }
 
 const EJEMPLO = `[Matemáticas] Si un cuaderno cuesta $3.500, ¿cuánto cuestan 4 cuadernos?
@@ -166,6 +170,7 @@ export class SimulacroDetalleComponent {
         opciones: [...p.opciones],
         correcta: p.correcta,
         explicacion: p.explicacion,
+        preguntaBancoId: p.preguntaBancoId ?? null,
       })),
     );
     this.cambios.set(false);
@@ -291,6 +296,42 @@ export class SimulacroDetalleComponent {
     );
   }
 
+  protected async agregarDesdeBanco(): Promise<void> {
+    const simulacro = this.simulacro();
+    if (!simulacro) {
+      return;
+    }
+    if (this.cambios()) {
+      this.#snackBar.open('Guarde o descarte primero los cambios de las preguntas.', 'Cerrar', { duration: 5000 });
+      return;
+    }
+    const resultado = await firstValueFrom(
+      this.#dialog
+        .open<AgregarDesdeBancoDialogComponent, AgregarDesdeBancoData, AgregadasDesdeBanco>(AgregarDesdeBancoDialogComponent, {
+          data: {
+            simulacro,
+            yaIncluidas: this.preguntas()
+              .map((p) => p.preguntaBancoId)
+              .filter((id): id is string => !!id),
+          },
+          width: '640px',
+          maxWidth: '95vw',
+        })
+        .afterClosed(),
+    );
+    if (resultado) {
+      this.simulacro.set(resultado.simulacro.simulacro);
+      this.#cargarPreguntas(resultado.simulacro.preguntas);
+      const faltaron = resultado.solicitadas - resultado.agregadas;
+      this.#snackBar.open(
+        `${resultado.agregadas} pregunta(s) del banco agregadas.` +
+          (faltaron > 0 ? ` El banco no tenía ${faltaron} más para este simulacro.` : ''),
+        'Cerrar',
+        { duration: 5000 },
+      );
+    }
+  }
+
   protected descartar(): void {
     void this.cargar(this.id());
   }
@@ -308,7 +349,7 @@ export class SimulacroDetalleComponent {
     try {
       const detalle = await this.#servicio.guardarPreguntas(
         this.id(),
-        lista.map(({ clave: _, ...p }) => ({
+        lista.map(({ clave: _, preguntaBancoId: __, ...p }) => ({
           ...p,
           enunciado: p.enunciado.trim(),
           opciones: p.opciones.map((o) => o.trim()),
