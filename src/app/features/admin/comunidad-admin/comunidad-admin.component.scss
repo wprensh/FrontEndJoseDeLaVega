@@ -239,3 +239,43 @@ tr.inactivo .nombre {
     }
   }
 }
+
+.chip.acudiente {
+  background: #efe7f8;
+  color: #4b2a75;
+}
+
+.hoja-carnes {
+  margin-block-start: 1.5rem;
+
+  .barra {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-block-end: 0.75rem;
+
+    h2 {
+      margin: 0 auto 0 0;
+    }
+  }
+
+  .aviso {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--jv-radio);
+    background: #eef4fc;
+  }
+}
+
+.carnes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  @media print {
+    gap: 4mm;
+  }
+}

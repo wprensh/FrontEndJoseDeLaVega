@@ -170,10 +170,11 @@ img {
   white-space: nowrap;
 }
 
-// ---- Impresión de certificados: solo la hoja con membrete (ver CertificadosAdminComponent.imprimir) ----
+// ---- Impresión de certificados, claves, carnés y boletines: solo las hojas, sin encabezado ni pie del sitio ----
 @media print {
   body.imprimiendo-certificado,
-  body.imprimiendo-claves {
+  body.imprimiendo-claves,
+  body.imprimiendo-boletin {
     background: #fff;
 
     app-site-header,
@@ -192,5 +193,15 @@ img {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+// Las páginas del campus (carné, resultados) se imprimen sin el encabezado ni el pie del sitio.
+@media print {
+  app-site-header,
+  app-site-footer,
+  .saltar-contenido,
+  .no-imprimir {
+    display: none !important;
   }
 }

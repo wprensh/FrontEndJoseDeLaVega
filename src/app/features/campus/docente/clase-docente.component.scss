@@ -1,0 +1,239 @@
+.pestanas {
+  padding-block-start: 0.25rem;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-block: 1rem 0.5rem;
+}
+
+.resumen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline-end: auto;
+  color: var(--jv-texto-suave);
+
+  .bajo {
+    color: var(--jv-rojo);
+    font-weight: 700;
+  }
+
+  .ok {
+    color: #0f7b3f;
+  }
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--jv-radio);
+  background: #fff7d6;
+}
+
+.aviso-error {
+  color: var(--jv-rojo);
+}
+
+.ayuda {
+  margin-block-start: 0;
+  color: var(--jv-texto-suave);
+  font-size: 0.9rem;
+}
+
+.tabla {
+  overflow-x: auto;
+}
+
+.planilla {
+  inline-size: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.35rem 0.45rem;
+    border-block-end: 1px solid var(--jv-borde);
+    text-align: center;
+  }
+
+  .nombre {
+    text-align: start;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .observacion {
+    min-inline-size: 14rem;
+
+    input {
+      inline-size: 100%;
+    }
+  }
+
+  input {
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--jv-borde);
+    border-radius: 6px;
+    font: inherit;
+
+    &:focus {
+      outline: 2px solid var(--jv-azul-medio);
+      border-color: transparent;
+    }
+
+    &:disabled {
+      background: var(--jv-superficie-suave);
+    }
+  }
+
+  .nota {
+    inline-size: 4.5rem;
+    text-align: center;
+    font-weight: 700;
+
+    &.invalida {
+      border-color: var(--jv-rojo);
+      background: #fff1f2;
+    }
+  }
+
+  .fallas {
+    inline-size: 4.5rem;
+    text-align: center;
+  }
+
+  .vacio {
+    padding: 2rem;
+    color: var(--jv-texto-suave);
+  }
+}
+
+.desempeno {
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #e3edf9;
+  color: var(--jv-azul-medio);
+
+  &[data-desempeno='Bajo'] {
+    background: #fde2e5;
+    color: #8c1222;
+  }
+
+  &[data-desempeno='Superior'] {
+    background: #e5f5ec;
+    color: #0f5d31;
+  }
+}
+
+.lista {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--jv-radio);
+
+    &[data-estado='Ausente'] {
+      background: #fff1f2;
+    }
+
+    &[data-estado='Tarde'] {
+      background: #fff7d6;
+    }
+
+    &[data-estado='Excusa'] {
+      background: #eef4fc;
+    }
+  }
+
+  .numero {
+    inline-size: 1.6rem;
+    color: var(--jv-texto-suave);
+    text-align: end;
+  }
+
+  .nombre {
+    flex: 1 1 14rem;
+    font-weight: 600;
+  }
+
+  .obs {
+    flex: 1 1 12rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--jv-borde);
+    border-radius: 6px;
+    font: inherit;
+  }
+}
+
+.contactos {
+  margin-block-start: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #b9e2c9;
+  border-radius: var(--jv-radio);
+  background: #f3fbf6;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.6rem;
+    color: #0f5d31;
+    font-size: 1rem;
+  }
+
+  ul {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .acudientes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-block-start: 0.3rem;
+  }
+
+  .whatsapp {
+    --mdc-outlined-button-label-text-color: #0f5d31;
+    --mdc-outlined-button-outline-color: #25d366;
+  }
+
+  .sin-telefono {
+    color: var(--jv-texto-suave);
+    font-size: 0.88rem;
+  }
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.25rem 1rem;
+  padding-block-start: 1.25rem;
+
+  .ancho {
+    grid-column: 1 / -1;
+  }
+
+  .acciones {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

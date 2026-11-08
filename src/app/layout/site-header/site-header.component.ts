@@ -22,6 +22,7 @@ export class SiteHeaderComponent {
   protected readonly accesos: readonly EnlaceNavegacion[] = [
     { ruta: '/contacto', etiqueta: 'PQRS' },
     { ruta: '/admisiones', etiqueta: 'Inscripción de cupos' },
+    { ruta: '/calendario', etiqueta: 'Calendario' },
     { ruta: '/campus', etiqueta: 'Campus virtual' },
     { ruta: '/verificar', etiqueta: 'Verificar certificado' },
   ];

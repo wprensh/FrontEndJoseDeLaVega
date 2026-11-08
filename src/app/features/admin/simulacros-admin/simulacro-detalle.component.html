@@ -1,0 +1,248 @@
+<div class="contenedor">
+  <app-page-heading
+    [titulo]="simulacro()?.titulo ?? 'Simulacro'"
+    subtitulo="Preguntas, horario y resultados"
+    etiqueta="Simulacros Saber"
+  />
+  <app-barra-admin />
+
+  @if (cargando()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando" />
+  }
+  @if (error(); as e) {
+    <p class="aviso-error" role="alert">{{ e }}</p>
+  }
+
+  @if (simulacro(); as s) {
+    <section class="tarjeta resumen">
+      <a mat-button routerLink="/admin/simulacros" class="volver">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        Todos los simulacros
+      </a>
+      <div class="datos">
+        <p><mat-icon aria-hidden="true">quiz</mat-icon>{{ tipos[s.tipo] }} · {{ grados(s) }} · {{ s.duracionMinutos }} minutos</p>
+        <p>
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          {{ s.inicio | date: "EEEE d 'de' MMMM, h:mm a" }} a {{ s.fin | date: "EEEE d 'de' MMMM, h:mm a" }}
+        </p>
+        <p>
+          <mat-icon aria-hidden="true">groups</mat-icon>
+          {{ s.totalPreguntas }} preguntas · {{ s.presentados }} entregados ·
+          {{ s.mostrarRespuestas ? 'muestra respuestas al cerrar' : 'no muestra respuestas' }}
+        </p>
+      </div>
+      <div class="lado">
+        <span class="estado" [attr.data-estado]="s.estado">{{ estados[s.estado] }}</span>
+        @if (puedeEditar()) {
+          <button mat-stroked-button type="button" (click)="editarDatos()">
+            <mat-icon aria-hidden="true">edit</mat-icon>
+            Editar datos
+          </button>
+        }
+      </div>
+    </section>
+
+    <mat-tab-group [selectedIndex]="pestana()" (selectedIndexChange)="cambiarPestana($event)" animationDuration="0ms">
+      <mat-tab [label]="'Preguntas (' + preguntas().length + ')'">
+        <div class="pestana">
+          @if (conIntentos()) {
+            <p class="aviso">
+              <mat-icon aria-hidden="true">info</mat-icon>
+              Ya hay estudiantes que lo presentaron: puede corregir textos, pero no agregar, quitar ni cambiar la respuesta correcta.
+            </p>
+          }
+
+          @if (conteoPorArea().length) {
+            <p class="conteo">
+              @for (c of conteoPorArea(); track c.area) {
+                <span>{{ c.area }}: <strong>{{ c.total }}</strong></span>
+              }
+            </p>
+          }
+
+          @for (p of preguntas(); track p.clave; let i = $index, primera = $first, ultima = $last) {
+            <article class="tarjeta pregunta">
+              <header>
+                <strong>Pregunta {{ i + 1 }}</strong>
+                <mat-form-field subscriptSizing="dynamic" class="area">
+                  <mat-label>Área</mat-label>
+                  <mat-select [(ngModel)]="p.area" (selectionChange)="marcarCambio()" [disabled]="!puedeEditar()">
+                    @for (a of areasDisponibles(); track a[0]) {
+                      <mat-option [value]="a[0]">{{ a[1] }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                @if (puedeEditar()) {
+                  <span class="herramientas">
+                    <button mat-icon-button type="button" matTooltip="Subir" aria-label="Subir" [disabled]="primera" (click)="mover(i, -1)">
+                      <mat-icon>arrow_upward</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" matTooltip="Bajar" aria-label="Bajar" [disabled]="ultima" (click)="mover(i, 1)">
+                      <mat-icon>arrow_downward</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" matTooltip="Quitar" aria-label="Quitar pregunta" [disabled]="conIntentos()" (click)="quitar(p)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </span>
+                }
+              </header>
+
+              <mat-form-field subscriptSizing="dynamic">
+                <mat-label>Contexto o lectura (opcional)</mat-label>
+                <textarea matInput rows="2" maxlength="4000" [(ngModel)]="p.contexto" (ngModelChange)="marcarCambio()" [readonly]="!puedeEditar()"></textarea>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic">
+                <mat-label>Enunciado</mat-label>
+                <textarea matInput rows="2" maxlength="2000" required [(ngModel)]="p.enunciado" (ngModelChange)="marcarCambio()" [readonly]="!puedeEditar()"></textarea>
+              </mat-form-field>
+
+              <mat-radio-group
+                class="opciones"
+                [attr.aria-label]="'Respuesta correcta de la pregunta ' + (i + 1)"
+                [(ngModel)]="p.correcta"
+                (change)="marcarCambio()"
+                [disabled]="!puedeEditar() || conIntentos()"
+              >
+                @for (o of p.opciones; track $index; let j = $index) {
+                  <div class="opcion" [class.correcta]="p.correcta === j">
+                    <mat-radio-button [value]="j" [matTooltip]="'Marcar ' + letras[j] + ' como correcta'">{{ letras[j] }}</mat-radio-button>
+                    <input
+                      class="texto-opcion"
+                      [attr.aria-label]="'Opción ' + letras[j]"
+                      maxlength="500"
+                      [value]="o"
+                      (input)="cambiarOpcion(p, j, $any($event.target).value)"
+                      [readonly]="!puedeEditar()"
+                    />
+                    @if (puedeEditar() && !conIntentos() && p.opciones.length > 2) {
+                      <button mat-icon-button type="button" aria-label="Quitar opción" (click)="quitarOpcion(p, j)">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    }
+                  </div>
+                }
+              </mat-radio-group>
+              @if (puedeEditar() && !conIntentos() && p.opciones.length < maximoOpciones) {
+                <button mat-button type="button" class="agregar-opcion" (click)="agregarOpcion(p)">
+                  <mat-icon aria-hidden="true">add</mat-icon>
+                  Opción
+                </button>
+              }
+
+              <details>
+                <summary>Más datos (competencia, imagen, explicación)</summary>
+                <div class="mas">
+                  <mat-form-field subscriptSizing="dynamic">
+                    <mat-label>Competencia (opcional)</mat-label>
+                    <input matInput maxlength="150" [(ngModel)]="p.competencia" (ngModelChange)="marcarCambio()" placeholder="Interpretación y representación" [readonly]="!puedeEditar()" />
+                  </mat-form-field>
+                  <mat-form-field subscriptSizing="dynamic">
+                    <mat-label>Enlace de imagen https (opcional)</mat-label>
+                    <input matInput type="url" maxlength="500" [(ngModel)]="p.imagenUrl" (ngModelChange)="marcarCambio()" [readonly]="!puedeEditar()" />
+                  </mat-form-field>
+                  <mat-form-field subscriptSizing="dynamic" class="ancho">
+                    <mat-label>Explicación de la respuesta (opcional)</mat-label>
+                    <textarea matInput rows="2" maxlength="2000" [(ngModel)]="p.explicacion" (ngModelChange)="marcarCambio()" [readonly]="!puedeEditar()"></textarea>
+                  </mat-form-field>
+                </div>
+              </details>
+            </article>
+          } @empty {
+            <p class="vacio">Aún no hay preguntas. Agréguelas una por una o péguelas como texto abajo.</p>
+          }
+
+          @if (puedeEditar()) {
+            <div class="acciones-editor">
+              <button mat-stroked-button type="button" (click)="agregar()" [disabled]="conIntentos()">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                Agregar pregunta
+              </button>
+              <span class="espacio"></span>
+              @if (cambios()) {
+                <span class="pendiente">Hay cambios sin guardar</span>
+                <button mat-button type="button" (click)="descartar()">Descartar</button>
+              }
+              <button mat-flat-button class="boton-azul" type="button" [disabled]="guardando() || !cambios()" (click)="guardarPreguntas()">
+                {{ guardando() ? 'Guardando...' : 'Guardar preguntas' }}
+              </button>
+            </div>
+
+            @if (!conIntentos()) {
+              <section class="tarjeta importar">
+                <h3>Pegar preguntas como texto</h3>
+                <p class="ayuda">
+                  Una línea en blanco entre preguntas. Las opciones empiezan con A), B), C)... y la correcta lleva un asterisco
+                  (<code>*B)</code>). El área entre corchetes y la línea «Explicación:» son opcionales.
+                </p>
+                <div class="fila-importar">
+                  <mat-form-field subscriptSizing="dynamic">
+                    <mat-label>Área si no se indica</mat-label>
+                    <mat-select [value]="areaImportar()" (selectionChange)="areaImportar.set($event.value)">
+                      @for (a of areasDisponibles(); track a[0]) {
+                        <mat-option [value]="a[0]">{{ a[1] }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-button type="button" (click)="textoImportar.set(ejemplo)">Ver ejemplo</button>
+                </div>
+                <mat-form-field subscriptSizing="dynamic">
+                  <mat-label>Preguntas</mat-label>
+                  <textarea
+                    matInput
+                    rows="10"
+                    class="monoespacio"
+                    [ngModel]="textoImportar()"
+                    (ngModelChange)="textoImportar.set($event)"
+                  ></textarea>
+                </mat-form-field>
+                @if (vistaPrevia(); as v) {
+                  <p class="ayuda" aria-live="polite">
+                    {{ v.preguntas.length }} pregunta(s) válidas
+                    @if (v.errores.length) {
+                      · <span class="error">{{ v.errores.length }} con errores</span>
+                    }
+                  </p>
+                }
+                @for (e of erroresImportar(); track $index) {
+                  <p class="error">{{ e }}</p>
+                }
+                @if (vistaPrevia()?.errores; as errores) {
+                  @for (e of errores; track $index) {
+                    <p class="error">{{ e }}</p>
+                  }
+                }
+                <div class="acciones-editor">
+                  <button mat-stroked-button type="button" (click)="importar(false)">Agregar al final</button>
+                  @if (preguntas().length) {
+                    <button mat-button type="button" (click)="importar(true)">Reemplazar todas</button>
+                  }
+                </div>
+              </section>
+            }
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Resultados">
+        <div class="pestana">
+          <div class="acciones-editor">
+            <span class="espacio"></span>
+            <button mat-button type="button" (click)="cargarResultados()">
+              <mat-icon aria-hidden="true">refresh</mat-icon>
+              Actualizar
+            </button>
+          </div>
+          @if (resultados(); as r) {
+            @if (r.presentados > 0 || r.enCurso > 0) {
+              <app-resultados-simulacro [resultados]="r" />
+            } @else {
+              <p class="vacio">Nadie lo ha presentado todavía.</p>
+            }
+          } @else {
+            <mat-progress-bar mode="indeterminate" aria-label="Cargando resultados" />
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

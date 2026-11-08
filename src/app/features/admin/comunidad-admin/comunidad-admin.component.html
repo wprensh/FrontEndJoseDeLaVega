@@ -1,8 +1,8 @@
 <div class="contenedor">
   <app-page-heading
     class="no-imprimir"
-    titulo="Estudiantes y docentes"
-    subtitulo="Quiénes entran al campus virtual con su documento y su clave de acceso"
+    titulo="Comunidad del campus"
+    subtitulo="Estudiantes, docentes y acudientes que entran al campus con su documento y su clave de acceso"
     etiqueta="Panel administrativo"
   />
   <app-barra-admin class="no-imprimir" />
@@ -15,6 +15,10 @@
           <mat-icon aria-hidden="true">upload_file</mat-icon>
           Importar lista
         </button>
+        <button mat-stroked-button type="button" (click)="importarAcudientes()">
+          <mat-icon aria-hidden="true">family_restroom</mat-icon>
+          Importar acudientes
+        </button>
         <button mat-stroked-button type="button" (click)="nuevo()">
           <mat-icon aria-hidden="true">person_add</mat-icon>
           Registrar
@@ -26,6 +30,10 @@
           {{ generando() ? 'Generando...' : 'Generar claves' }}
         </button>
       }
+      <button mat-stroked-button type="button" [disabled]="cargandoCarnes()" (click)="prepararCarnes()">
+        <mat-icon aria-hidden="true">badge</mat-icon>
+        {{ cargandoCarnes() ? 'Preparando...' : 'Imprimir carnés' }}
+      </button>
     </div>
 
     <div class="filtros">
@@ -42,6 +50,7 @@
           <mat-option [value]="null">Todos</mat-option>
           <mat-option value="Estudiante">Estudiantes</mat-option>
           <mat-option value="Docente">Docentes</mat-option>
+          <mat-option value="Acudiente">Acudientes</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
@@ -76,14 +85,14 @@
           <th mat-header-cell *matHeaderCellDef>Nombre</th>
           <td mat-cell *matCellDef="let m">
             <span class="nombre">{{ m.nombreCompleto }}</span>
-            <span class="detalle">Documento {{ m.documento }}</span>
+            <span class="detalle">Documento {{ m.documento }}{{ m.telefono ? ' · ' + m.telefono : '' }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="curso">
           <th mat-header-cell *matHeaderCellDef>Curso</th>
           <td mat-cell *matCellDef="let m">
-            <span class="chip" [class.docente]="m.rol === 'Docente'">{{ cursoDe(m) }}</span>
+            <span class="chip" [class.docente]="m.rol === 'Docente'" [class.acudiente]="m.rol === 'Acudiente'">{{ cursoDe(m) }}</span>
           </td>
         </ng-container>
 
@@ -110,6 +119,11 @@
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef><span class="visualmente-oculto">Acciones</span></th>
           <td mat-cell *matCellDef="let m" class="acciones">
+            @if (m.rol !== 'Docente') {
+              <button mat-icon-button type="button" [matTooltip]="m.rol === 'Acudiente' ? 'Estudiantes a cargo' : 'Acudientes'" [attr.aria-label]="'Vínculos de ' + m.nombreCompleto" (click)="vinculos(m)">
+                <mat-icon>family_restroom</mat-icon>
+              </button>
+            }
             @if (sesion.puede('Campus', 'Editar')) {
               <button mat-icon-button type="button" matTooltip="Editar" [attr.aria-label]="'Editar ' + m.nombreCompleto" (click)="editar(m)">
                 <mat-icon>edit</mat-icon>
@@ -182,6 +196,31 @@
           </li>
         }
       </ul>
+    </section>
+  }
+
+  @if (carnes(); as lista) {
+    <section id="hoja-carnes" class="hoja-carnes" aria-labelledby="titulo-carnes">
+      <div class="barra no-imprimir">
+        <h2 id="titulo-carnes">Carnés ({{ lista.length }})</h2>
+        <button mat-flat-button class="boton-azul" type="button" (click)="imprimir()">
+          <mat-icon aria-hidden="true">print</mat-icon>
+          Imprimir
+        </button>
+        <button mat-button type="button" (click)="cerrarCarnes()">Cerrar</button>
+      </div>
+      <p class="aviso no-imprimir" role="note">
+        <mat-icon aria-hidden="true">info</mat-icon>
+        Tamaño tarjeta (85,6 × 54 mm), diez por hoja carta. El QR abre la verificación pública del carné; quien sea
+        desactivado o retirado aparece como no vigente.
+      </p>
+      <div class="carnes">
+        @for (m of lista; track m.id) {
+          <app-carnet [datos]="m" />
+        } @empty {
+          <p>No hay personas activas con estos filtros.</p>
+        }
+      </div>
     </section>
   }
 </div>
