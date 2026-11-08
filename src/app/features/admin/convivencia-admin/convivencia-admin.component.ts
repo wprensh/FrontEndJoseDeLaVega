@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -26,8 +27,8 @@ import { GRADOS, cursoDe, nombreGrado } from '../../../core/models/campus.model'
 import { paginadorEnEspanol } from '../../../core/paginador-intl';
 import { AcademicoAdminService } from '../../../core/services/academico-admin.service';
 import { SesionService } from '../../../core/services/sesion.service';
+import { fechaIsoOVacio } from '../../../core/utils/fechas';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { AnotacionTarjetaComponent } from '../../../shared/convivencia/anotacion-tarjeta.component';
 import { ReporteAsistenciaComponent } from '../../../shared/asistencia/reporte-asistencia.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
@@ -44,6 +45,7 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
     MatAutocompleteModule,
     MatButtonModule,
     MatCheckboxModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -51,7 +53,6 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
     MatProgressBarModule,
     MatSelectModule,
     AnotacionTarjetaComponent,
-    BarraAdminComponent,
     PageHeadingComponent,
     ReporteAsistenciaComponent,
   ],
@@ -60,6 +61,7 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
   styleUrl: './convivencia-admin.component.scss',
 })
 export class ConvivenciaAdminComponent implements OnInit {
+  protected readonly aIso = fechaIsoOVacio;
   readonly #servicio = inject(AcademicoAdminService);
   readonly #snackBar = inject(MatSnackBar);
   protected readonly sesion = inject(SesionService);

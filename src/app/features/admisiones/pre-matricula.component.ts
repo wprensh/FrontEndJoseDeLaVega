@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, output, signal } from '@ang
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -17,6 +18,7 @@ import {
   TipoDocumentoAspirante,
 } from '../../core/models/comunicaciones.model';
 import { ComunicacionesService } from '../../core/services/comunicaciones.service';
+import { fechaIsoOVacio } from '../../core/utils/fechas';
 import { mensajesDeError } from '../../core/utils/http-error';
 
 /** Formulario público de pre-matrícula: la familia radica la solicitud y recibe un número de radicado. */
@@ -28,6 +30,7 @@ import { mensajesDeError } from '../../core/utils/http-error';
     FormsModule,
     MatButtonModule,
     MatCheckboxModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -97,7 +100,9 @@ import { mensajesDeError } from '../../core/utils/http-error';
             </mat-form-field>
             <mat-form-field>
               <mat-label>Fecha de nacimiento</mat-label>
-              <input matInput type="date" name="nacimiento" required [max]="hoy" [(ngModel)]="datos.aspiranteFechaNacimiento" />
+              <input matInput [matDatepicker]="selectorFecha1" name="nacimiento" required [max]="hoy" [ngModel]="datos.aspiranteFechaNacimiento" (ngModelChange)="datos.aspiranteFechaNacimiento = aIso($event)" />
+              <mat-datepicker-toggle matIconSuffix [for]="selectorFecha1" />
+              <mat-datepicker #selectorFecha1 startView="multi-year" />
             </mat-form-field>
             <mat-form-field>
               <mat-label>Colegio de procedencia (opcional)</mat-label>
@@ -242,6 +247,7 @@ import { mensajesDeError } from '../../core/utils/http-error';
   `,
 })
 export class PreMatriculaComponent {
+  protected readonly aIso = fechaIsoOVacio;
   readonly #servicio = inject(ComunicacionesService);
 
   /** Pide abrir la consulta de la solicitud recién radicada. */

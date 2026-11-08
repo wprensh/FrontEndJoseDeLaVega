@@ -14,7 +14,6 @@ import { Circular, Evento, PUBLICOS_CIRCULAR, TIPOS_EVENTO } from '../../../core
 import { ComunicacionesService } from '../../../core/services/comunicaciones.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { fechaLocal } from '../../../shared/calendario/calendario-eventos.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
@@ -43,7 +42,6 @@ export type SeccionComunicaciones = 'circulares' | 'calendario';
     MatIconModule,
     MatProgressBarModule,
     MatTooltipModule,
-    BarraAdminComponent,
     PageHeadingComponent,
   ],
   template: `
@@ -57,7 +55,6 @@ export type SeccionComunicaciones = 'circulares' | 'calendario';
         "
         etiqueta="Panel administrativo"
       />
-      <app-barra-admin />
 
       @if (seccion() === 'circulares') {
           <section class="tarjeta">

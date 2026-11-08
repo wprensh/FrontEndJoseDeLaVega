@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,13 +11,14 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { hoyColombia } from '../../../core/models/academico.model';
 import { Evento, TIPOS_EVENTO, TipoEvento } from '../../../core/models/comunicaciones.model';
 import { ComunicacionesService } from '../../../core/services/comunicaciones.service';
+import { fechaIsoOVacio } from '../../../core/utils/fechas';
 import { mensajeDeError } from '../../../core/utils/http-error';
 
 /** Crear o editar un evento del calendario escolar. */
 @Component({
   selector: 'app-evento-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule],
+  imports: [FormsModule, MatButtonModule, MatDatepickerModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule],
   template: `
     <h2 mat-dialog-title>{{ evento ? 'Editar evento' : 'Nuevo evento' }}</h2>
     <form (ngSubmit)="guardar()">
@@ -40,11 +42,15 @@ import { mensajeDeError } from '../../../core/utils/http-error';
           </mat-form-field>
           <mat-form-field>
             <mat-label>Desde</mat-label>
-            <input matInput type="date" name="inicio" required [(ngModel)]="datos.inicio" />
+            <input matInput [matDatepicker]="selectorFecha1" name="inicio" required [ngModel]="datos.inicio" (ngModelChange)="datos.inicio = aIso($event)" />
+            <mat-datepicker-toggle matIconSuffix [for]="selectorFecha1" />
+            <mat-datepicker #selectorFecha1 />
           </mat-form-field>
           <mat-form-field>
             <mat-label>Hasta (opcional)</mat-label>
-            <input matInput type="date" name="fin" [min]="datos.inicio" [(ngModel)]="datos.fin" />
+            <input matInput [matDatepicker]="selectorFecha2" name="fin" [min]="datos.inicio" [ngModel]="datos.fin" (ngModelChange)="datos.fin = aIso($event)" />
+            <mat-datepicker-toggle matIconSuffix [for]="selectorFecha2" />
+            <mat-datepicker #selectorFecha2 />
           </mat-form-field>
         </div>
         <mat-form-field>
@@ -87,6 +93,7 @@ import { mensajeDeError } from '../../../core/utils/http-error';
   `,
 })
 export class EventoDialogComponent {
+  protected readonly aIso = fechaIsoOVacio;
   readonly #servicio = inject(ComunicacionesService);
   readonly #ref = inject(MatDialogRef<EventoDialogComponent, Evento>);
   protected readonly evento = inject<Evento | null>(MAT_DIALOG_DATA);

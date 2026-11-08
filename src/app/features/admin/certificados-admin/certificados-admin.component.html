@@ -6,7 +6,6 @@
     etiqueta="Panel administrativo"
   />
 
-  <app-barra-admin class="no-imprimir" />
 
   @if (puedeExpedir() || seleccionado()) {
     <div class="rejilla" [class.sin-formulario]="!puedeExpedir()">

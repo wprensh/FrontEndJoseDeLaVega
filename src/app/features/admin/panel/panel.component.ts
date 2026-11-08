@@ -4,14 +4,13 @@ import { RouterLink } from '@angular/router';
 
 import { ACCIONES, MODULOS } from '../../../core/models/usuario.model';
 import { SesionService } from '../../../core/services/sesion.service';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 
 /** Inicio del panel: los módulos que el usuario de la sesión puede usar y qué puede hacer en cada uno. */
 @Component({
   selector: 'app-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, MatIconModule, BarraAdminComponent, PageHeadingComponent],
+  imports: [RouterLink, MatIconModule, PageHeadingComponent],
   template: `
     <div class="contenedor">
       <app-page-heading
@@ -19,7 +18,6 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
         [subtitulo]="'Hola, ' + (sesion.usuario()?.nombreCompleto ?? '') + '. Elija el módulo con el que va a trabajar.'"
         etiqueta="Panel administrativo"
       />
-      <app-barra-admin />
 
       @if (sinPermiso(); as modulo) {
         <p class="aviso" role="alert">

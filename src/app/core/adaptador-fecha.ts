@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { NativeDateAdapter } from '@angular/material/core';
 
+const PATRON_ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 const PATRON_DIA_MES_ANIO = /^\s*(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})\s*$/;
 
 /**
  * Adaptador de fechas de los calendarios de Angular Material.
  * El adaptador nativo muestra "1/7/2026" (1 de julio, formato de Colombia) pero al escribirla la
  * interpreta con Date.parse como 7 de enero. Este adaptador lee día/mes/año al escribir la fecha.
+ * También lee "2026-11-08" (valor de los modelos y de min/max) como medianoche local, no UTC,
+ * para que en Colombia no aparezca el día anterior.
  */
 @Injectable()
 export class AdaptadorFechaColombia extends NativeDateAdapter {
@@ -21,5 +24,16 @@ export class AdaptadorFechaColombia extends NativeDateAdapter {
       }
     }
     return super.parse(valor, formato);
+  }
+
+  override deserialize(valor: unknown): Date | null {
+    if (typeof valor === 'string') {
+      const coincidencia = PATRON_ISO.exec(valor);
+      if (coincidencia) {
+        const [, anio, mes, dia] = coincidencia.map(Number);
+        return new Date(anio, mes - 1, dia);
+      }
+    }
+    return super.deserialize(valor);
   }
 }

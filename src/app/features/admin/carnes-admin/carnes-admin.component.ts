@@ -11,7 +11,6 @@ import { Router } from '@angular/router';
 import { GRADOS, MiembroCampus, RolCampus, nombreGrado } from '../../../core/models/campus.model';
 import { ComunidadService } from '../../../core/services/comunidad.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { CarnetComponent } from '../../../shared/carnet/carnet.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 
@@ -30,7 +29,6 @@ const CLASE_IMPRESION = 'imprimiendo-claves';
     MatInputModule,
     MatProgressBarModule,
     MatSelectModule,
-    BarraAdminComponent,
     CarnetComponent,
     PageHeadingComponent,
   ],
@@ -42,7 +40,6 @@ const CLASE_IMPRESION = 'imprimiendo-claves';
           subtitulo="Carnés de estudiantes y docentes con código QR que cualquiera puede verificar"
           etiqueta="Panel administrativo"
         />
-        <app-barra-admin />
 
         <div class="rejilla">
           <section class="tarjeta">

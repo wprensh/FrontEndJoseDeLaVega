@@ -2,26 +2,30 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatTimepickerModule } from '@angular/material/timepicker';
 
 import { CARGOS, CargoEleccion, Eleccion } from '../../../core/models/eleccion.model';
 import { EleccionesService } from '../../../core/services/elecciones.service';
 import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/http-error';
 
-/** "2027-02-20T07:00" en la hora del equipo, para un input datetime-local. */
-export function aFechaHoraLocal(iso: string | Date): string {
-  const fecha = new Date(iso);
-  const dos = (n: number) => String(n).padStart(2, '0');
-  return `${fecha.getFullYear()}-${dos(fecha.getMonth() + 1)}-${dos(fecha.getDate())}T${dos(fecha.getHours())}:${dos(fecha.getMinutes())}`;
-}
-
 /** Crear o editar una jornada electoral: nombre, horario de votación y cargos. */
 @Component({
   selector: 'app-eleccion-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatCheckboxModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTimepickerModule,
+  ],
   template: `
     <h2 mat-dialog-title>{{ eleccion ? 'Editar elección' : 'Nueva elección' }}</h2>
     <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
@@ -41,15 +45,33 @@ export function aFechaHoraLocal(iso: string | Date): string {
 
         <div class="fila">
           <mat-form-field>
-            <mat-label>Abre la votación</mat-label>
-            <input matInput type="datetime-local" formControlName="inicio" />
+            <mat-label>Abre la votación el día</mat-label>
+            <input matInput [matDatepicker]="diaInicio" formControlName="inicio" />
+            <mat-datepicker-toggle matIconSuffix [for]="diaInicio" />
+            <mat-datepicker #diaInicio />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>Cierra la votación</mat-label>
-            <input matInput type="datetime-local" formControlName="fin" />
+            <mat-label>A la hora</mat-label>
+            <input matInput [matTimepicker]="horaInicio" formControlName="inicio" />
+            <mat-timepicker-toggle matIconSuffix [for]="horaInicio" />
+            <mat-timepicker #horaInicio />
+          </mat-form-field>
+        </div>
+        <div class="fila">
+          <mat-form-field>
+            <mat-label>Cierra la votación el día</mat-label>
+            <input matInput [matDatepicker]="diaFin" formControlName="fin" />
+            <mat-datepicker-toggle matIconSuffix [for]="diaFin" />
+            <mat-datepicker #diaFin />
             @if (formulario.controls.fin.invalid) {
               <mat-error>{{ formulario.controls.fin.getError('servidor') ?? 'El cierre debe ser posterior a la apertura.' }}</mat-error>
             }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>A la hora</mat-label>
+            <input matInput [matTimepicker]="horaFin" formControlName="fin" />
+            <mat-timepicker-toggle matIconSuffix [for]="horaFin" />
+            <mat-timepicker #horaFin />
           </mat-form-field>
         </div>
 
@@ -137,8 +159,8 @@ export class EleccionDialogComponent {
   protected readonly formulario = inject(NonNullableFormBuilder).group({
     nombre: [this.eleccion?.nombre ?? `Gobierno escolar ${new Date().getFullYear()}`, [Validators.required, Validators.maxLength(120)]],
     descripcion: [this.eleccion?.descripcion ?? ''],
-    inicio: [this.eleccion ? aFechaHoraLocal(this.eleccion.inicio) : manana(7), Validators.required],
-    fin: [this.eleccion ? aFechaHoraLocal(this.eleccion.fin) : manana(12), Validators.required],
+    inicio: [this.eleccion ? new Date(this.eleccion.inicio) : manana(7), Validators.required],
+    fin: [this.eleccion ? new Date(this.eleccion.fin) : manana(12), Validators.required],
   });
 
   protected alternar(cargo: CargoEleccion, marcado: boolean): void {
@@ -156,7 +178,7 @@ export class EleccionDialogComponent {
 
   protected async guardar(): Promise<void> {
     const v = this.formulario.getRawValue();
-    if (v.inicio && v.fin && new Date(v.fin) <= new Date(v.inicio)) {
+    if (v.inicio && v.fin && v.fin.getTime() <= v.inicio.getTime()) {
       this.formulario.controls.fin.setErrors({ orden: true });
     }
     this.sinCargos.set(this.elegidos().size === 0);
@@ -168,8 +190,8 @@ export class EleccionDialogComponent {
     const datos = {
       nombre: v.nombre.trim(),
       descripcion: v.descripcion.trim() || null,
-      inicio: new Date(v.inicio).toISOString(),
-      fin: new Date(v.fin).toISOString(),
+      inicio: v.inicio.toISOString(),
+      fin: v.fin.toISOString(),
       cargos: CARGOS.map((c) => c.cargo).filter((c) => this.elegidos().has(c)),
     };
 
@@ -191,9 +213,9 @@ export class EleccionDialogComponent {
   }
 }
 
-function manana(hora: number): string {
+function manana(hora: number): Date {
   const fecha = new Date();
   fecha.setDate(fecha.getDate() + 1);
   fecha.setHours(hora, 0, 0, 0);
-  return aFechaHoraLocal(fecha);
+  return fecha;
 }

@@ -23,6 +23,7 @@ import {
   TipoAnotacion,
 } from '../models/academico.model';
 import { Tablero } from '../models/comunicaciones.model';
+import { BloqueHorario, GuardarBloque, Horario } from '../models/horario.model';
 
 /** Convierte un objeto de filtros en parámetros de consulta, omitiendo los vacíos. */
 export function parametros(filtro: object): HttpParams {
@@ -115,6 +116,24 @@ export class AcademicoAdminService {
 
   docentes(): Promise<PersonaResumen[]> {
     return firstValueFrom(this.#http.get<PersonaResumen[]>(`${this.#url}/docentes`));
+  }
+
+  // ---- Horario semanal ----
+
+  horario(anio: number, filtro: { docenteId?: string; grado?: number; grupo?: string | null }): Promise<Horario> {
+    return firstValueFrom(this.#http.get<Horario>(`${this.#url}/horario`, { params: parametros({ anio, ...filtro }) }));
+  }
+
+  crearBloque(datos: GuardarBloque): Promise<BloqueHorario> {
+    return firstValueFrom(this.#http.post<BloqueHorario>(`${this.#url}/horario`, datos));
+  }
+
+  moverBloque(id: string, datos: Omit<GuardarBloque, 'asignacionId'>): Promise<BloqueHorario> {
+    return firstValueFrom(this.#http.put<BloqueHorario>(`${this.#url}/horario/${id}`, datos));
+  }
+
+  eliminarBloque(id: string): Promise<void> {
+    return firstValueFrom(this.#http.delete<void>(`${this.#url}/horario/${id}`));
   }
 
   // ---- Reportes ----

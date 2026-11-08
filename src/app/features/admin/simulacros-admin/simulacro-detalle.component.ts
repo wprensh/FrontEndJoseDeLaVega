@@ -33,7 +33,6 @@ import {
 import { SesionService } from '../../../core/services/sesion.service';
 import { SimulacrosService } from '../../../core/services/simulacros.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { ResultadosSimulacroComponent } from '../../../shared/simulacros/resultados-simulacro.component';
 import { SimulacroDialogComponent } from './simulacro-dialog.component';
@@ -73,7 +72,6 @@ D) Dar instrucciones`;
     MatSelectModule,
     MatTabsModule,
     MatTooltipModule,
-    BarraAdminComponent,
     PageHeadingComponent,
     ResultadosSimulacroComponent,
   ],

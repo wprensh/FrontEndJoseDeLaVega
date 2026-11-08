@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,8 +31,8 @@ import { GRADOS, nombreGrado } from '../../../core/models/campus.model';
 import { AcademicoAdminService } from '../../../core/services/academico-admin.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { descargarCsv } from '../../../core/utils/csv';
+import { fechaIsoOVacio } from '../../../core/utils/fechas';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { BoletinDocumentoComponent, imprimirBoletines } from '../../../shared/boletin-documento/boletin-documento.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
@@ -66,6 +67,7 @@ interface FormAsignatura {
     DatePipe,
     FormsModule,
     MatButtonModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -74,7 +76,6 @@ interface FormAsignatura {
     MatSlideToggleModule,
     MatTabsModule,
     MatTooltipModule,
-    BarraAdminComponent,
     BoletinDocumentoComponent,
     PageHeadingComponent,
   ],
@@ -82,6 +83,7 @@ interface FormAsignatura {
   styleUrl: './academico-admin.component.scss',
 })
 export class AcademicoAdminComponent implements OnInit {
+  protected readonly aIso = fechaIsoOVacio;
   readonly #servicio = inject(AcademicoAdminService);
   readonly #snackBar = inject(MatSnackBar);
   readonly #dialog = inject(MatDialog);

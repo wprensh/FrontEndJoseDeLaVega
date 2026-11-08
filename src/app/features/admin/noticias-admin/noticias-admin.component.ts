@@ -22,7 +22,6 @@ import { NoticiasService } from '../../../core/services/noticias.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { aFechaIso, desdeFechaIso } from '../../../core/utils/fechas';
 import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 
@@ -57,7 +56,6 @@ const PATRON_URL = /^(https?:\/\/\S+|\/(?!\/)(?!.*\.\.)\S+)$/i;
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    BarraAdminComponent,
     PageHeadingComponent,
   ],
   // Textos del paginador en español (se provee aquí para no cargar el paginador en el bundle inicial).

@@ -23,7 +23,6 @@ import {
 import { EleccionesService } from '../../../core/services/elecciones.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { FotoCandidatoComponent } from '../../../shared/elecciones/foto-candidato.component';
 import { ResultadosEleccionComponent } from '../../../shared/elecciones/resultados-eleccion.component';
@@ -46,7 +45,6 @@ const REFRESCO_MS = 30_000;
     MatProgressBarModule,
     MatTabsModule,
     MatTooltipModule,
-    BarraAdminComponent,
     FotoCandidatoComponent,
     PageHeadingComponent,
     ResultadosEleccionComponent,

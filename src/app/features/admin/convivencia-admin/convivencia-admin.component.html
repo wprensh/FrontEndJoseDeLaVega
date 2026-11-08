@@ -5,7 +5,6 @@
     subtitulo="Inasistencias por curso, observador del estudiante y situaciones tipo I, II y III (Ley 1620 de 2013)"
     etiqueta="Panel administrativo"
   />
-  <app-barra-admin class="no-imprimir" />
 
   <section class="tarjeta no-imprimir asistencia">
     <h2>Reporte de asistencia</h2>
@@ -55,7 +54,9 @@
         </mat-form-field>
         <mat-form-field>
           <mat-label>Fecha de los hechos</mat-label>
-          <input matInput type="date" name="fecha" [max]="hoy" [(ngModel)]="nueva.fecha" />
+          <input matInput [matDatepicker]="selectorFecha1" name="fecha" [max]="hoy" [ngModel]="nueva.fecha" (ngModelChange)="nueva.fecha = aIso($event)" />
+          <mat-datepicker-toggle matIconSuffix [for]="selectorFecha1" />
+          <mat-datepicker #selectorFecha1 />
         </mat-form-field>
         <mat-form-field class="ancho">
           <mat-label>Descripción de los hechos</mat-label>

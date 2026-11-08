@@ -65,6 +65,13 @@ export const routes: Routes = [
       import('./features/campus/academico/boletines-campus.component').then((m) => m.BoletinesCampusComponent),
   },
   {
+    path: 'campus/horario',
+    title: 'Horario de clases',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () =>
+      import('./features/campus/academico/horario-campus.component').then((m) => m.HorarioCampusComponent),
+  },
+  {
     path: 'campus/asistencia',
     title: 'Asistencia',
     canActivate: [requiereSesionCampus],
@@ -147,123 +154,137 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/login/login.component').then((m) => m.LoginComponent),
   },
   {
+    // Todas las páginas del panel comparten el menú lateral agrupado por área.
     path: 'admin',
-    pathMatch: 'full',
-    title: 'Panel administrativo',
     canActivate: [requiereSesion],
-    loadComponent: () => import('./features/admin/panel/panel.component').then((m) => m.PanelComponent),
-  },
-  {
-    path: 'admin/noticias',
-    title: 'Administrar noticias',
-    canActivate: [requierePermiso('Noticias')],
-    loadComponent: () =>
-      import('./features/admin/noticias-admin/noticias-admin.component').then((m) => m.NoticiasAdminComponent),
-  },
-  {
-    path: 'admin/certificados',
-    title: 'Certificaciones',
-    canActivate: [requierePermiso('Certificados')],
-    loadComponent: () =>
-      import('./features/admin/certificados-admin/certificados-admin.component').then(
-        (m) => m.CertificadosAdminComponent,
-      ),
-  },
-  {
-    path: 'admin/usuarios',
-    title: 'Usuarios',
-    canActivate: [requierePermiso('Usuarios')],
-    loadComponent: () =>
-      import('./features/admin/usuarios-admin/usuarios-admin.component').then((m) => m.UsuariosAdminComponent),
-  },
-  {
-    path: 'admin/elecciones',
-    title: 'Elecciones escolares',
-    canActivate: [requierePermiso('Elecciones')],
-    loadComponent: () =>
-      import('./features/admin/elecciones-admin/elecciones-admin.component').then((m) => m.EleccionesAdminComponent),
-  },
-  {
-    path: 'admin/elecciones/:id',
-    title: 'Elección',
-    canActivate: [requierePermiso('Elecciones')],
-    loadComponent: () =>
-      import('./features/admin/elecciones-admin/eleccion-detalle.component').then((m) => m.EleccionDetalleComponent),
-  },
-  {
-    path: 'admin/comunidad',
-    title: 'Estudiantes y docentes',
-    canActivate: [requierePermiso('Campus')],
-    loadComponent: () =>
-      import('./features/admin/comunidad-admin/comunidad-admin.component').then((m) => m.ComunidadAdminComponent),
-  },
-  {
-    path: 'admin/indicadores',
-    title: 'Tablero del rector',
-    canActivate: [requierePermiso('Indicadores')],
-    loadComponent: () =>
-      import('./features/admin/indicadores-admin/indicadores-admin.component').then((m) => m.IndicadoresAdminComponent),
-  },
-  {
-    path: 'admin/academico',
-    title: 'Gestión académica',
-    canActivate: [requierePermiso('Academico')],
-    loadComponent: () =>
-      import('./features/admin/academico-admin/academico-admin.component').then((m) => m.AcademicoAdminComponent),
-  },
-  {
-    path: 'admin/convivencia',
-    title: 'Asistencia y observador',
-    canActivate: [requierePermiso('Convivencia')],
-    loadComponent: () =>
-      import('./features/admin/convivencia-admin/convivencia-admin.component').then((m) => m.ConvivenciaAdminComponent),
-  },
-  {
-    path: 'admin/simulacros',
-    title: 'Simulador Saber',
-    canActivate: [requierePermiso('Simulacros')],
-    loadComponent: () =>
-      import('./features/admin/simulacros-admin/simulacros-admin.component').then((m) => m.SimulacrosAdminComponent),
-  },
-  {
-    path: 'admin/simulacros/:id',
-    title: 'Simulacro',
-    canActivate: [requierePermiso('Simulacros')],
-    loadComponent: () =>
-      import('./features/admin/simulacros-admin/simulacro-detalle.component').then((m) => m.SimulacroDetalleComponent),
-  },
-  {
-    path: 'admin/circulares',
-    title: 'Circulares',
-    canActivate: [requierePermiso('Circulares')],
-    data: { seccion: 'circulares' },
-    loadComponent: () =>
-      import('./features/admin/comunicaciones-admin/comunicaciones-admin.component').then(
-        (m) => m.ComunicacionesAdminComponent,
-      ),
-  },
-  {
-    path: 'admin/calendario',
-    title: 'Calendario escolar',
-    canActivate: [requierePermiso('Calendario')],
-    data: { seccion: 'calendario' },
-    loadComponent: () =>
-      import('./features/admin/comunicaciones-admin/comunicaciones-admin.component').then(
-        (m) => m.ComunicacionesAdminComponent,
-      ),
-  },
-  {
-    path: 'admin/carnes',
-    title: 'Carné con QR',
-    canActivate: [requierePermiso('Carnets')],
-    loadComponent: () => import('./features/admin/carnes-admin/carnes-admin.component').then((m) => m.CarnesAdminComponent),
-  },
-  {
-    path: 'admin/admisiones',
-    title: 'Pre-matrícula en línea',
-    canActivate: [requierePermiso('Admisiones')],
-    loadComponent: () =>
-      import('./features/admin/admisiones-admin/admisiones-admin.component').then((m) => m.AdmisionesAdminComponent),
+    loadComponent: () => import('./shared/barra-admin/panel-admin.component').then((m) => m.PanelAdminComponent),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        title: 'Panel administrativo',
+        loadComponent: () => import('./features/admin/panel/panel.component').then((m) => m.PanelComponent),
+      },
+      {
+        path: 'noticias',
+        title: 'Administrar noticias',
+        canActivate: [requierePermiso('Noticias')],
+        loadComponent: () =>
+          import('./features/admin/noticias-admin/noticias-admin.component').then((m) => m.NoticiasAdminComponent),
+      },
+      {
+        path: 'certificados',
+        title: 'Certificaciones',
+        canActivate: [requierePermiso('Certificados')],
+        loadComponent: () =>
+          import('./features/admin/certificados-admin/certificados-admin.component').then(
+            (m) => m.CertificadosAdminComponent,
+          ),
+      },
+      {
+        path: 'usuarios',
+        title: 'Usuarios',
+        canActivate: [requierePermiso('Usuarios')],
+        loadComponent: () =>
+          import('./features/admin/usuarios-admin/usuarios-admin.component').then((m) => m.UsuariosAdminComponent),
+      },
+      {
+        path: 'elecciones',
+        title: 'Elecciones escolares',
+        canActivate: [requierePermiso('Elecciones')],
+        loadComponent: () =>
+          import('./features/admin/elecciones-admin/elecciones-admin.component').then((m) => m.EleccionesAdminComponent),
+      },
+      {
+        path: 'elecciones/:id',
+        title: 'Elección',
+        canActivate: [requierePermiso('Elecciones')],
+        loadComponent: () =>
+          import('./features/admin/elecciones-admin/eleccion-detalle.component').then((m) => m.EleccionDetalleComponent),
+      },
+      {
+        path: 'comunidad',
+        title: 'Estudiantes y docentes',
+        canActivate: [requierePermiso('Campus')],
+        loadComponent: () =>
+          import('./features/admin/comunidad-admin/comunidad-admin.component').then((m) => m.ComunidadAdminComponent),
+      },
+      {
+        path: 'indicadores',
+        title: 'Tablero del rector',
+        canActivate: [requierePermiso('Indicadores')],
+        loadComponent: () =>
+          import('./features/admin/indicadores-admin/indicadores-admin.component').then((m) => m.IndicadoresAdminComponent),
+      },
+      {
+        path: 'academico',
+        title: 'Gestión académica',
+        canActivate: [requierePermiso('Academico')],
+        loadComponent: () =>
+          import('./features/admin/academico-admin/academico-admin.component').then((m) => m.AcademicoAdminComponent),
+      },
+      {
+        path: 'horarios',
+        title: 'Horarios',
+        canActivate: [requierePermiso('Academico')],
+        loadComponent: () =>
+          import('./features/admin/horarios-admin/horarios-admin.component').then((m) => m.HorariosAdminComponent),
+      },
+      {
+        path: 'convivencia',
+        title: 'Asistencia y observador',
+        canActivate: [requierePermiso('Convivencia')],
+        loadComponent: () =>
+          import('./features/admin/convivencia-admin/convivencia-admin.component').then((m) => m.ConvivenciaAdminComponent),
+      },
+      {
+        path: 'simulacros',
+        title: 'Simulador Saber',
+        canActivate: [requierePermiso('Simulacros')],
+        loadComponent: () =>
+          import('./features/admin/simulacros-admin/simulacros-admin.component').then((m) => m.SimulacrosAdminComponent),
+      },
+      {
+        path: 'simulacros/:id',
+        title: 'Simulacro',
+        canActivate: [requierePermiso('Simulacros')],
+        loadComponent: () =>
+          import('./features/admin/simulacros-admin/simulacro-detalle.component').then((m) => m.SimulacroDetalleComponent),
+      },
+      {
+        path: 'circulares',
+        title: 'Circulares',
+        canActivate: [requierePermiso('Circulares')],
+        data: { seccion: 'circulares' },
+        loadComponent: () =>
+          import('./features/admin/comunicaciones-admin/comunicaciones-admin.component').then(
+            (m) => m.ComunicacionesAdminComponent,
+          ),
+      },
+      {
+        path: 'calendario',
+        title: 'Calendario escolar',
+        canActivate: [requierePermiso('Calendario')],
+        data: { seccion: 'calendario' },
+        loadComponent: () =>
+          import('./features/admin/comunicaciones-admin/comunicaciones-admin.component').then(
+            (m) => m.ComunicacionesAdminComponent,
+          ),
+      },
+      {
+        path: 'carnes',
+        title: 'Carné con QR',
+        canActivate: [requierePermiso('Carnets')],
+        loadComponent: () => import('./features/admin/carnes-admin/carnes-admin.component').then((m) => m.CarnesAdminComponent),
+      },
+      {
+        path: 'admisiones',
+        title: 'Pre-matrícula en línea',
+        canActivate: [requierePermiso('Admisiones')],
+        loadComponent: () =>
+          import('./features/admin/admisiones-admin/admisiones-admin.component').then((m) => m.AdmisionesAdminComponent),
+      },
+    ],
   },
   {
     // Verificación pública del carné; el QR de cada carné apunta a /carnet/{codigo}.
