@@ -8,6 +8,7 @@ describe('Menú del panel', () => {
       expect(rutas).toContain(m.ruta!);
     }
     expect(rutas).toContain('/admin/horarios');
+    expect(rutas).toContain('/admin/banco-preguntas');
     expect(new Set(rutas).size).toBe(rutas.length);
   });
 

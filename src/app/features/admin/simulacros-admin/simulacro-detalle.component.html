@@ -63,6 +63,9 @@
             <article class="tarjeta pregunta">
               <header>
                 <strong>Pregunta {{ i + 1 }}</strong>
+                @if (p.preguntaBancoId) {
+                  <span class="del-banco" matTooltip="Copiada del banco de preguntas">Del banco</span>
+                }
                 <mat-form-field subscriptSizing="dynamic" class="area">
                   <mat-label>Área</mat-label>
                   <mat-select [(ngModel)]="p.area" (selectionChange)="marcarCambio()" [disabled]="!puedeEditar()">
@@ -147,7 +150,7 @@
               </details>
             </article>
           } @empty {
-            <p class="vacio">Aún no hay preguntas. Agréguelas una por una o péguelas como texto abajo.</p>
+            <p class="vacio">Aún no hay preguntas. Tómelas del banco, agréguelas una por una o péguelas como texto abajo.</p>
           }
 
           @if (puedeEditar()) {
@@ -155,6 +158,10 @@
               <button mat-stroked-button type="button" (click)="agregar()" [disabled]="conIntentos()">
                 <mat-icon aria-hidden="true">add</mat-icon>
                 Agregar pregunta
+              </button>
+              <button mat-stroked-button type="button" (click)="agregarDesdeBanco()" [disabled]="conIntentos()">
+                <mat-icon aria-hidden="true">inventory_2</mat-icon>
+                Agregar desde el banco
               </button>
               <span class="espacio"></span>
               @if (cambios()) {
