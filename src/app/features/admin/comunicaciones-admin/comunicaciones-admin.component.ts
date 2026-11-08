@@ -1,11 +1,10 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 
@@ -30,7 +29,10 @@ function primeroDelMes(fecha: string, meses: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Circulares con confirmación de lectura y calendario escolar. */
+/** Qué parte muestra la ruta: /admin/circulares o /admin/calendario (dato de la ruta). */
+export type SeccionComunicaciones = 'circulares' | 'calendario';
+
+/** Circulares con confirmación de lectura, o calendario escolar: cada uno es un módulo del panel. */
 @Component({
   selector: 'app-comunicaciones-admin',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,7 +42,6 @@ function primeroDelMes(fecha: string, meses: number): string {
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
-    MatTabsModule,
     MatTooltipModule,
     BarraAdminComponent,
     PageHeadingComponent,
@@ -48,21 +49,24 @@ function primeroDelMes(fecha: string, meses: number): string {
   template: `
     <div class="contenedor">
       <app-page-heading
-        titulo="Circulares y calendario"
-        subtitulo="Comunicados con confirmación de lectura y agenda institucional"
+        [titulo]="seccion() === 'circulares' ? 'Circulares' : 'Calendario escolar'"
+        [subtitulo]="
+          seccion() === 'circulares'
+            ? 'Comunicados para familias y docentes con confirmación de lectura'
+            : 'Agenda institucional, fechas académicas y festivos'
+        "
         etiqueta="Panel administrativo"
       />
       <app-barra-admin />
 
-      <mat-tab-group animationDuration="0ms" (selectedIndexChange)="cambiarPestana($event)">
-        <mat-tab label="Circulares">
-          <section class="tarjeta pestana">
+      @if (seccion() === 'circulares') {
+          <section class="tarjeta">
             <div class="barra">
               <p class="ayuda">
                 Al publicar, la circular aparece en el campus de los destinatarios y se envía por correo a quienes lo tengan
                 registrado. Aquí ve quién la leyó y puede recordarle por WhatsApp a quien falte.
               </p>
-              @if (sesion.puede('Comunicaciones', 'Crear')) {
+              @if (sesion.puede('Circulares', 'Crear')) {
                 <button mat-flat-button class="boton-azul" type="button" (click)="editarCircular(null)">
                   <mat-icon aria-hidden="true">add</mat-icon>
                   Nueva circular
@@ -121,7 +125,7 @@ function primeroDelMes(fecha: string, meses: number): string {
                         }
                       </td>
                       <td class="acciones">
-                        @if (!c.publicadaEn && sesion.puede('Comunicaciones', 'Editar')) {
+                        @if (!c.publicadaEn && sesion.puede('Circulares', 'Editar')) {
                           <button mat-flat-button class="boton-institucional" type="button" (click)="publicar(c)">Publicar</button>
                         }
                         @if (c.publicadaEn) {
@@ -129,12 +133,12 @@ function primeroDelMes(fecha: string, meses: number): string {
                             <mat-icon>pending_actions</mat-icon>
                           </button>
                         }
-                        @if (sesion.puede('Comunicaciones', 'Editar')) {
+                        @if (sesion.puede('Circulares', 'Editar')) {
                           <button mat-icon-button type="button" matTooltip="Editar" aria-label="Editar" (click)="editarCircular(c)">
                             <mat-icon>edit</mat-icon>
                           </button>
                         }
-                        @if (sesion.puede('Comunicaciones', 'Eliminar')) {
+                        @if (sesion.puede('Circulares', 'Eliminar')) {
                           <button mat-icon-button type="button" matTooltip="Eliminar" aria-label="Eliminar" (click)="eliminarCircular(c)">
                             <mat-icon>delete</mat-icon>
                           </button>
@@ -150,10 +154,8 @@ function primeroDelMes(fecha: string, meses: number): string {
               </table>
             </div>
           </section>
-        </mat-tab>
-
-        <mat-tab label="Calendario escolar">
-          <section class="tarjeta pestana">
+      } @else {
+          <section class="tarjeta">
             <div class="barra">
               <div class="navegacion">
                 <button mat-icon-button type="button" aria-label="Meses anteriores" (click)="moverMeses(-3)">
@@ -165,7 +167,7 @@ function primeroDelMes(fecha: string, meses: number): string {
                 </button>
               </div>
               <span class="espacio"></span>
-              @if (sesion.puede('Comunicaciones', 'Crear')) {
+              @if (sesion.puede('Calendario', 'Crear')) {
                 <button mat-flat-button class="boton-azul" type="button" (click)="editarEvento(null)">
                   <mat-icon aria-hidden="true">add</mat-icon>
                   Nuevo evento
@@ -202,12 +204,12 @@ function primeroDelMes(fecha: string, meses: number): string {
                       <td><span class="tipo" [attr.data-tipo]="e.tipo">{{ tiposEvento[e.tipo] }}</span></td>
                       <td>{{ e.publico ? 'Página pública y campus' : 'Solo campus' }}</td>
                       <td class="acciones">
-                        @if (sesion.puede('Comunicaciones', 'Editar')) {
+                        @if (sesion.puede('Calendario', 'Editar')) {
                           <button mat-icon-button type="button" matTooltip="Editar" aria-label="Editar" (click)="editarEvento(e)">
                             <mat-icon>edit</mat-icon>
                           </button>
                         }
-                        @if (sesion.puede('Comunicaciones', 'Eliminar')) {
+                        @if (sesion.puede('Calendario', 'Eliminar')) {
                           <button mat-icon-button type="button" matTooltip="Eliminar" aria-label="Eliminar" (click)="eliminarEvento(e)">
                             <mat-icon>delete</mat-icon>
                           </button>
@@ -224,14 +226,10 @@ function primeroDelMes(fecha: string, meses: number): string {
             </div>
             <p class="ayuda">Los eventos públicos se ven en <a href="calendario" target="_blank">la página del calendario</a>.</p>
           </section>
-        </mat-tab>
-      </mat-tab-group>
+      }
     </div>
   `,
   styles: `
-    .pestana {
-      margin-block-start: 1rem;
-    }
 
     .barra {
       display: flex;
@@ -369,6 +367,9 @@ function primeroDelMes(fecha: string, meses: number): string {
   `,
 })
 export class ComunicacionesAdminComponent implements OnInit {
+  /** Llega de `data` en la ruta. */
+  readonly seccion = input<SeccionComunicaciones>('circulares');
+
   readonly #servicio = inject(ComunicacionesService);
   readonly #dialog = inject(MatDialog);
   readonly #snackBar = inject(MatSnackBar);
@@ -385,16 +386,9 @@ export class ComunicacionesAdminComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly desde = signal(primeroDelMes(hoyColombia(), 0));
   protected readonly ultimoMes = signal(primeroDelMes(hoyColombia(), 2));
-  #eventosCargados = false;
 
   ngOnInit(): void {
-    void this.cargarCirculares();
-  }
-
-  protected cambiarPestana(indice: number): void {
-    if (indice === 1 && !this.#eventosCargados) {
-      void this.cargarEventos();
-    }
+    void (this.seccion() === 'circulares' ? this.cargarCirculares() : this.cargarEventos());
   }
 
   protected porcentaje(parte: number, total: number): number {
@@ -422,7 +416,6 @@ export class ComunicacionesAdminComponent implements OnInit {
 
   async cargarEventos(): Promise<void> {
     this.cargandoEventos.set(true);
-    this.#eventosCargados = true;
     try {
       const hasta = primeroDelMes(this.ultimoMes(), 1);
       this.eventos.set(await this.#servicio.eventos(this.desde(), hasta));

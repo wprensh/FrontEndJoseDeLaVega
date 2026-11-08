@@ -15,6 +15,8 @@ import {
   InfoModulo,
   MODULOS,
   PATRON_CLAVE,
+  PERFILES_PERMISOS,
+  PerfilPermisos,
   PATRON_NOMBRE_USUARIO,
   Permiso,
   Usuario,
@@ -52,6 +54,7 @@ export class UsuarioDialogComponent {
   protected readonly data = inject<UsuarioDialogData>(MAT_DIALOG_DATA);
 
   protected readonly modulos = MODULOS;
+  protected readonly perfiles = PERFILES_PERMISOS;
   protected readonly acciones = ACCIONES;
   protected readonly editando = this.data.usuario ?? null;
   protected readonly esUnoMismo = this.editando !== null && this.editando.id === this.data.idSesion;
@@ -80,6 +83,23 @@ export class UsuarioDialogComponent {
   });
 
   protected readonly sinPermisos = computed(() => !this.esSuper() && this.permisos().size === 0);
+
+  /** Perfil cuyos permisos coinciden exactamente con los marcados (para resaltarlo). */
+  protected readonly perfilActual = computed(() => {
+    const marcados = this.permisos();
+    return (
+      this.perfiles.find((p) => p.permisos.length === marcados.size && p.permisos.every((x) => marcados.has(x)))?.nombre ?? null
+    );
+  });
+
+  /** Reemplaza los permisos por los del perfil; después se pueden ajustar casilla por casilla. */
+  protected aplicarPerfil(perfil: PerfilPermisos): void {
+    this.formulario.controls.esSuperAdministrador.setValue(false);
+    this.permisos.set(new Set(perfil.permisos));
+    if (!this.editando && !this.formulario.controls.nombreUsuario.value && perfil.nombre.startsWith('Rector')) {
+      this.formulario.controls.nombreUsuario.setValue('rector');
+    }
+  }
 
   protected tiene(modulo: InfoModulo, accion: Accion): boolean {
     return this.esSuper() || this.permisos().has(`${modulo.modulo}:${accion}`);

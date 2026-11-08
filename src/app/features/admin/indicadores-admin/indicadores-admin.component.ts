@@ -203,8 +203,8 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
             @if (t.ultimaCircular; as c) {
               <p><strong>{{ c.codigo }}</strong> {{ c.titulo }}</p>
               <app-barras [barras]="barrasCircular()" [umbral]="50" [meta]="80" />
-              @if (sesion.puede('Comunicaciones', 'Ver')) {
-                <a mat-button routerLink="/admin/comunicaciones">Ver pendientes</a>
+              @if (sesion.puede('Circulares', 'Ver')) {
+                <a mat-button routerLink="/admin/circulares">Ver pendientes</a>
               }
             } @else {
               <p class="vacio">Aún no se ha publicado ninguna circular.</p>

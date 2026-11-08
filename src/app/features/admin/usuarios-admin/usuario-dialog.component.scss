@@ -104,3 +104,59 @@ mat-dialog-content {
 .aviso-error {
   color: var(--jv-rojo);
 }
+
+.perfiles {
+  margin-block: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .nota {
+    margin: 0.2rem 0 0.5rem;
+  }
+}
+
+.opciones-perfil {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.perfil {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--jv-borde);
+  border-radius: var(--jv-radio);
+  background: var(--jv-superficie);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  strong {
+    color: var(--jv-azul);
+  }
+
+  small {
+    color: var(--jv-texto-suave);
+    line-height: 1.3;
+  }
+
+  &:hover {
+    border-color: var(--jv-azul);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--jv-azul);
+    outline-offset: 2px;
+  }
+
+  &.activo {
+    border-color: var(--jv-azul);
+    background: #eef4fc;
+    box-shadow: inset 0 0 0 1px var(--jv-azul);
+  }
+}

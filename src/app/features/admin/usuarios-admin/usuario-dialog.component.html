@@ -68,6 +68,25 @@
       }
     </div>
 
+    <section class="perfiles" aria-labelledby="titulo-perfiles">
+      <h3 id="titulo-perfiles">Perfil</h3>
+      <p class="nota">Elija un perfil para marcar sus permisos de una vez; luego puede ajustar las casillas.</p>
+      <div class="opciones-perfil">
+        @for (perfil of perfiles; track perfil.nombre) {
+          <button
+            type="button"
+            class="perfil"
+            [class.activo]="!esSuper() && perfilActual() === perfil.nombre"
+            [attr.aria-pressed]="!esSuper() && perfilActual() === perfil.nombre"
+            (click)="aplicarPerfil(perfil)"
+          >
+            <strong>{{ perfil.nombre }}</strong>
+            <small>{{ perfil.descripcion }}</small>
+          </button>
+        }
+      </div>
+    </section>
+
     <fieldset class="permisos" [disabled]="esSuper()">
       <legend>Permisos por módulo</legend>
       <table>

@@ -213,14 +213,14 @@ export const routes: Routes = [
   },
   {
     path: 'admin/convivencia',
-    title: 'Convivencia escolar',
+    title: 'Asistencia y observador',
     canActivate: [requierePermiso('Convivencia')],
     loadComponent: () =>
       import('./features/admin/convivencia-admin/convivencia-admin.component').then((m) => m.ConvivenciaAdminComponent),
   },
   {
     path: 'admin/simulacros',
-    title: 'Simulacros Saber',
+    title: 'Simulador Saber',
     canActivate: [requierePermiso('Simulacros')],
     loadComponent: () =>
       import('./features/admin/simulacros-admin/simulacros-admin.component').then((m) => m.SimulacrosAdminComponent),
@@ -233,17 +233,34 @@ export const routes: Routes = [
       import('./features/admin/simulacros-admin/simulacro-detalle.component').then((m) => m.SimulacroDetalleComponent),
   },
   {
-    path: 'admin/comunicaciones',
-    title: 'Circulares y calendario',
-    canActivate: [requierePermiso('Comunicaciones')],
+    path: 'admin/circulares',
+    title: 'Circulares',
+    canActivate: [requierePermiso('Circulares')],
+    data: { seccion: 'circulares' },
     loadComponent: () =>
       import('./features/admin/comunicaciones-admin/comunicaciones-admin.component').then(
         (m) => m.ComunicacionesAdminComponent,
       ),
   },
   {
+    path: 'admin/calendario',
+    title: 'Calendario escolar',
+    canActivate: [requierePermiso('Calendario')],
+    data: { seccion: 'calendario' },
+    loadComponent: () =>
+      import('./features/admin/comunicaciones-admin/comunicaciones-admin.component').then(
+        (m) => m.ComunicacionesAdminComponent,
+      ),
+  },
+  {
+    path: 'admin/carnes',
+    title: 'Carné con QR',
+    canActivate: [requierePermiso('Carnets')],
+    loadComponent: () => import('./features/admin/carnes-admin/carnes-admin.component').then((m) => m.CarnesAdminComponent),
+  },
+  {
     path: 'admin/admisiones',
-    title: 'Admisiones',
+    title: 'Pre-matrícula en línea',
     canActivate: [requierePermiso('Admisiones')],
     loadComponent: () =>
       import('./features/admin/admisiones-admin/admisiones-admin.component').then((m) => m.AdmisionesAdminComponent),

@@ -1,11 +1,19 @@
 <div class="contenedor">
   <app-page-heading
     class="no-imprimir"
-    titulo="Convivencia escolar"
-    subtitulo="Observador del estudiante y situaciones tipo I, II y III según la Ley 1620 de 2013"
+    titulo="Asistencia y observador"
+    subtitulo="Inasistencias por curso, observador del estudiante y situaciones tipo I, II y III (Ley 1620 de 2013)"
     etiqueta="Panel administrativo"
   />
   <app-barra-admin class="no-imprimir" />
+
+  <section class="tarjeta no-imprimir asistencia">
+    <h2>Reporte de asistencia</h2>
+    <p class="ayuda-asistencia">
+      Los docentes toman lista en el campus; cada ausencia o llegada tarde avisa al acudiente.
+    </p>
+    <app-reporte-asistencia />
+  </section>
 
   <section class="tarjeta no-imprimir">
     <div class="barra">
