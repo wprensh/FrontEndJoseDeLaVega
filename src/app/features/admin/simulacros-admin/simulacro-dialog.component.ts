@@ -2,25 +2,31 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTimepickerModule } from '@angular/material/timepicker';
 
 import { GRADOS, nombreGrado } from '../../../core/models/campus.model';
 import { GRADOS_PRUEBA, Simulacro, TIPOS_PRUEBA, TipoPrueba } from '../../../core/models/simulacro.model';
 import { SimulacrosService } from '../../../core/services/simulacros.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
 
-/** "2026-11-07T08:00" en hora de Colombia ↔ ISO con zona horaria. */
-function aLocal(iso: string): string {
+/**
+ * ISO con zona horaria ↔ Date cuyo día y hora del calendario son la hora de Colombia,
+ * sin importar la zona horaria configurada en el equipo.
+ */
+function aLocal(iso: string): Date {
   const d = new Date(Date.parse(iso) - 5 * 3600_000);
-  return d.toISOString().slice(0, 16);
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes());
 }
 
-function aIso(local: string): string {
-  return `${local}:00-05:00`;
+function aIso(local: Date): string {
+  const dos = (n: number) => String(n).padStart(2, '0');
+  return `${local.getFullYear()}-${dos(local.getMonth() + 1)}-${dos(local.getDate())}T${dos(local.getHours())}:${dos(local.getMinutes())}:00-05:00`;
 }
 
 /** Crear o editar los datos de un simulacro (las preguntas se editan aparte). */
@@ -31,11 +37,13 @@ function aIso(local: string): string {
     FormsModule,
     MatButtonModule,
     MatCheckboxModule,
+    MatDatepickerModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatSlideToggleModule,
+    MatTimepickerModule,
   ],
   template: `
     <h2 mat-dialog-title>{{ simulacro ? 'Editar simulacro' : 'Nuevo simulacro' }}</h2>
@@ -67,12 +75,30 @@ function aIso(local: string): string {
         </fieldset>
         <div class="fila">
           <mat-form-field>
-            <mat-label>Abre</mat-label>
-            <input matInput type="datetime-local" name="inicio" [(ngModel)]="inicio" required />
+            <mat-label>Abre el día</mat-label>
+            <input matInput [matDatepicker]="diaInicio" name="diaInicio" [(ngModel)]="inicio" required />
+            <mat-datepicker-toggle matIconSuffix [for]="diaInicio" />
+            <mat-datepicker #diaInicio />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>Cierra</mat-label>
-            <input matInput type="datetime-local" name="fin" [(ngModel)]="fin" required />
+            <mat-label>A la hora</mat-label>
+            <input matInput [matTimepicker]="horaInicio" name="horaInicio" [(ngModel)]="inicio" required />
+            <mat-timepicker-toggle matIconSuffix [for]="horaInicio" />
+            <mat-timepicker #horaInicio />
+          </mat-form-field>
+        </div>
+        <div class="fila">
+          <mat-form-field>
+            <mat-label>Cierra el día</mat-label>
+            <input matInput [matDatepicker]="diaFin" name="diaFin" [(ngModel)]="fin" required />
+            <mat-datepicker-toggle matIconSuffix [for]="diaFin" />
+            <mat-datepicker #diaFin />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>A la hora</mat-label>
+            <input matInput [matTimepicker]="horaFin" name="horaFin" [(ngModel)]="fin" required />
+            <mat-timepicker-toggle matIconSuffix [for]="horaFin" />
+            <mat-timepicker #horaFin />
           </mat-form-field>
         </div>
         <mat-form-field>
@@ -145,8 +171,8 @@ export class SimulacroDialogComponent {
     duracionMinutos: this.simulacro?.duracionMinutos ?? 120,
     mostrarRespuestas: this.simulacro?.mostrarRespuestas ?? true,
   };
-  protected inicio = this.simulacro ? aLocal(this.simulacro.inicio) : '';
-  protected fin = this.simulacro ? aLocal(this.simulacro.fin) : '';
+  protected inicio: Date | null = this.simulacro ? aLocal(this.simulacro.inicio) : null;
+  protected fin: Date | null = this.simulacro ? aLocal(this.simulacro.fin) : null;
 
   protected cambiarTipo(tipo: TipoPrueba): void {
     const sugeridos = GRADOS_PRUEBA[tipo];
@@ -166,7 +192,7 @@ export class SimulacroDialogComponent {
       this.error.set('Complete el título, los grados y el horario.');
       return;
     }
-    if (this.fin <= this.inicio) {
+    if (this.fin.getTime() <= this.inicio.getTime()) {
       this.error.set('El cierre debe ser posterior a la apertura.');
       return;
     }

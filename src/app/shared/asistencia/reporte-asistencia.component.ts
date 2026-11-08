@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -12,13 +13,14 @@ import { Curso, ReporteAsistencia, hoyColombia } from '../../core/models/academi
 import { nombreGrado } from '../../core/models/campus.model';
 import { AcademicoAdminService } from '../../core/services/academico-admin.service';
 import { descargarCsv } from '../../core/utils/csv';
+import { fechaIsoOVacio } from '../../core/utils/fechas';
 import { mensajeDeError } from '../../core/utils/http-error';
 
 /** Inasistencias por estudiante de un curso en un rango de fechas, con descarga a Excel (CSV). */
 @Component({
   selector: 'app-reporte-asistencia',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, MatSelectModule],
+  imports: [DatePipe, FormsModule, MatButtonModule, MatDatepickerModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, MatSelectModule],
   template: `
     <form class="filtros" (ngSubmit)="ver()">
       <mat-form-field subscriptSizing="dynamic">
@@ -31,11 +33,15 @@ import { mensajeDeError } from '../../core/utils/http-error';
       </mat-form-field>
       <mat-form-field subscriptSizing="dynamic">
         <mat-label>Desde</mat-label>
-        <input matInput type="date" name="desde" [(ngModel)]="desde" />
+        <input matInput [matDatepicker]="selectorFecha1" name="desde" [ngModel]="desde" (ngModelChange)="desde = aIso($event)" />
+        <mat-datepicker-toggle matIconSuffix [for]="selectorFecha1" />
+        <mat-datepicker #selectorFecha1 />
       </mat-form-field>
       <mat-form-field subscriptSizing="dynamic">
         <mat-label>Hasta</mat-label>
-        <input matInput type="date" name="hasta" [(ngModel)]="hasta" />
+        <input matInput [matDatepicker]="selectorFecha2" name="hasta" [ngModel]="hasta" (ngModelChange)="hasta = aIso($event)" />
+        <mat-datepicker-toggle matIconSuffix [for]="selectorFecha2" />
+        <mat-datepicker #selectorFecha2 />
       </mat-form-field>
       <button mat-flat-button class="boton-azul" type="submit" [disabled]="cargando()">Ver reporte</button>
     </form>
@@ -131,6 +137,7 @@ import { mensajeDeError } from '../../core/utils/http-error';
   `,
 })
 export class ReporteAsistenciaComponent implements OnInit {
+  protected readonly aIso = fechaIsoOVacio;
   readonly #servicio = inject(AcademicoAdminService);
 
   protected readonly cursos = signal<Curso[]>([]);

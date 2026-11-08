@@ -47,8 +47,8 @@
           <form class="formulario tarjeta" (ngSubmit)="guardarPeriodo()">
             <mat-form-field><mat-label>Número</mat-label><input matInput type="number" min="1" max="6" name="numero" [(ngModel)]="f.numero" required /></mat-form-field>
             <mat-form-field><mat-label>Nombre (opcional)</mat-label><input matInput name="nombre" maxlength="60" [(ngModel)]="f.nombre" placeholder="Primer periodo" /></mat-form-field>
-            <mat-form-field><mat-label>Inicio</mat-label><input matInput type="date" name="inicio" [(ngModel)]="f.inicio" required /></mat-form-field>
-            <mat-form-field><mat-label>Fin</mat-label><input matInput type="date" name="fin" [(ngModel)]="f.fin" required /></mat-form-field>
+            <mat-form-field><mat-label>Inicio</mat-label><input matInput [matDatepicker]="selectorFecha1" name="inicio" required [ngModel]="f.inicio" (ngModelChange)="f.inicio = aIso($event)" /><mat-datepicker-toggle matIconSuffix [for]="selectorFecha1" /><mat-datepicker #selectorFecha1 /></mat-form-field>
+            <mat-form-field><mat-label>Fin</mat-label><input matInput [matDatepicker]="selectorFecha2" name="fin" required [ngModel]="f.fin" (ngModelChange)="f.fin = aIso($event)" /><mat-datepicker-toggle matIconSuffix [for]="selectorFecha2" /><mat-datepicker #selectorFecha2 /></mat-form-field>
             <mat-form-field><mat-label>Porcentaje</mat-label><input matInput type="number" min="1" max="100" name="porcentaje" [(ngModel)]="f.porcentaje" required /><span matTextSuffix>%</span></mat-form-field>
             <mat-slide-toggle name="notasAbiertas" [(ngModel)]="f.notasAbiertas">Notas abiertas</mat-slide-toggle>
             <mat-slide-toggle name="publicado" [(ngModel)]="f.publicado">Boletines publicados</mat-slide-toggle>
@@ -324,8 +324,8 @@
               }
             </mat-select>
           </mat-form-field>
-          <mat-form-field subscriptSizing="dynamic"><mat-label>Desde</mat-label><input matInput type="date" [(ngModel)]="asistencia.desde" /></mat-form-field>
-          <mat-form-field subscriptSizing="dynamic"><mat-label>Hasta</mat-label><input matInput type="date" [(ngModel)]="asistencia.hasta" /></mat-form-field>
+          <mat-form-field subscriptSizing="dynamic"><mat-label>Desde</mat-label><input matInput [matDatepicker]="selectorFecha3" [ngModel]="asistencia.desde" (ngModelChange)="asistencia.desde = aIso($event)" /><mat-datepicker-toggle matIconSuffix [for]="selectorFecha3" /><mat-datepicker #selectorFecha3 /></mat-form-field>
+          <mat-form-field subscriptSizing="dynamic"><mat-label>Hasta</mat-label><input matInput [matDatepicker]="selectorFecha4" [ngModel]="asistencia.hasta" (ngModelChange)="asistencia.hasta = aIso($event)" /><mat-datepicker-toggle matIconSuffix [for]="selectorFecha4" /><mat-datepicker #selectorFecha4 /></mat-form-field>
           <button mat-flat-button class="boton-azul" type="button" (click)="verAsistencia()">Ver reporte</button>
         </div>
         @if (reporteAsistencia(); as r) {

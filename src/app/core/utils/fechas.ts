@@ -5,6 +5,11 @@ export function aFechaIso(fecha: Date): string {
   return `${fecha.getFullYear()}-${mes}-${dia}`;
 }
 
+/** Valor del calendario (Date o null si quedó vacío o inválido) → "yyyy-MM-dd" o ''. */
+export function fechaIsoOVacio(fecha: Date | null): string {
+  return fecha && !Number.isNaN(fecha.getTime()) ? aFechaIso(fecha) : '';
+}
+
 /** "yyyy-MM-dd" → Date a medianoche local (evita que "2026-09-21" se muestre como el día 20). */
 export function desdeFechaIso(valor: string): Date {
   const [anio, mes, dia] = valor.split('-').map(Number);

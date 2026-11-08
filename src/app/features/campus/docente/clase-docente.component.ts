@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, si
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -28,6 +29,7 @@ import {
 } from '../../../core/models/academico.model';
 import { enlaceWhatsApp, nombreGrado } from '../../../core/models/campus.model';
 import { CampusAcademicoService } from '../../../core/services/campus-academico.service';
+import { fechaIsoOVacio } from '../../../core/utils/fechas';
 import { mensajeDeError } from '../../../core/utils/http-error';
 import { EncabezadoCampusComponent } from '../compartido/encabezado-campus.component';
 
@@ -59,6 +61,7 @@ const DIAS_ASISTENCIA = 7;
     FormsModule,
     MatButtonModule,
     MatButtonToggleModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -71,6 +74,7 @@ const DIAS_ASISTENCIA = 7;
   styleUrl: './clase-docente.component.scss',
 })
 export class ClaseDocenteComponent implements OnInit {
+  protected readonly aIso = fechaIsoOVacio;
   readonly asignacionId = input.required<string>();
 
   readonly #servicio = inject(CampusAcademicoService);

@@ -126,7 +126,9 @@
         <div class="barra">
           <mat-form-field subscriptSizing="dynamic">
             <mat-label>Fecha de la clase</mat-label>
-            <input matInput type="date" [min]="fechaMinima" [max]="hoy" [value]="fecha()" (change)="cambiarFecha($any($event.target).value)" />
+            <input matInput [matDatepicker]="selectorFechaClase" [min]="fechaMinima" [max]="hoy" [value]="fecha()" (dateChange)="$event.value && cambiarFecha(aIso($event.value))" />
+            <mat-datepicker-toggle matIconSuffix [for]="selectorFechaClase" />
+            <mat-datepicker #selectorFechaClase />
           </mat-form-field>
           <span class="resumen">
             @if (tomada()) {
@@ -221,7 +223,9 @@
           </mat-form-field>
           <mat-form-field>
             <mat-label>Fecha</mat-label>
-            <input matInput type="date" [max]="hoy" [(ngModel)]="anotacion.fecha" name="fecha" required />
+            <input matInput [matDatepicker]="selectorFecha1" [max]="hoy" name="fecha" required [ngModel]="anotacion.fecha" (ngModelChange)="anotacion.fecha = aIso($event)" />
+            <mat-datepicker-toggle matIconSuffix [for]="selectorFecha1" />
+            <mat-datepicker #selectorFecha1 />
           </mat-form-field>
           <mat-form-field class="ancho">
             <mat-label>Descripción de los hechos</mat-label>
