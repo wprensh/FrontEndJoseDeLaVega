@@ -17,7 +17,6 @@ import { paginadorEnEspanol } from '../../../core/paginador-intl';
 import { SesionService } from '../../../core/services/sesion.service';
 import { UsuariosService } from '../../../core/services/usuarios.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { RestablecerClaveDialogComponent } from './restablecer-clave-dialog.component';
@@ -37,7 +36,6 @@ import { UsuarioDialogComponent, UsuarioDialogData } from './usuario-dialog.comp
     MatProgressBarModule,
     MatTableModule,
     MatTooltipModule,
-    BarraAdminComponent,
     PageHeadingComponent,
   ],
   providers: [{ provide: MatPaginatorIntl, useFactory: paginadorEnEspanol }],

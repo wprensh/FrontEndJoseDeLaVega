@@ -27,7 +27,6 @@ import { ComunidadService } from '../../../core/services/comunidad.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
 import { CarnetComponent } from '../../../shared/carnet/carnet.component';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { GenerarClavesDialogComponent } from './generar-claves-dialog.component';
@@ -58,7 +57,6 @@ const CLASE_IMPRESION = 'imprimiendo-claves';
     MatSelectModule,
     MatTableModule,
     MatTooltipModule,
-    BarraAdminComponent,
     CarnetComponent,
     PageHeadingComponent,
   ],

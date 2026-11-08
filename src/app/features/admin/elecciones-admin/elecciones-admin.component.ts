@@ -11,7 +11,6 @@ import { ESTADOS_ELECCION, Eleccion, infoCargo } from '../../../core/models/elec
 import { EleccionesService } from '../../../core/services/elecciones.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { EleccionDialogComponent } from './eleccion-dialog.component';
 
@@ -19,7 +18,7 @@ import { EleccionDialogComponent } from './eleccion-dialog.component';
 @Component({
   selector: 'app-elecciones-admin',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule, BarraAdminComponent, PageHeadingComponent],
+  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule, PageHeadingComponent],
   template: `
     <div class="contenedor">
       <app-page-heading
@@ -27,7 +26,6 @@ import { EleccionDialogComponent } from './eleccion-dialog.component';
         subtitulo="Personero, contralor, voceros y representantes: candidatos, votación en el campus y resultados"
         etiqueta="Panel administrativo"
       />
-      <app-barra-admin />
 
       <div class="barra">
         <h2>Jornadas electorales</h2>

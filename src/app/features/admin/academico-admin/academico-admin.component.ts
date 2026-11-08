@@ -33,7 +33,6 @@ import { SesionService } from '../../../core/services/sesion.service';
 import { descargarCsv } from '../../../core/utils/csv';
 import { fechaIsoOVacio } from '../../../core/utils/fechas';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { BoletinDocumentoComponent, imprimirBoletines } from '../../../shared/boletin-documento/boletin-documento.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
@@ -77,7 +76,6 @@ interface FormAsignatura {
     MatSlideToggleModule,
     MatTabsModule,
     MatTooltipModule,
-    BarraAdminComponent,
     BoletinDocumentoComponent,
     PageHeadingComponent,
   ],

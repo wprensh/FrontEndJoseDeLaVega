@@ -19,6 +19,7 @@ import {
   ResumenAsistencia,
 } from '../models/academico.model';
 import { CircularCampus, Evento } from '../models/comunicaciones.model';
+import { Horario } from '../models/horario.model';
 import { Presentacion, ResultadoIntento, ResultadosSimulacro, SimulacroCampus } from '../models/simulacro.model';
 import { URL_CAMPUS } from './campus.service';
 
@@ -49,6 +50,12 @@ export class CampusAcademicoService {
   }
 
   // ---- Boletines, asistencia y observador ----
+
+  /** Horario de clases: el del docente, el del curso del estudiante o el del estudiante elegido por el acudiente. */
+  miHorario(estudianteId?: string | null): Promise<Horario> {
+    const params = estudianteId ? new HttpParams().set('estudianteId', estudianteId) : undefined;
+    return firstValueFrom(this.#http.get<Horario>(`${URL_CAMPUS}/horario`, { params }));
+  }
 
   boletinesDisponibles(): Promise<BoletinesDisponibles> {
     return firstValueFrom(this.#http.get<BoletinesDisponibles>(`${URL_CAMPUS}/boletines`));

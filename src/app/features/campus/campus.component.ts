@@ -26,6 +26,7 @@ interface AccesoCampus {
 /** Módulos del campus según el rol de quien ingresa. */
 const ACCESOS: Readonly<Record<RolCampus, readonly AccesoCampus[]>> = {
   Estudiante: [
+    { ruta: '/campus/horario', icono: 'schedule', titulo: 'Horario', descripcion: 'Sus clases de la semana, día por día.' },
     { ruta: '/campus/boletines', icono: 'grading', titulo: 'Boletines', descripcion: 'Notas de cada periodo, promedio y puesto.' },
     { ruta: '/campus/simulacros', icono: 'quiz', titulo: 'Simulacros Saber', descripcion: 'Practique para las Pruebas Saber y vea sus resultados.' },
     { ruta: '/campus/asistencia', icono: 'event_available', titulo: 'Asistencia', descripcion: 'Fallas, llegadas tarde y excusas del año.' },
@@ -37,6 +38,7 @@ const ACCESOS: Readonly<Record<RolCampus, readonly AccesoCampus[]>> = {
   Acudiente: [
     { ruta: '/campus/boletines', icono: 'grading', titulo: 'Boletines', descripcion: 'Notas de cada periodo, listas para imprimir.' },
     { ruta: '/campus/asistencia', icono: 'event_available', titulo: 'Asistencia', descripcion: 'Fallas y llegadas tarde de sus hijos.' },
+    { ruta: '/campus/horario', icono: 'schedule', titulo: 'Horario', descripcion: 'Las clases de la semana de sus hijos.' },
     { ruta: '/campus/observador', icono: 'diversity_3', titulo: 'Observador', descripcion: 'Anotaciones del colegio; confirme que las leyó.' },
     { ruta: '/campus/simulacros', icono: 'quiz', titulo: 'Simulacros Saber', descripcion: 'Resultados de los simulacros presentados.' },
     { ruta: '/campus/circulares', icono: 'campaign', titulo: 'Circulares', descripcion: 'Comunicados y confirmación de lectura.' },
@@ -45,6 +47,7 @@ const ACCESOS: Readonly<Record<RolCampus, readonly AccesoCampus[]>> = {
   ],
   Docente: [
     { ruta: '/campus/docente', icono: 'co_present', titulo: 'Mis clases', descripcion: 'Notas, asistencia y anotaciones de sus cursos.' },
+    { ruta: '/campus/horario', icono: 'schedule', titulo: 'Mi horario', descripcion: 'Sus clases de la semana por día y hora.' },
     { ruta: '/campus/simulacros', icono: 'quiz', titulo: 'Simulacros Saber', descripcion: 'Resultados de sus cursos por área y pregunta.' },
     { ruta: '/campus/circulares', icono: 'campaign', titulo: 'Circulares', descripcion: 'Comunicados para docentes.' },
     { ruta: '/campus/calendario', icono: 'calendar_month', titulo: 'Calendario', descripcion: 'Calendario escolar y fechas de cierre.' },

@@ -19,7 +19,6 @@ import { hoyColombia } from '../../../core/models/academico.model';
 import { ComunicacionesService, FiltroAdmisiones } from '../../../core/services/comunicaciones.service';
 import { descargarCsv } from '../../../core/utils/csv';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { AdmisionDialogComponent, ResultadoAdmisionDialog } from './admision-dialog.component';
 
@@ -37,7 +36,6 @@ import { AdmisionDialogComponent, ResultadoAdmisionDialog } from './admision-dia
     MatPaginatorModule,
     MatProgressBarModule,
     MatSelectModule,
-    BarraAdminComponent,
     PageHeadingComponent,
   ],
   template: `
@@ -47,7 +45,6 @@ import { AdmisionDialogComponent, ResultadoAdmisionDialog } from './admision-dia
         subtitulo="Solicitudes de cupo radicadas en línea por las familias"
         etiqueta="Panel administrativo"
       />
-      <app-barra-admin />
 
       <section class="tarjeta">
         <form class="filtros" (ngSubmit)="buscar()">

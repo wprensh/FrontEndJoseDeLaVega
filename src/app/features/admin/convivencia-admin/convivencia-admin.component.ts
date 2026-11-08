@@ -29,7 +29,6 @@ import { AcademicoAdminService } from '../../../core/services/academico-admin.se
 import { SesionService } from '../../../core/services/sesion.service';
 import { fechaIsoOVacio } from '../../../core/utils/fechas';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { AnotacionTarjetaComponent } from '../../../shared/convivencia/anotacion-tarjeta.component';
 import { ReporteAsistenciaComponent } from '../../../shared/asistencia/reporte-asistencia.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
@@ -54,7 +53,6 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
     MatProgressBarModule,
     MatSelectModule,
     AnotacionTarjetaComponent,
-    BarraAdminComponent,
     PageHeadingComponent,
     ReporteAsistenciaComponent,
   ],

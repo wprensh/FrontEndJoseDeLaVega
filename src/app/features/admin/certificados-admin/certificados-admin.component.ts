@@ -36,7 +36,6 @@ import { CertificadosService } from '../../../core/services/certificados.service
 import { SesionService } from '../../../core/services/sesion.service';
 import { aFechaIso, desdeFechaIso } from '../../../core/utils/fechas';
 import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { CertificadoDocumentoComponent } from '../../../shared/certificado-documento/certificado-documento.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { AnularCertificadoDialogComponent } from './anular-certificado-dialog.component';
@@ -69,7 +68,6 @@ const CLASE_IMPRESION = 'imprimiendo-certificado';
     MatTableModule,
     MatTooltipModule,
     CertificadoDocumentoComponent,
-    BarraAdminComponent,
     PageHeadingComponent,
   ],
   providers: [{ provide: MatPaginatorIntl, useFactory: paginadorEnEspanol }],

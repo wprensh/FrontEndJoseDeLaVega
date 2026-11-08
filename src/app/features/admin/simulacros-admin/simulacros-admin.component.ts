@@ -14,7 +14,6 @@ import { ESTADOS_SIMULACRO, Simulacro, TIPOS_PRUEBA } from '../../../core/models
 import { SesionService } from '../../../core/services/sesion.service';
 import { SimulacrosService } from '../../../core/services/simulacros.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { SimulacroDialogComponent } from './simulacro-dialog.component';
@@ -30,7 +29,6 @@ import { SimulacroDialogComponent } from './simulacro-dialog.component';
     MatIconModule,
     MatProgressBarModule,
     MatTooltipModule,
-    BarraAdminComponent,
     PageHeadingComponent,
   ],
   template: `
@@ -40,7 +38,6 @@ import { SimulacroDialogComponent } from './simulacro-dialog.component';
         subtitulo="Pruebas tipo ICFES en el campus: Saber 11, 9°, 5° y 3°"
         etiqueta="Panel administrativo"
       />
-      <app-barra-admin />
 
       <section class="tarjeta">
         <div class="barra">

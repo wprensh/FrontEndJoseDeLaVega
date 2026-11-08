@@ -12,7 +12,6 @@ import { AREAS, TIPOS_PRUEBA } from '../../../core/models/simulacro.model';
 import { AcademicoAdminService } from '../../../core/services/academico-admin.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
-import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { Barra, BarrasComponent } from '../../../shared/graficos/barras.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 
@@ -27,7 +26,6 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
-    BarraAdminComponent,
     BarrasComponent,
     PageHeadingComponent,
   ],
@@ -38,7 +36,6 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
         subtitulo="Matrícula, asistencia, rendimiento, convivencia, simulacros y comunicaciones en una vista"
         etiqueta="Panel administrativo"
       />
-      <app-barra-admin />
 
       @if (error(); as e) {
         <p class="aviso-error" role="alert">{{ e }}</p>
