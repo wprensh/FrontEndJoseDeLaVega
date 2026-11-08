@@ -1,0 +1,246 @@
+<div class="contenedor">
+  <app-encabezado-campus
+    [titulo]="titulo()"
+    [subtitulo]="clase()?.area ?? ''"
+    icono="co_present"
+    volverA="/campus/docente"
+    textoVolver="Mis clases"
+  />
+
+  @if (error(); as e) {
+    <p class="tarjeta aviso-error" role="alert">{{ e }}</p>
+  }
+
+  @if (clase()) {
+    <mat-tab-group class="tarjeta pestanas" animationDuration="0ms" mat-stretch-tabs="false">
+      <!-- ================= Notas ================= -->
+      <mat-tab label="Notas">
+        <div class="barra">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Periodo</mat-label>
+            <mat-select [value]="periodoId()" (selectionChange)="cambiarPeriodo($event.value)">
+              @for (p of periodos(); track p.id) {
+                <mat-option [value]="p.id">{{ p.nombre }}{{ p.notasAbiertas ? '' : ' (cerrado)' }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <span class="resumen">
+            {{ resumenNotas().registradas }}/{{ resumenNotas().total }} con nota
+            @if (resumenNotas().promedio !== null) {
+              · promedio {{ resumenNotas().promedio!.toFixed(1).replace('.', ',') }}
+            }
+            @if (resumenNotas().bajos) {
+              · <span class="bajo">{{ resumenNotas().bajos }} en bajo</span>
+            }
+          </span>
+          @if (editable()) {
+            <button mat-stroked-button type="button" (click)="usarFallasRegistradas()">
+              <mat-icon aria-hidden="true">event_busy</mat-icon>
+              Traer fallas de la asistencia
+            </button>
+            <button mat-flat-button class="boton-institucional" type="button" [disabled]="guardandoNotas() || !cambiosNotas()" (click)="guardarNotas()">
+              {{ guardandoNotas() ? 'Guardando...' : 'Guardar notas' }}
+            </button>
+          }
+        </div>
+
+        @if (!editable() && periodos().length) {
+          <p class="aviso"><mat-icon aria-hidden="true">lock</mat-icon> Este periodo está cerrado para notas. Pida a coordinación que lo abra si necesita corregir.</p>
+        }
+        @if (!periodos().length) {
+          <p class="aviso">Coordinación todavía no ha creado los periodos del año.</p>
+        }
+        @for (e of erroresNotas(); track e) {
+          <p class="aviso-error" role="alert">{{ e }}</p>
+        }
+        @if (cargandoNotas()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Cargando notas" />
+        }
+
+        <div class="tabla">
+          <table class="planilla">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col" class="nombre">Estudiante</th>
+                <th scope="col">Nota (1,0 – 5,0)</th>
+                <th scope="col">Desempeño</th>
+                <th scope="col" title="Fallas del periodo">Fallas</th>
+                <th scope="col" class="observacion">Observación para el boletín</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (f of filasNotas(); track f.estudianteId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <th scope="row" class="nombre">{{ f.nombreCompleto }}</th>
+                  <td>
+                    <input
+                      class="nota"
+                      inputmode="decimal"
+                      [class.invalida]="notaInvalida(f)"
+                      [value]="f.nota === null ? '' : f.nota.toString().replace('.', ',')"
+                      [disabled]="!editable()"
+                      [attr.aria-label]="'Nota de ' + f.nombreCompleto"
+                      (change)="leerNota(f, $any($event.target).value)"
+                    />
+                  </td>
+                  <td>
+                    @if (desempenoDe(f.nota); as d) {
+                      <span class="desempeno" [attr.data-desempeno]="d">{{ desempenos[d] }}</span>
+                    }
+                  </td>
+                  <td>
+                    <input
+                      class="fallas"
+                      type="number"
+                      min="0"
+                      max="500"
+                      [(ngModel)]="f.fallas"
+                      [disabled]="!editable()"
+                      [attr.aria-label]="'Fallas de ' + f.nombreCompleto"
+                      [title]="'Registradas en asistencia: ' + f.fallasRegistradas"
+                      (ngModelChange)="marcarCambio()"
+                    />
+                  </td>
+                  <td class="observacion">
+                    <input
+                      maxlength="400"
+                      [(ngModel)]="f.observacion"
+                      [disabled]="!editable()"
+                      [attr.aria-label]="'Observación de ' + f.nombreCompleto"
+                      (ngModelChange)="cambiosNotas.set(true)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="vacio">No hay estudiantes activos en este curso.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </mat-tab>
+
+      <!-- ================= Asistencia ================= -->
+      <mat-tab label="Asistencia">
+        <div class="barra">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Fecha de la clase</mat-label>
+            <input matInput type="date" [min]="fechaMinima" [max]="hoy" [value]="fecha()" (change)="cambiarFecha($any($event.target).value)" />
+          </mat-form-field>
+          <span class="resumen">
+            @if (tomada()) {
+              <mat-icon class="ok" aria-hidden="true">task_alt</mat-icon> Lista tomada ·
+            }
+            {{ conteoLista().ausentes }} ausentes · {{ conteoLista().tardes }} tarde · {{ conteoLista().excusas }} con excusa
+          </span>
+          <button mat-flat-button class="boton-institucional" type="button" [disabled]="guardandoLista() || !lista().length" (click)="guardarLista()">
+            {{ guardandoLista() ? 'Guardando...' : tomada() ? 'Actualizar lista' : 'Guardar lista' }}
+          </button>
+        </div>
+        <p class="ayuda">Todos aparecen presentes: marque solo las novedades. Al guardar, el acudiente recibe el aviso en el campus (y por correo si es ausencia).</p>
+
+        @if (cargandoLista()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Cargando lista" />
+        }
+
+        <ul class="lista">
+          @for (f of lista(); track f.estudianteId; let i = $index) {
+            <li [attr.data-estado]="f.estado">
+              <span class="numero">{{ i + 1 }}</span>
+              <span class="nombre">{{ f.nombreCompleto }}</span>
+              <mat-button-toggle-group
+                hideSingleSelectionIndicator
+                [value]="f.estado"
+                (change)="cambiarEstado(f, $event.value)"
+                [attr.aria-label]="'Asistencia de ' + f.nombreCompleto"
+              >
+                <mat-button-toggle value="Presente">Presente</mat-button-toggle>
+                <mat-button-toggle value="Ausente">Ausente</mat-button-toggle>
+                <mat-button-toggle value="Tarde">Tarde</mat-button-toggle>
+                <mat-button-toggle value="Excusa">Excusa</mat-button-toggle>
+              </mat-button-toggle-group>
+              @if (f.estado !== 'Presente') {
+                <input class="obs" maxlength="200" placeholder="Observación (opcional)" [(ngModel)]="f.observacion" [attr.aria-label]="'Observación de ' + f.nombreCompleto" />
+              }
+            </li>
+          }
+        </ul>
+
+        @if (registro(); as r) {
+          @if (r.contactos.length) {
+            <section class="contactos" aria-labelledby="titulo-contactos">
+              <h3 id="titulo-contactos">
+                <mat-icon aria-hidden="true">chat</mat-icon>
+                Escribir por WhatsApp a los acudientes
+              </h3>
+              <ul>
+                @for (c of r.contactos; track c.estudianteId) {
+                  <li>
+                    <strong>{{ c.estudiante }}</strong> · {{ estadosAsistencia[c.estado] }}
+                    <span class="acudientes">
+                      @for (a of c.acudientes; track $index) {
+                        @if (whatsApp(a.telefono, c.estudiante, c.estado); as enlace) {
+                          <a mat-stroked-button class="whatsapp" [href]="enlace" target="_blank" rel="noopener">
+                            {{ a.nombre }}{{ a.parentesco ? ' (' + a.parentesco + ')' : '' }}
+                          </a>
+                        } @else {
+                          <span class="sin-telefono">{{ a.nombre }}: sin celular registrado</span>
+                        }
+                      } @empty {
+                        <span class="sin-telefono">Sin acudiente registrado</span>
+                      }
+                    </span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        }
+      </mat-tab>
+
+      <!-- ================= Observador ================= -->
+      <mat-tab label="Observador">
+        <form class="formulario" (ngSubmit)="guardarAnotacion()">
+          <mat-form-field>
+            <mat-label>Estudiante</mat-label>
+            <mat-select [(ngModel)]="anotacion.estudianteId" name="estudiante" required>
+              @for (e of estudiantes(); track e.id) {
+                <mat-option [value]="e.id">{{ e.nombreCompleto }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Tipo</mat-label>
+            <mat-select [(ngModel)]="anotacion.tipo" name="tipo">
+              @for (t of tiposAnotacion; track t[0]) {
+                <mat-option [value]="t[0]">{{ t[1] }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>{{ ayudaTipo[anotacion.tipo] }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Fecha</mat-label>
+            <input matInput type="date" [max]="hoy" [(ngModel)]="anotacion.fecha" name="fecha" required />
+          </mat-form-field>
+          <mat-form-field class="ancho">
+            <mat-label>Descripción de los hechos</mat-label>
+            <textarea matInput rows="4" maxlength="3000" [(ngModel)]="anotacion.descripcion" name="descripcion" required></textarea>
+            <mat-hint>Describa hechos concretos, sin juicios sobre la persona.</mat-hint>
+          </mat-form-field>
+          <mat-form-field class="ancho">
+            <mat-label>Compromisos (opcional)</mat-label>
+            <textarea matInput rows="2" maxlength="1500" [(ngModel)]="anotacion.compromisos" name="compromisos"></textarea>
+          </mat-form-field>
+          <div class="ancho acciones">
+            <button mat-flat-button class="boton-institucional" type="submit" [disabled]="guardandoAnotacion()">
+              {{ guardandoAnotacion() ? 'Guardando...' : 'Registrar anotación' }}
+            </button>
+          </div>
+        </form>
+      </mat-tab>
+    </mat-tab-group>
+  } @else if (!error()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando clase" />
+  }
+</div>

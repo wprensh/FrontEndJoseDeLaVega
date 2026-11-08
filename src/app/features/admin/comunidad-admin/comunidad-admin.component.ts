@@ -26,19 +26,23 @@ import { paginadorEnEspanol } from '../../../core/paginador-intl';
 import { ComunidadService } from '../../../core/services/comunidad.service';
 import { SesionService } from '../../../core/services/sesion.service';
 import { mensajeDeError } from '../../../core/utils/http-error';
+import { CarnetComponent } from '../../../shared/carnet/carnet.component';
 import { BarraAdminComponent } from '../../../shared/barra-admin/barra-admin.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.component';
 import { GenerarClavesDialogComponent } from './generar-claves-dialog.component';
+import { ImportarAcudientesDialogComponent } from './importar-acudientes-dialog.component';
 import { ImportarDialogComponent } from './importar-dialog.component';
 import { MiembroDialogComponent } from './miembro-dialog.component';
+import { VinculosDialogComponent } from './vinculos-dialog.component';
 
 /** Clase del <body> que deja visibles solo las claves al imprimir (ver styles.scss). */
 const CLASE_IMPRESION = 'imprimiendo-claves';
 
 /**
- * Estudiantes y docentes del campus virtual: registro, importación de listas y claves de acceso.
- * Las claves solo llegan al generarlas, así que se muestran en tarjetas listas para imprimir y recortar.
+ * Estudiantes, docentes y acudientes del campus virtual: registro, importación de listas, vínculos
+ * acudiente–estudiante, claves de acceso y carnés. Las claves solo llegan al generarlas, así que se muestran
+ * en tarjetas listas para imprimir y recortar.
  */
 @Component({
   selector: 'app-comunidad-admin',
@@ -55,6 +59,7 @@ const CLASE_IMPRESION = 'imprimiendo-claves';
     MatTableModule,
     MatTooltipModule,
     BarraAdminComponent,
+    CarnetComponent,
     PageHeadingComponent,
   ],
   providers: [{ provide: MatPaginatorIntl, useFactory: paginadorEnEspanol }],
@@ -84,6 +89,10 @@ export class ComunidadAdminComponent implements OnInit {
   /** Claves recién generadas, para imprimir. Se descartan al cerrar la hoja. */
   protected readonly claves = signal<ClaveGenerada[] | null>(null);
   protected readonly generando = signal(false);
+
+  /** Carnés para imprimir con los filtros actuales. */
+  protected readonly carnes = signal<MiembroCampus[] | null>(null);
+  protected readonly cargandoCarnes = signal(false);
 
   ngOnInit(): void {
     void this.recargar();
@@ -132,6 +141,43 @@ export class ComunidadAdminComponent implements OnInit {
     if (importado) {
       await this.recargar();
     }
+  }
+
+  protected async importarAcudientes(): Promise<void> {
+    const importado = await firstValueFrom(
+      this.#dialog.open(ImportarAcudientesDialogComponent, { width: '760px', maxWidth: '95vw' }).afterClosed(),
+    );
+    if (importado) {
+      await this.recargar();
+    }
+  }
+
+  protected vinculos(miembro: MiembroCampus): void {
+    this.#dialog.open(VinculosDialogComponent, { data: miembro, width: '600px', maxWidth: '95vw' });
+  }
+
+  /** Carnés de todos los activos con los filtros de la lista (rol, grado, grupo, búsqueda). */
+  protected async prepararCarnes(): Promise<void> {
+    this.cargandoCarnes.set(true);
+    try {
+      const miembros = await this.servicio.todos({
+        buscar: this.busqueda().trim() || undefined,
+        rol: this.rol() ?? undefined,
+        grado: this.grado() ?? undefined,
+        grupo: this.grupo().trim() || undefined,
+      });
+      this.carnes.set(miembros.filter((m) => m.activo));
+      this.claves.set(null);
+      queueMicrotask(() => document.getElementById('hoja-carnes')?.scrollIntoView({ behavior: 'smooth' }));
+    } catch (error) {
+      this.#snackBar.open(mensajeDeError(error), 'Cerrar');
+    } finally {
+      this.cargandoCarnes.set(false);
+    }
+  }
+
+  protected cerrarCarnes(): void {
+    this.carnes.set(null);
   }
 
   protected async generarClaves(): Promise<void> {
@@ -195,6 +241,7 @@ export class ComunidadAdminComponent implements OnInit {
     try {
       const claves = await this.servicio.generarClaves(filtro);
       this.claves.set(claves);
+      this.carnes.set(null);
       this.#snackBar.open(
         `${claves.length} ${claves.length === 1 ? 'clave generada' : 'claves generadas'}. Imprímalas ahora: no se vuelven a mostrar.`,
         'Cerrar',

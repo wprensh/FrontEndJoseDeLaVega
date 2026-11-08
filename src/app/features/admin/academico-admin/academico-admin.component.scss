@@ -1,0 +1,159 @@
+.barra-anio {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-block-end: 1rem;
+
+  mat-progress-bar {
+    flex: 1;
+  }
+}
+
+.seccion {
+  display: grid;
+  gap: 1rem;
+  padding-block: 1rem;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  .ayuda,
+  h2 {
+    margin: 0 auto 0 0;
+  }
+}
+
+.ayuda {
+  margin: 0;
+  color: var(--jv-texto-suave);
+
+  .alerta {
+    display: block;
+    color: var(--jv-rojo);
+  }
+}
+
+.filtros {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: center;
+  gap: 0.25rem 1rem;
+  background: var(--jv-superficie-suave);
+
+  .acciones-form {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    grid-column: 1 / -1;
+  }
+}
+
+.tabla {
+  inline-size: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.45rem 0.6rem;
+    border-block-end: 1px solid var(--jv-borde);
+    text-align: start;
+  }
+
+  thead th {
+    color: var(--jv-texto-suave);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .acciones {
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  .detalle {
+    display: block;
+    color: var(--jv-texto-suave);
+    font-size: 0.82rem;
+  }
+
+  .vacio {
+    padding: 1.5rem;
+    color: var(--jv-texto-suave);
+    text-align: center;
+  }
+
+  .inactiva {
+    opacity: 0.55;
+  }
+
+  .alerta-fila {
+    background: #fff1f2;
+  }
+}
+
+.selector-docente {
+  min-inline-size: 14rem;
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+}
+
+.sabana {
+  font-size: 0.88rem;
+
+  th,
+  td {
+    padding: 0.3rem 0.4rem;
+    text-align: center;
+    border: 1px solid var(--jv-borde);
+  }
+
+  .nombre {
+    text-align: start;
+    white-space: nowrap;
+  }
+
+  .vertical {
+    block-size: 9rem;
+    vertical-align: bottom;
+
+    span {
+      display: inline-block;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      white-space: nowrap;
+    }
+  }
+
+  .perdida {
+    color: var(--jv-rojo);
+    font-weight: 700;
+  }
+
+  .sin-nota {
+    background: #fffbeb;
+    color: var(--jv-texto-suave);
+  }
+}
+
+.aviso-error {
+  color: var(--jv-rojo);
+}
+
+.boletines-curso {
+  display: grid;
+  gap: 1.5rem;
+  margin-block-start: 1.5rem;
+}

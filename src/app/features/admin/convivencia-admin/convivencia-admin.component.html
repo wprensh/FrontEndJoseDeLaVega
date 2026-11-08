@@ -1,0 +1,200 @@
+<div class="contenedor">
+  <app-page-heading
+    class="no-imprimir"
+    titulo="Asistencia y observador"
+    subtitulo="Inasistencias por curso, observador del estudiante y situaciones tipo I, II y III (Ley 1620 de 2013)"
+    etiqueta="Panel administrativo"
+  />
+  <app-barra-admin class="no-imprimir" />
+
+  <section class="tarjeta no-imprimir asistencia">
+    <h2>Reporte de asistencia</h2>
+    <p class="ayuda-asistencia">
+      Los docentes toman lista en el campus; cada ausencia o llegada tarde avisa al acudiente.
+    </p>
+    <app-reporte-asistencia />
+  </section>
+
+  <section class="tarjeta no-imprimir">
+    <div class="barra">
+      <h2>Anotaciones</h2>
+      @if (sesion.puede('Convivencia', 'Crear')) {
+        <button mat-flat-button class="boton-azul" type="button" (click)="creando.set(!creando())">
+          <mat-icon aria-hidden="true">{{ creando() ? 'close' : 'add' }}</mat-icon>
+          {{ creando() ? 'Cancelar' : 'Registrar anotación' }}
+        </button>
+      }
+    </div>
+
+    @if (creando()) {
+      <form class="formulario" (ngSubmit)="crear()">
+        <mat-form-field class="ancho">
+          <mat-label>Estudiante (escriba nombre o documento)</mat-label>
+          <input
+            matInput
+            name="estudiante"
+            [ngModel]="textoEstudiante"
+            (ngModelChange)="buscarEstudiante($event)"
+            [matAutocomplete]="auto"
+            autocomplete="off"
+          />
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="nombreSugerencia" (optionSelected)="elegirEstudiante($event.option.value)">
+            @for (e of sugerencias(); track e.id) {
+              <mat-option [value]="e">{{ e.nombreCompleto }} · {{ cursoDe(e) }} · {{ e.documento }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Tipo</mat-label>
+          <mat-select name="tipo" [(ngModel)]="nueva.tipo">
+            @for (t of tipos; track t[0]) {
+              <mat-option [value]="t[0]">{{ t[1] }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>{{ ayudaTipo[nueva.tipo] }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Fecha de los hechos</mat-label>
+          <input matInput type="date" name="fecha" [max]="hoy" [(ngModel)]="nueva.fecha" />
+        </mat-form-field>
+        <mat-form-field class="ancho">
+          <mat-label>Descripción de los hechos</mat-label>
+          <textarea matInput rows="4" maxlength="3000" name="descripcion" [(ngModel)]="nueva.descripcion"></textarea>
+        </mat-form-field>
+        <mat-form-field class="ancho">
+          <mat-label>Compromisos / acciones pedagógicas</mat-label>
+          <textarea matInput rows="2" maxlength="1500" name="compromisos" [(ngModel)]="nueva.compromisos"></textarea>
+        </mat-form-field>
+        @if (nueva.tipo === 'SituacionTipoIII') {
+          <p class="ancho alerta-ley">
+            <mat-icon aria-hidden="true">gavel</mat-icon>
+            Situación tipo III: además de registrarla, el rector debe informar a la Policía de Infancia y Adolescencia y activar la ruta
+            de atención integral (artículo 44 del Decreto 1965 de 2013).
+          </p>
+        }
+        <div class="ancho acciones-form">
+          <button mat-flat-button class="boton-institucional" type="submit" [disabled]="guardando()">Registrar</button>
+        </div>
+      </form>
+    }
+
+    <div class="filtros">
+      <mat-form-field subscriptSizing="dynamic" class="buscador">
+        <mat-label>Buscar estudiante</mat-label>
+        <input matInput type="search" [(ngModel)]="filtro.buscar" (keyup.enter)="filtrar()" />
+        <button mat-icon-button matSuffix type="button" aria-label="Buscar" (click)="filtrar()"><mat-icon>search</mat-icon></button>
+      </mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Tipo</mat-label>
+        <mat-select [(ngModel)]="filtro.tipo" (selectionChange)="filtrar()">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (t of tipos; track t[0]) {
+            <mat-option [value]="t[0]">{{ t[1] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Estado</mat-label>
+        <mat-select [(ngModel)]="filtro.estado" (selectionChange)="filtrar()">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (e of estados; track e[0]) {
+            <mat-option [value]="e[0]">{{ e[1] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Grado</mat-label>
+        <mat-select [(ngModel)]="filtro.grado" (selectionChange)="filtrar()">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (g of grados; track g) {
+            <mat-option [value]="g">{{ nombreGrado(g) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-checkbox [(ngModel)]="filtro.soloSituaciones" (change)="filtrar()">Solo situaciones de convivencia</mat-checkbox>
+    </div>
+
+    @if (cargando()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Cargando" />
+    }
+    @if (error(); as e) {
+      <p class="aviso-error" role="alert">{{ e }} <button mat-button type="button" (click)="recargar()">Reintentar</button></p>
+    }
+
+    <div class="lista">
+      @for (a of anotaciones(); track a.id) {
+        <app-anotacion-tarjeta [anotacion]="a" [mostrarEstudiante]="true">
+          <span class="espacio"></span>
+          <button mat-button type="button" (click)="verObservador(a.estudianteId)">
+            <mat-icon aria-hidden="true">menu_book</mat-icon>
+            Observador
+          </button>
+          @if (sesion.puede('Convivencia', 'Editar') && a.tipo !== 'Positiva') {
+            <button mat-stroked-button type="button" (click)="abrirSeguimiento(a)">
+              <mat-icon aria-hidden="true">edit_note</mat-icon>
+              Seguimiento
+            </button>
+          }
+        </app-anotacion-tarjeta>
+        @if (seleccionada()?.id === a.id) {
+          <form class="formulario seguimiento" (ngSubmit)="guardarSeguimiento(a)">
+            <mat-form-field class="ancho">
+              <mat-label>Seguimiento (citación, acuerdo, remisión...)</mat-label>
+              <textarea matInput rows="3" maxlength="2000" name="texto" [(ngModel)]="seguimiento.texto"></textarea>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Cambiar estado</mat-label>
+              <mat-select name="estado" [(ngModel)]="seguimiento.estado">
+                <mat-option [value]="null">Sin cambio</mat-option>
+                @for (e of estados; track e[0]) {
+                  <mat-option [value]="e[0]">{{ e[1] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <div class="acciones-form">
+              <button mat-button type="button" (click)="seleccionada.set(null)">Cancelar</button>
+              <button mat-flat-button class="boton-azul" type="submit" [disabled]="guardando()">Guardar seguimiento</button>
+            </div>
+          </form>
+        }
+      } @empty {
+        @if (!cargando()) {
+          <p class="vacio">No hay anotaciones con estos filtros.</p>
+        }
+      }
+    </div>
+
+    <mat-paginator
+      [length]="total()"
+      [pageIndex]="pagina() - 1"
+      [pageSize]="tamanoPagina()"
+      [pageSizeOptions]="[20, 50, 100]"
+      (page)="cambiarPagina($event)"
+      aria-label="Seleccionar página"
+    />
+  </section>
+
+  @if (observador(); as o) {
+    <section id="observador" class="observador">
+      <div class="barra no-imprimir">
+        <h2>Observador de {{ o.nombreCompleto }}</h2>
+        <button mat-flat-button class="boton-azul" type="button" (click)="imprimirObservador()">
+          <mat-icon aria-hidden="true">print</mat-icon>
+          Imprimir
+        </button>
+        <button mat-button type="button" (click)="observador.set(null)">Cerrar</button>
+      </div>
+      <header class="encabezado-impresion">
+        <h2>Observador del estudiante</h2>
+        <p><strong>{{ o.nombreCompleto }}</strong> · Documento {{ o.documento }} · {{ cursoDe(o) }}</p>
+      </header>
+      <div class="lista">
+        @for (a of o.anotaciones; track a.id) {
+          <app-anotacion-tarjeta [anotacion]="a" />
+        } @empty {
+          <p class="vacio">Sin anotaciones.</p>
+        }
+      </div>
+    </section>
+  }
+</div>

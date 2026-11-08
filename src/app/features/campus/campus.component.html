@@ -1,16 +1,30 @@
 <div class="contenedor">
   <app-page-heading
     titulo="Campus Virtual & Plataforma Académica"
-    subtitulo="Ingreso de estudiantes y docentes: elecciones escolares, calificaciones y guías"
+    subtitulo="Estudiantes, docentes y acudientes: boletines, asistencia, simulacros Saber, circulares y elecciones"
     etiqueta="Acceso seguro"
   />
 
   @if (campus.perfil(); as perfil) {
     <section class="tarjeta bienvenida" aria-labelledby="titulo-bienvenida">
-      <mat-icon class="icono" aria-hidden="true">{{ perfil.rol === 'Docente' ? 'co_present' : 'school' }}</mat-icon>
+      <mat-icon class="icono" aria-hidden="true">{{ perfil.rol === 'Docente' ? 'co_present' : perfil.rol === 'Acudiente' ? 'family_restroom' : 'school' }}</mat-icon>
       <div>
         <h2 id="titulo-bienvenida">Hola, {{ perfil.nombreCompleto }}</h2>
-        <p>{{ perfil.rol === 'Docente' ? 'Docente' : 'Estudiante de ' + cursoDe(perfil) }} · Documento {{ perfil.documento }}</p>
+        <p>
+          @switch (perfil.rol) {
+            @case ('Docente') { Docente }
+            @case ('Acudiente') {
+              Acudiente de
+              @for (e of perfil.estudiantes; track e.id; let ultimo = $last) {
+                {{ e.nombreCompleto }} ({{ cursoDe(e) }}){{ ultimo ? '' : ', ' }}
+              } @empty {
+                (sin estudiantes vinculados)
+              }
+            }
+            @default { Estudiante de {{ cursoDe(perfil) }} }
+          }
+          · Documento {{ perfil.documento }}
+        </p>
       </div>
       <button mat-stroked-button type="button" (click)="salir()">
         <mat-icon aria-hidden="true">logout</mat-icon>
@@ -18,6 +32,50 @@
       </button>
     </section>
 
+    @if (avisos(); as lista) {
+      @if (lista.length) {
+        <section class="tarjeta avisos" aria-labelledby="titulo-avisos">
+          <div class="barra-avisos">
+            <h2 id="titulo-avisos" class="seccion">
+              <mat-icon aria-hidden="true">notifications</mat-icon>
+              Avisos
+              @if (academico.noLeidos()) {
+                <span class="contador" [attr.aria-label]="academico.noLeidos() + ' sin leer'">{{ academico.noLeidos() }}</span>
+              }
+            </h2>
+            @if (academico.noLeidos()) {
+              <button mat-button type="button" (click)="marcarTodos()">Marcar todos como leídos</button>
+            }
+          </div>
+          <ul>
+            @for (a of lista.slice(0, 6); track a.id) {
+              <li>
+                <button type="button" class="aviso-item" [class.no-leido]="!a.leido" (click)="abrirAviso(a)">
+                  <mat-icon aria-hidden="true">{{ iconosAviso[a.tipo] }}</mat-icon>
+                  <span class="texto">
+                    <strong>{{ a.titulo }}</strong>
+                    <span>{{ a.mensaje }}</span>
+                  </span>
+                  <time [attr.datetime]="a.creadoEn">{{ a.creadoEn | date: "d MMM, h:mm a" }}</time>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    }
+
+    <nav class="accesos" aria-label="Plataforma académica">
+      @for (a of accesos(); track a.ruta) {
+        <a class="tarjeta-franja franja-azul acceso-modulo" [routerLink]="a.ruta">
+          <mat-icon aria-hidden="true">{{ a.icono }}</mat-icon>
+          <span class="titulo">{{ a.titulo }}</span>
+          <span class="descripcion">{{ a.descripcion }}</span>
+        </a>
+      }
+    </nav>
+
+    @if (votaODocente()) {
     <section aria-labelledby="titulo-elecciones">
       <h2 id="titulo-elecciones" class="seccion">
         <mat-icon aria-hidden="true">how_to_vote</mat-icon>
@@ -68,11 +126,12 @@
         <mat-progress-bar mode="indeterminate" aria-label="Cargando elecciones" />
       }
     </section>
+    }
   } @else {
     <div class="rejilla">
       <section class="acceso" aria-labelledby="titulo-acceso">
         <mat-icon class="candado" aria-hidden="true">lock</mat-icon>
-        <h2 id="titulo-acceso">Ingreso de estudiantes y docentes</h2>
+        <h2 id="titulo-acceso">Ingreso de estudiantes, docentes y acudientes</h2>
         <p>Escriba su número de documento y la clave de acceso que le entregó el colegio.</p>
 
         @if (motivo() === 'vencida') {
@@ -113,17 +172,24 @@
           </div>
         </li>
         <li class="tarjeta-lateral franja-azul">
-          <mat-icon aria-hidden="true">description</mat-icon>
+          <mat-icon aria-hidden="true">grading</mat-icon>
           <div>
-            <h3>Consulta de Boletines</h3>
-            <p>Próximamente: calificaciones de cada periodo lectivo.</p>
+            <h3>Boletines y asistencia</h3>
+            <p>Estudiantes y acudientes consultan las notas de cada periodo, las fallas y el observador.</p>
           </div>
         </li>
         <li class="tarjeta-lateral franja-azul">
-          <mat-icon aria-hidden="true">auto_stories</mat-icon>
+          <mat-icon aria-hidden="true">quiz</mat-icon>
           <div>
-            <h3>Guías de Aprendizaje</h3>
-            <p>Próximamente: material de apoyo por asignatura para primaria y secundaria.</p>
+            <h3>Simulacros Saber</h3>
+            <p>Pruebas tipo Saber 11, 3°, 5° y 9° con resultados por área al entregar.</p>
+          </div>
+        </li>
+        <li class="tarjeta-lateral franja-azul">
+          <mat-icon aria-hidden="true">campaign</mat-icon>
+          <div>
+            <h3>Circulares y avisos</h3>
+            <p>Comunicados del colegio y avisos de inasistencia para las familias.</p>
           </div>
         </li>
       </ul>

@@ -37,3 +37,14 @@ export function aplicarErroresDeServidor(formulario: FormGroup, error: unknown):
   }
   return true;
 }
+
+/** Mensajes de validación del servidor (ValidationProblemDetails.errors) en una lista, o el mensaje general. */
+export function mensajesDeError(error: unknown): string[] {
+  if (error instanceof HttpErrorResponse && error.status === 400) {
+    const mensajes = Object.values((error.error as ProblemDetails | null)?.errors ?? {}).flat();
+    if (mensajes.length) {
+      return [...new Set(mensajes)];
+    }
+  }
+  return [mensajeDeError(error)];
+}

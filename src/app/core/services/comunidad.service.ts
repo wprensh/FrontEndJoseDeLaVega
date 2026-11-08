@@ -9,10 +9,14 @@ import {
   ClaveGenerada,
   CrearMiembro,
   FiltroClaves,
+  FilaAcudiente,
   FilaImportacion,
   MiembroCampus,
   ResultadoImportacion,
+  ResultadoImportacionAcudientes,
   RolCampus,
+  VerificacionCarnet,
+  Vinculo,
 } from '../models/campus.model';
 import { mensajeDeError } from '../utils/http-error';
 
@@ -83,5 +87,48 @@ export class ComunidadService {
 
   generarClaves(filtro: FiltroClaves): Promise<ClaveGenerada[]> {
     return firstValueFrom(this.#http.post<ClaveGenerada[]>(`${this.#url}/claves`, filtro));
+  }
+
+  // ---- Acudientes ----
+
+  vinculos(miembroId: string): Promise<Vinculo[]> {
+    return firstValueFrom(this.#http.get<Vinculo[]>(`${this.#url}/${miembroId}/vinculos`));
+  }
+
+  /** Vincula al miembro (estudiante o acudiente) con la persona del documento indicado. */
+  vincular(miembroId: string, documento: string, parentesco: string | null): Promise<Vinculo> {
+    return firstValueFrom(this.#http.post<Vinculo>(`${this.#url}/${miembroId}/vinculos`, { documento, parentesco }));
+  }
+
+  desvincular(miembroId: string, vinculoId: string): Promise<void> {
+    return firstValueFrom(this.#http.delete<void>(`${this.#url}/${miembroId}/vinculos/${vinculoId}`));
+  }
+
+  importarAcudientes(filas: FilaAcudiente[]): Promise<ResultadoImportacionAcudientes> {
+    return firstValueFrom(this.#http.post<ResultadoImportacionAcudientes>(`${this.#url}/acudientes/importar`, { filas }));
+  }
+
+  /** Miembros activos con los filtros indicados (para imprimir carnés), hasta 200 por página. */
+  async todos(filtro: MiembroFiltro): Promise<MiembroCampus[]> {
+    const resultado: MiembroCampus[] = [];
+    for (let pagina = 1; pagina <= 30; pagina++) {
+      const params = Object.entries({ ...filtro, pagina, tamanoPagina: 200 }).reduce(
+        (p, [clave, valor]) => (valor === undefined || valor === null || valor === '' ? p : p.set(clave, String(valor))),
+        new HttpParams(),
+      );
+      const pag = await firstValueFrom(this.#http.get<PagedResult<MiembroCampus>>(this.#url, { params }));
+      resultado.push(...pag.items);
+      if (resultado.length >= pag.total || pag.items.length === 0) {
+        break;
+      }
+    }
+    return resultado;
+  }
+
+  /** Verificación pública del carné (el QR apunta a /carnet/{codigo}). */
+  verificarCarnet(codigo: string): Promise<VerificacionCarnet> {
+    return firstValueFrom(
+      this.#http.get<VerificacionCarnet>(`${environment.apiBaseUrl}/carnets/${encodeURIComponent(codigo)}`),
+    );
   }
 }

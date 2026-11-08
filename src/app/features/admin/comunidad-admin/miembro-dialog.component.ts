@@ -12,7 +12,7 @@ import { GRADOS, MiembroCampus, RolCampus, nombreGrado } from '../../../core/mod
 import { ComunidadService } from '../../../core/services/comunidad.service';
 import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/http-error';
 
-/** Registrar o editar un estudiante o docente del campus. */
+/** Registrar o editar un estudiante, docente o acudiente del campus. */
 @Component({
   selector: 'app-miembro-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,12 +27,13 @@ import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/ht
     MatSlideToggleModule,
   ],
   template: `
-    <h2 mat-dialog-title>{{ miembro ? 'Editar ' + miembro.nombreCompleto : 'Registrar estudiante o docente' }}</h2>
+    <h2 mat-dialog-title>{{ miembro ? 'Editar ' + miembro.nombreCompleto : 'Registrar en el campus' }}</h2>
     <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
       <mat-dialog-content>
         <mat-button-toggle-group formControlName="rol" aria-label="Rol en el campus">
           <mat-button-toggle value="Estudiante">Estudiante</mat-button-toggle>
           <mat-button-toggle value="Docente">Docente</mat-button-toggle>
+          <mat-button-toggle value="Acudiente">Acudiente</mat-button-toggle>
         </mat-button-toggle-group>
 
         <mat-form-field>
@@ -79,6 +80,29 @@ import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/ht
           </div>
         }
 
+        <div class="fila">
+          <mat-form-field>
+            <mat-label>Celular{{ formulario.controls.rol.value === 'Acudiente' ? '' : ' (opcional)' }}</mat-label>
+            <input matInput formControlName="telefono" type="tel" inputmode="tel" maxlength="20" autocomplete="off" placeholder="300 123 4567" />
+            <mat-hint>Para los avisos por WhatsApp.</mat-hint>
+            @if (formulario.controls.telefono.invalid) {
+              <mat-error>{{ formulario.controls.telefono.getError('servidor') ?? 'Escriba un celular válido.' }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Correo (opcional)</mat-label>
+            <input matInput formControlName="correo" type="email" maxlength="150" autocomplete="off" />
+            <mat-hint>Recibe avisos de inasistencia y circulares.</mat-hint>
+            @if (formulario.controls.correo.invalid) {
+              <mat-error>{{ formulario.controls.correo.getError('servidor') ?? 'Escriba un correo válido.' }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        @if (formulario.controls.rol.value === 'Acudiente' && !miembro) {
+          <p class="ayuda">Después de registrarlo, vincúlelo con sus hijos desde el botón «Acudientes» de la lista.</p>
+        }
+
         @if (miembro) {
           <mat-slide-toggle formControlName="activo">Puede entrar al campus</mat-slide-toggle>
         }
@@ -111,6 +135,12 @@ import { aplicarErroresDeServidor, mensajeDeError } from '../../../core/utils/ht
       gap: 0.75rem;
     }
 
+    .ayuda {
+      margin: 0;
+      color: var(--jv-texto-suave);
+      font-size: 0.9rem;
+    }
+
     .aviso-error {
       margin: 0;
       color: var(--jv-rojo);
@@ -134,6 +164,8 @@ export class MiembroDialogComponent {
     grado: [this.miembro?.grado ?? (null as number | null)],
     grupo: [this.miembro?.grupo ?? '', Validators.pattern(/^[A-Za-z0-9]{0,5}$/)],
     activo: [this.miembro?.activo ?? true],
+    correo: [this.miembro?.correo ?? '', [Validators.email, Validators.maxLength(150)]],
+    telefono: [this.miembro?.telefono ?? '', Validators.pattern(/^[+\d\s()-]{7,20}$/)],
   });
 
   protected async guardar(): Promise<void> {
@@ -152,6 +184,8 @@ export class MiembroDialogComponent {
       nombreCompleto: valor.nombreCompleto.trim(),
       grado: esEstudiante ? valor.grado : null,
       grupo: esEstudiante ? valor.grupo.trim() || null : null,
+      correo: valor.correo.trim() || null,
+      telefono: valor.telefono.trim() || null,
     };
 
     this.guardando.set(true);

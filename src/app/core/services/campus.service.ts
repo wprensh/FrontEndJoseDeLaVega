@@ -34,6 +34,20 @@ export class CampusService {
     return sesion.perfil;
   }
 
+  /** Vuelve a leer el perfil (p. ej. si la secretaría vinculó otro hijo al acudiente). */
+  async actualizarPerfil(): Promise<void> {
+    const actual = this.#sesion();
+    if (!actual) {
+      return;
+    }
+    const perfil = await firstValueFrom(this.#http.get<PerfilCampus>(`${URL_CAMPUS}/perfil`));
+    if (this.#sesion()?.token === actual.token) {
+      const sesion = { ...actual, perfil };
+      this.#sesion.set(sesion);
+      escribir(sesion);
+    }
+  }
+
   cerrar(): void {
     this.#sesion.set(null);
     escribir(null);

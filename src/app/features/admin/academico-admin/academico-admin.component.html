@@ -1,0 +1,372 @@
+<div class="contenedor">
+  <app-page-heading
+    class="no-imprimir"
+    titulo="Académico"
+    subtitulo="Periodos, asignaturas, carga docente, consolidado de notas y boletines"
+    etiqueta="Panel administrativo"
+  />
+  <app-barra-admin class="no-imprimir" />
+
+  <div class="barra-anio no-imprimir">
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Año lectivo</mat-label>
+      <mat-select [value]="anio()" (selectionChange)="cambiarAnio($event.value)">
+        @for (a of [anioActual - 1, anioActual, anioActual + 1]; track a) {
+          <mat-option [value]="a">{{ a }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (cargando() || guardando()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Cargando" />
+    }
+  </div>
+  @if (error(); as e) {
+    <p class="aviso-error no-imprimir" role="alert">{{ e }} <button mat-button type="button" (click)="recargar()">Reintentar</button></p>
+  }
+
+  <mat-tab-group class="tarjeta no-imprimir" animationDuration="0ms" mat-stretch-tabs="false">
+    <!-- ================= Periodos ================= -->
+    <mat-tab label="Periodos">
+      <div class="seccion">
+        <div class="barra">
+          <p class="ayuda">
+            Abra las notas para que los docentes registren y publique el periodo para que estudiantes y acudientes vean el boletín.
+            @if (periodos().length && sumaPorcentajes() !== 100) {
+              <strong class="alerta">Los porcentajes suman {{ sumaPorcentajes() }} %: deberían sumar 100 %.</strong>
+            }
+          </p>
+          @if (sesion.puede('Academico', 'Crear')) {
+            <button mat-flat-button class="boton-azul" type="button" (click)="nuevoPeriodo()">
+              <mat-icon aria-hidden="true">add</mat-icon>
+              Nuevo periodo
+            </button>
+          }
+        </div>
+
+        @if (formPeriodo; as f) {
+          <form class="formulario tarjeta" (ngSubmit)="guardarPeriodo()">
+            <mat-form-field><mat-label>Número</mat-label><input matInput type="number" min="1" max="6" name="numero" [(ngModel)]="f.numero" required /></mat-form-field>
+            <mat-form-field><mat-label>Nombre (opcional)</mat-label><input matInput name="nombre" maxlength="60" [(ngModel)]="f.nombre" placeholder="Primer periodo" /></mat-form-field>
+            <mat-form-field><mat-label>Inicio</mat-label><input matInput type="date" name="inicio" [(ngModel)]="f.inicio" required /></mat-form-field>
+            <mat-form-field><mat-label>Fin</mat-label><input matInput type="date" name="fin" [(ngModel)]="f.fin" required /></mat-form-field>
+            <mat-form-field><mat-label>Porcentaje</mat-label><input matInput type="number" min="1" max="100" name="porcentaje" [(ngModel)]="f.porcentaje" required /><span matTextSuffix>%</span></mat-form-field>
+            <mat-slide-toggle name="notasAbiertas" [(ngModel)]="f.notasAbiertas">Notas abiertas</mat-slide-toggle>
+            <mat-slide-toggle name="publicado" [(ngModel)]="f.publicado">Boletines publicados</mat-slide-toggle>
+            <div class="acciones-form">
+              <button mat-button type="button" (click)="formPeriodo = null">Cancelar</button>
+              <button mat-flat-button class="boton-azul" type="submit" [disabled]="guardando()">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <table class="tabla">
+          <thead>
+            <tr><th scope="col">Periodo</th><th scope="col">Fechas</th><th scope="col">%</th><th scope="col">Notas abiertas</th><th scope="col">Boletines publicados</th><th scope="col"><span class="visualmente-oculto">Acciones</span></th></tr>
+          </thead>
+          <tbody>
+            @for (p of periodos(); track p.id) {
+              <tr>
+                <th scope="row">{{ p.nombre }}</th>
+                <td>{{ p.inicio | date: 'd MMM' }} – {{ p.fin | date: 'd MMM y' }}</td>
+                <td>{{ p.porcentaje }} %</td>
+                <td><mat-slide-toggle [checked]="p.notasAbiertas" [disabled]="!sesion.puede('Academico', 'Editar') || guardando()" (change)="alternar(p, 'notasAbiertas', $event.checked)" [attr.aria-label]="'Notas abiertas en ' + p.nombre" /></td>
+                <td><mat-slide-toggle [checked]="p.publicado" [disabled]="!sesion.puede('Academico', 'Editar') || guardando()" (change)="alternar(p, 'publicado', $event.checked)" [attr.aria-label]="'Publicar boletines de ' + p.nombre" /></td>
+                <td class="acciones">
+                  @if (sesion.puede('Academico', 'Editar')) {
+                    <button mat-icon-button type="button" matTooltip="Editar" aria-label="Editar" (click)="editarPeriodo(p)"><mat-icon>edit</mat-icon></button>
+                  }
+                  @if (sesion.puede('Academico', 'Eliminar')) {
+                    <button mat-icon-button type="button" matTooltip="Eliminar" aria-label="Eliminar" (click)="eliminarPeriodo(p)"><mat-icon>delete</mat-icon></button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="vacio">No hay periodos en {{ anio() }}. Cree los cuatro periodos del año (por ejemplo 25 % cada uno).</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </mat-tab>
+
+    <!-- ================= Carga docente ================= -->
+    <mat-tab label="Carga docente">
+      <div class="seccion">
+        <p class="ayuda">Qué asignatura dicta cada docente en cada curso. Sin grupo, la asignación aplica a todos los grupos del grado.</p>
+        @if (sesion.puede('Academico', 'Crear')) {
+          <form class="formulario tarjeta" (ngSubmit)="agregarAsignacion()">
+            <mat-form-field>
+              <mat-label>Docente</mat-label>
+              <mat-select name="docente" [(ngModel)]="nuevaAsignacion.docenteId">
+                @for (d of docentes(); track d.id) {
+                  <mat-option [value]="d.id">{{ d.nombreCompleto }}</mat-option>
+                }
+              </mat-select>
+              @if (!docentes().length) {
+                <mat-hint>Registre primero a los docentes en Comunidad del campus.</mat-hint>
+              }
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Asignatura</mat-label>
+              <mat-select name="asignatura" [(ngModel)]="nuevaAsignacion.asignaturaId">
+                @for (a of asignaturas(); track a.id) {
+                  @if (a.activa) {
+                    <mat-option [value]="a.id">{{ a.nombre }}</mat-option>
+                  }
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Grado</mat-label>
+              <mat-select name="grado" [(ngModel)]="nuevaAsignacion.grado">
+                @for (g of grados; track g) {
+                  <mat-option [value]="g">{{ nombreGrado(g) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field><mat-label>Grupo (opcional)</mat-label><input matInput name="grupo" maxlength="5" [(ngModel)]="nuevaAsignacion.grupo" placeholder="A" /></mat-form-field>
+            <mat-form-field><mat-label>Horas por semana</mat-label><input matInput type="number" min="1" max="40" name="ih" [(ngModel)]="nuevaAsignacion.intensidadHoraria" /></mat-form-field>
+            <div class="acciones-form">
+              <button mat-flat-button class="boton-azul" type="submit" [disabled]="guardando()">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                Asignar
+              </button>
+            </div>
+          </form>
+        }
+
+        <div class="filtros">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Filtrar por docente</mat-label>
+            <mat-select [(ngModel)]="filtroCarga.docenteId">
+              <mat-option value="">Todos</mat-option>
+              @for (d of docentes(); track d.id) {
+                <mat-option [value]="d.id">{{ d.nombreCompleto }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Grado</mat-label>
+            <mat-select [(ngModel)]="filtroCarga.grado">
+              <mat-option [value]="null">Todos</mat-option>
+              @for (g of grados; track g) {
+                <mat-option [value]="g">{{ nombreGrado(g) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <table class="tabla">
+          <thead>
+            <tr><th scope="col">Curso</th><th scope="col">Asignatura</th><th scope="col">Docente</th><th scope="col">IH</th><th scope="col"><span class="visualmente-oculto">Acciones</span></th></tr>
+          </thead>
+          <tbody>
+            @for (a of cargaVisible(); track a.id) {
+              <tr>
+                <td>{{ nombreGrado(a.grado) }} {{ a.grupo ?? '(todos)' }}</td>
+                <td>{{ a.asignatura }}<span class="detalle">{{ a.area }}</span></td>
+                <td>
+                  @if (sesion.puede('Academico', 'Editar')) {
+                    <mat-select class="selector-docente" [value]="a.docenteId" (selectionChange)="cambiarDocente(a, $event.value)" [attr.aria-label]="'Docente de ' + a.asignatura">
+                      @for (d of docentes(); track d.id) {
+                        <mat-option [value]="d.id">{{ d.nombreCompleto }}</mat-option>
+                      }
+                    </mat-select>
+                  } @else {
+                    {{ a.docenteNombre }}
+                  }
+                </td>
+                <td>{{ a.intensidadHoraria ?? '' }}</td>
+                <td class="acciones">
+                  @if (sesion.puede('Academico', 'Eliminar')) {
+                    <button mat-icon-button type="button" matTooltip="Quitar" aria-label="Quitar asignación" (click)="eliminarAsignacion(a)"><mat-icon>delete</mat-icon></button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="vacio">No hay asignaciones con estos filtros.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </mat-tab>
+
+    <!-- ================= Consolidado ================= -->
+    <mat-tab label="Consolidado y boletines">
+      <div class="seccion">
+        <div class="filtros">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Periodo</mat-label>
+            <mat-select [(ngModel)]="reporte.periodoId">
+              @for (p of periodos(); track p.id) {
+                <mat-option [value]="p.id">{{ p.nombre }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Curso</mat-label>
+            <mat-select [(ngModel)]="reporte.curso">
+              @for (c of cursos(); track claveCurso(c)) {
+                <mat-option [value]="claveCurso(c)">{{ nombreCurso(c) }} ({{ c.estudiantes }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button class="boton-azul" type="button" [disabled]="cargandoReporte()" (click)="verConsolidado()">Ver consolidado</button>
+        </div>
+
+        @if (cargandoReporte()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Cargando" />
+        }
+
+        @if (consolidado(); as c) {
+          <div class="barra">
+            <p class="ayuda">
+              Avance del cargue de notas: <strong>{{ c.avanceCarguePorcentaje }} %</strong>
+              · Promedio del curso: <strong>{{ formatoNota(c.promedioCurso) }}</strong>
+            </p>
+            <button mat-stroked-button type="button" (click)="descargarConsolidado()">
+              <mat-icon aria-hidden="true">download</mat-icon>
+              Descargar Excel (CSV)
+            </button>
+            <button mat-flat-button class="boton-institucional" type="button" [disabled]="cargandoReporte()" (click)="prepararBoletines()">
+              <mat-icon aria-hidden="true">print</mat-icon>
+              Boletines del curso
+            </button>
+          </div>
+          <div class="tabla-scroll">
+            <table class="tabla sabana">
+              <thead>
+                <tr>
+                  <th scope="col">Puesto</th>
+                  <th scope="col" class="nombre">Estudiante</th>
+                  @for (a of c.asignaturas; track a.id) {
+                    <th scope="col" class="vertical" [title]="a.nombre"><span>{{ a.nombre }}</span></th>
+                  }
+                  <th scope="col">Prom.</th>
+                  <th scope="col" title="Asignaturas en desempeño bajo">Bajo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (f of c.filas; track f.estudianteId) {
+                  <tr>
+                    <td>{{ f.puesto ?? '' }}</td>
+                    <th scope="row" class="nombre">{{ f.nombreCompleto }}</th>
+                    @for (n of f.notas; track $index) {
+                      <td [class.perdida]="n !== null && n < aprobatoria" [class.sin-nota]="n === null">{{ formatoNota(n) }}</td>
+                    }
+                    <td><strong>{{ formatoNota(f.promedio) }}</strong></td>
+                    <td [class.perdida]="f.asignaturasPerdidas > 0">{{ f.asignaturasPerdidas || '' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ================= Asignaturas ================= -->
+    <mat-tab label="Asignaturas">
+      <div class="seccion">
+        <div class="barra">
+          <p class="ayuda">Las asignaturas se agrupan por área en el boletín, en este orden.</p>
+          @if (sesion.puede('Academico', 'Crear')) {
+            <button mat-flat-button class="boton-azul" type="button" (click)="nuevaAsignatura()">
+              <mat-icon aria-hidden="true">add</mat-icon>
+              Nueva asignatura
+            </button>
+          }
+        </div>
+        @if (formAsignatura; as f) {
+          <form class="formulario tarjeta" (ngSubmit)="guardarAsignatura()">
+            <mat-form-field><mat-label>Nombre</mat-label><input matInput name="nombre" maxlength="80" [(ngModel)]="f.nombre" required /></mat-form-field>
+            <mat-form-field><mat-label>Área</mat-label><input matInput name="area" maxlength="80" [(ngModel)]="f.area" placeholder="Igual al nombre si se deja vacío" /></mat-form-field>
+            <mat-form-field><mat-label>Orden</mat-label><input matInput type="number" min="0" name="orden" [(ngModel)]="f.orden" /></mat-form-field>
+            <mat-slide-toggle name="activa" [(ngModel)]="f.activa">Activa</mat-slide-toggle>
+            <div class="acciones-form">
+              <button mat-button type="button" (click)="formAsignatura = null">Cancelar</button>
+              <button mat-flat-button class="boton-azul" type="submit" [disabled]="guardando()">Guardar</button>
+            </div>
+          </form>
+        }
+        <table class="tabla">
+          <thead><tr><th scope="col">Orden</th><th scope="col">Asignatura</th><th scope="col">Área</th><th scope="col">Estado</th><th scope="col"><span class="visualmente-oculto">Acciones</span></th></tr></thead>
+          <tbody>
+            @for (a of asignaturas(); track a.id) {
+              <tr [class.inactiva]="!a.activa">
+                <td>{{ a.orden }}</td>
+                <th scope="row">{{ a.nombre }}</th>
+                <td>{{ a.area }}</td>
+                <td>{{ a.activa ? 'Activa' : 'Inactiva' }}</td>
+                <td class="acciones">
+                  @if (sesion.puede('Academico', 'Editar')) {
+                    <button mat-icon-button type="button" matTooltip="Editar" aria-label="Editar" (click)="editarAsignatura(a)"><mat-icon>edit</mat-icon></button>
+                  }
+                  @if (sesion.puede('Academico', 'Eliminar')) {
+                    <button mat-icon-button type="button" matTooltip="Eliminar" aria-label="Eliminar" (click)="eliminarAsignatura(a)"><mat-icon>delete</mat-icon></button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </mat-tab>
+
+    <!-- ================= Asistencia ================= -->
+    <mat-tab label="Reporte de asistencia">
+      <div class="seccion">
+        <div class="filtros">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Curso</mat-label>
+            <mat-select [(ngModel)]="asistencia.curso">
+              @for (c of cursos(); track claveCurso(c)) {
+                <mat-option [value]="claveCurso(c)">{{ nombreCurso(c) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic"><mat-label>Desde</mat-label><input matInput type="date" [(ngModel)]="asistencia.desde" /></mat-form-field>
+          <mat-form-field subscriptSizing="dynamic"><mat-label>Hasta</mat-label><input matInput type="date" [(ngModel)]="asistencia.hasta" /></mat-form-field>
+          <button mat-flat-button class="boton-azul" type="button" (click)="verAsistencia()">Ver reporte</button>
+        </div>
+        @if (reporteAsistencia(); as r) {
+          <div class="barra">
+            <p class="ayuda">{{ r.clasesRegistradas }} clases con lista tomada entre {{ r.desde | date: 'd MMM' }} y {{ r.hasta | date: 'd MMM y' }}.</p>
+            <button mat-stroked-button type="button" (click)="descargarAsistencia()">
+              <mat-icon aria-hidden="true">download</mat-icon>
+              Descargar Excel (CSV)
+            </button>
+          </div>
+          <table class="tabla">
+            <thead><tr><th scope="col">Estudiante</th><th scope="col">Fallas</th><th scope="col">Llegadas tarde</th><th scope="col">Con excusa</th></tr></thead>
+            <tbody>
+              @for (f of r.filas; track f.estudianteId) {
+                <tr [class.alerta-fila]="f.ausencias >= 10">
+                  <th scope="row">{{ f.nombreCompleto }}</th>
+                  <td>{{ f.ausencias }}</td>
+                  <td>{{ f.tardes }}</td>
+                  <td>{{ f.excusas }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  @if (boletines(); as lista) {
+    <section id="boletines-curso" class="boletines-curso">
+      <div class="barra no-imprimir">
+        <h2>Boletines del curso ({{ lista.length }})</h2>
+        <button mat-flat-button class="boton-azul" type="button" (click)="imprimirBoletines()">
+          <mat-icon aria-hidden="true">print</mat-icon>
+          Imprimir o guardar PDF
+        </button>
+        <button mat-button type="button" (click)="boletines.set(null)">Cerrar</button>
+      </div>
+      @for (b of lista; track b.estudiante.id) {
+        <app-boletin-documento [boletin]="b" />
+      }
+    </section>
+  }
+</div>
