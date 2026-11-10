@@ -62,7 +62,14 @@ npm start            # http://localhost:4200
 ```
 
 La URL de la API se configura en `src/environments/environment.development.ts` (desarrollo)
-y `src/environments/environment.ts` (producción, `/api` bajo el mismo dominio).
+y `src/environments/environment.ts` (producción, URL completa de la API en Render).
+
+## Publicación
+
+GitHub Pages publica el sitio en cada push a `main` (`.github/workflows`). El dominio propio
+`iejosedelavega.edu.co` se configura en *Settings → Pages → Custom domain* (no con un archivo `CNAME`,
+que se ignora al publicar con Actions). La compilación toma la base (`/` o `/FrontEndJoseDeLaVega/`)
+de la configuración de Pages, así que al activar o quitar el dominio basta con volver a ejecutar el workflow.
 
 ## Compilar y probar
 

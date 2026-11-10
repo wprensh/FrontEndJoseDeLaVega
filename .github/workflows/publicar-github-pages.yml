@@ -1,5 +1,6 @@
 # Compila el sitio Angular y lo publica en GitHub Pages en cada push a main.
-# Dirección: https://wprensh.github.io/FrontEndJoseDeLaVega/
+# Dirección: https://iejosedelavega.edu.co (dominio propio, configurado en Settings > Pages > Custom domain).
+# Mientras no haya dominio propio: https://wprensh.github.io/FrontEndJoseDeLaVega/
 # Requiere que el repositorio sea público (en el plan gratuito, Pages no publica repositorios privados).
 # La API se llama con la URL completa de Render (environment.ts): Pages no reenvía /api.
 name: Publicar en GitHub Pages
@@ -33,15 +34,17 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      # Lee la configuración de Pages: con dominio propio el sitio vive en la raíz ("/");
+      # sin él, en la subcarpeta /FrontEndJoseDeLaVega/. Así la base se ajusta sola al activar el dominio.
+      - id: pages
+        uses: actions/configure-pages@v5
+
       - name: Compilar (producción)
-        # El sitio vive en /FrontEndJoseDeLaVega/, no en la raíz del dominio.
-        run: npx ng build --configuration production --base-href /FrontEndJoseDeLaVega/
+        run: npx ng build --configuration production --base-href "${{ steps.pages.outputs.base_path }}/"
 
       - name: Soporte de rutas de Angular
         # GitHub Pages no conoce rutas como /nosotros: 404.html sirve la app y el router resuelve la ruta.
         run: cp dist/front-end-jose-de-la-vega/browser/index.html dist/front-end-jose-de-la-vega/browser/404.html
-
-      - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
