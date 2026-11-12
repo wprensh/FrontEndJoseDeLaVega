@@ -5,7 +5,16 @@
     icono="co_present"
     volverA="/campus/docente"
     textoVolver="Mis clases"
-  />
+  >
+    <a mat-stroked-button class="no-imprimir" [routerLink]="['/campus/docente', asignacionId(), 'aula']">
+      <mat-icon aria-hidden="true">auto_stories</mat-icon>
+      Aula virtual
+    </a>
+    <a mat-stroked-button class="no-imprimir" [routerLink]="['/campus/docente', asignacionId(), 'recuperaciones']">
+      <mat-icon aria-hidden="true">restart_alt</mat-icon>
+      Recuperaciones
+    </a>
+  </app-encabezado-campus>
 
   @if (error(); as e) {
     <p class="tarjeta aviso-error" role="alert">{{ e }}</p>

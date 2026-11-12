@@ -1,0 +1,26 @@
+{
+  "name": "I.E. José de la Vega",
+  "short_name": "José de la Vega",
+  "description": "Campus virtual de la Institución Educativa José de la Vega: notas, tareas, asistencia, mensajes y avisos del colegio.",
+  "lang": "es-CO",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./campus?origen=app",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0a2647",
+  "categories": ["education"],
+  "icons": [
+    { "src": "img/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "img/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Aula virtual", "short_name": "Tareas", "url": "./campus/aula", "icons": [{ "src": "img/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Mensajes", "short_name": "Mensajes", "url": "./campus/mensajes", "icons": [{ "src": "img/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Boletines", "short_name": "Notas", "url": "./campus/boletines", "icons": [{ "src": "img/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

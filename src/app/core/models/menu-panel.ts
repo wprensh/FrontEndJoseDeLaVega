@@ -17,14 +17,15 @@ export interface GrupoMenu {
 const PANTALLAS_EXTRA: readonly (OpcionMenu & { despuesDe: Modulo })[] = [
   { etiqueta: 'Horarios', icono: 'schedule', ruta: '/admin/horarios', modulo: 'Academico', despuesDe: 'Academico' },
   { etiqueta: 'Banco de preguntas', icono: 'inventory_2', ruta: '/admin/banco-preguntas', modulo: 'Simulacros', despuesDe: 'Simulacros' },
+  { etiqueta: 'Alerta temprana', icono: 'crisis_alert', ruta: '/admin/alertas', modulo: 'Indicadores', despuesDe: 'Indicadores' },
 ];
 
 /** Áreas del menú y los módulos de cada una, en orden. */
 const AREAS: readonly { area: string; modulos: readonly Modulo[] }[] = [
   { area: 'Comunicación', modulos: ['Noticias', 'Circulares', 'Calendario'] },
-  { area: 'Académico', modulos: ['Academico', 'Convivencia', 'Simulacros', 'Indicadores'] },
+  { area: 'Académico', modulos: ['Academico', 'Planeacion', 'Evaluacion', 'Convivencia', 'Simulacros', 'Indicadores'] },
   { area: 'Comunidad', modulos: ['Campus', 'Carnets', 'Admisiones', 'Elecciones'] },
-  { area: 'Administración', modulos: ['Certificados', 'Usuarios', 'Pqrs'] },
+  { area: 'Administración', modulos: ['Certificados', 'Reportes', 'Usuarios', 'Pqrs'] },
 ];
 
 function opcion(modulo: Modulo): OpcionMenu[] {

@@ -10,6 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
+import { RouterLink } from '@angular/router';
 
 import {
   AYUDA_TIPO_ANOTACION,
@@ -68,6 +69,7 @@ const DIAS_ASISTENCIA = 7;
     MatProgressBarModule,
     MatSelectModule,
     MatTabsModule,
+    RouterLink,
     EncabezadoCampusComponent,
   ],
   templateUrl: './clase-docente.component.html',
