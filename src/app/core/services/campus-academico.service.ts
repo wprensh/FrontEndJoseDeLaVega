@@ -17,7 +17,9 @@ import {
   PlanillaNotas,
   RegistroAsistencia,
   ResumenAsistencia,
+  TipoAnotacion,
 } from '../models/academico.model';
+import { PagedResult } from '../models/api.models';
 import { CircularCampus, Evento } from '../models/comunicaciones.model';
 import { Horario } from '../models/horario.model';
 import { Presentacion, ResultadoIntento, ResultadosSimulacro, SimulacroCampus } from '../models/simulacro.model';
@@ -158,5 +160,24 @@ export class CampusAcademicoService {
 
   crearAnotacion(datos: CrearAnotacion): Promise<Anotacion> {
     return firstValueFrom(this.#http.post<Anotacion>(`${URL_CAMPUS}/docente/anotaciones`, datos));
+  }
+
+  /** Historial del observador del curso de una clase del docente (más recientes primero). */
+  historialObservador(
+    asignacionId: string,
+    filtros: { tipo?: TipoAnotacion | null; buscar?: string; pagina?: number; tamanoPagina?: number } = {},
+  ): Promise<PagedResult<Anotacion>> {
+    let params = new HttpParams()
+      .set('pagina', filtros.pagina ?? 1)
+      .set('tamanoPagina', filtros.tamanoPagina ?? 20);
+    if (filtros.tipo) {
+      params = params.set('tipo', filtros.tipo);
+    }
+    if (filtros.buscar?.trim()) {
+      params = params.set('buscar', filtros.buscar.trim());
+    }
+    return firstValueFrom(
+      this.#http.get<PagedResult<Anotacion>>(`${URL_CAMPUS}/docente/clases/${asignacionId}/anotaciones`, { params }),
+    );
   }
 }
