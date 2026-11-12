@@ -18,6 +18,8 @@ import {
   Anotacion,
   CursoDocente,
   ESTADOS_CASO,
+  EditarAnotacion,
+  EstadoCaso,
   DESEMPENOS,
   ESTADOS_ASISTENCIA,
   EstadoAsistencia,
@@ -142,6 +144,18 @@ export class ClaseDocenteComponent implements OnInit {
   protected readonly filtroBuscar = signal('');
   protected readonly hayMasHistorial = computed(() => this.historial().length < this.totalHistorial());
   #historialCargado = false;
+
+  // ---- Mantenimiento de anotaciones ----
+  protected readonly estadosCasoLista = Object.entries(ESTADOS_CASO) as [EstadoCaso, string][];
+  /** Anotación que se está corrigiendo (una a la vez). */
+  protected readonly editandoId = signal<string | null>(null);
+  protected edicion: EditarAnotacion = { tipo: 'Observacion', fecha: '', descripcion: '', compromisos: null };
+  /** Anotación a la que se le está agregando un seguimiento. */
+  protected readonly seguimientoId = signal<string | null>(null);
+  protected seguimiento: { texto: string; estado: EstadoCaso | null } = { texto: '', estado: null };
+  protected readonly guardandoCambio = signal(false);
+  /** Detalle abierto (seguimientos) por anotación. */
+  protected readonly abiertas = signal<ReadonlySet<string>>(new Set());
 
   protected readonly titulo = computed(() => {
     const c = this.clase();
@@ -421,6 +435,93 @@ export class ClaseDocenteComponent implements OnInit {
     } finally {
       this.cargandoHistorial.set(false);
     }
+  }
+
+  protected alternarDetalle(id: string): void {
+    this.abiertas.update((actual) => {
+      const nuevo = new Set(actual);
+      if (!nuevo.delete(id)) {
+        nuevo.add(id);
+      }
+      return nuevo;
+    });
+  }
+
+  protected empezarEdicion(h: Anotacion): void {
+    this.seguimientoId.set(null);
+    this.edicion = { tipo: h.tipo, fecha: h.fecha, descripcion: h.descripcion, compromisos: h.compromisos ?? '' };
+    this.editandoId.set(h.id);
+  }
+
+  protected async guardarEdicion(h: Anotacion): Promise<void> {
+    const e = this.edicion;
+    if (!e.descripcion.trim() || !e.fecha) {
+      this.#snackBar.open('Escriba la descripción y la fecha.', 'Cerrar', { duration: 4000 });
+      return;
+    }
+    this.guardandoCambio.set(true);
+    try {
+      const actualizada = await this.#servicio.editarAnotacion(h.id, {
+        tipo: e.tipo,
+        fecha: e.fecha,
+        descripcion: e.descripcion.trim(),
+        compromisos: e.compromisos?.trim() || null,
+      });
+      this.#reemplazar(actualizada);
+      this.editandoId.set(null);
+      this.#snackBar.open('Anotación corregida.', 'Cerrar', { duration: 4000 });
+    } catch (error) {
+      this.#snackBar.open(mensajeDeError(error), 'Cerrar');
+    } finally {
+      this.guardandoCambio.set(false);
+    }
+  }
+
+  protected async eliminar(h: Anotacion): Promise<void> {
+    if (!confirm(`¿Eliminar la anotación de ${h.estudianteNombre} del ${h.fecha}? No se puede deshacer.`)) {
+      return;
+    }
+    this.guardandoCambio.set(true);
+    try {
+      await this.#servicio.eliminarAnotacion(h.id);
+      this.historial.update((lista) => lista.filter((a) => a.id !== h.id));
+      this.totalHistorial.update((t) => Math.max(0, t - 1));
+      this.#snackBar.open('Anotación eliminada.', 'Cerrar', { duration: 4000 });
+    } catch (error) {
+      this.#snackBar.open(mensajeDeError(error), 'Cerrar');
+    } finally {
+      this.guardandoCambio.set(false);
+    }
+  }
+
+  protected empezarSeguimiento(h: Anotacion): void {
+    this.editandoId.set(null);
+    this.seguimiento = { texto: '', estado: null };
+    this.seguimientoId.set(h.id);
+  }
+
+  protected async guardarSeguimiento(h: Anotacion): Promise<void> {
+    const texto = this.seguimiento.texto.trim();
+    if (!texto) {
+      this.#snackBar.open('Escriba el seguimiento.', 'Cerrar', { duration: 4000 });
+      return;
+    }
+    this.guardandoCambio.set(true);
+    try {
+      const actualizada = await this.#servicio.seguimientoAnotacion(h.id, texto, this.esSituacion(h.tipo) ? this.seguimiento.estado : null);
+      this.#reemplazar(actualizada);
+      this.seguimientoId.set(null);
+      this.abiertas.update((actual) => new Set(actual).add(h.id));
+      this.#snackBar.open('Seguimiento registrado.', 'Cerrar', { duration: 4000 });
+    } catch (error) {
+      this.#snackBar.open(mensajeDeError(error), 'Cerrar');
+    } finally {
+      this.guardandoCambio.set(false);
+    }
+  }
+
+  #reemplazar(actualizada: Anotacion): void {
+    this.historial.update((lista) => lista.map((a) => (a.id === actualizada.id ? actualizada : a)));
   }
 
   protected esSituacion(tipo: TipoAnotacion): boolean {
