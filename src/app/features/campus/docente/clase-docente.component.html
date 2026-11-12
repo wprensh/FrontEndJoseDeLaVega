@@ -21,7 +21,7 @@
   }
 
   @if (clase()) {
-    <mat-tab-group class="tarjeta pestanas" animationDuration="0ms" mat-stretch-tabs="false">
+    <mat-tab-group class="tarjeta pestanas" animationDuration="0ms" mat-stretch-tabs="false" (selectedIndexChange)="cambioDePestana($event)">
       <!-- ================= Notas ================= -->
       <mat-tab label="Notas">
         <div class="barra">
@@ -251,6 +251,77 @@
             </button>
           </div>
         </form>
+
+        <section class="historial" aria-labelledby="titulo-historial">
+          <div class="historial-encabezado">
+            <h2 id="titulo-historial">Historial del observador del curso</h2>
+            <span class="texto-suave">{{ totalHistorial() }} {{ totalHistorial() === 1 ? 'anotación' : 'anotaciones' }}</span>
+          </div>
+          <div class="historial-filtros">
+            <mat-form-field>
+              <mat-label>Tipo</mat-label>
+              <mat-select [value]="filtroTipo()" (selectionChange)="filtrarTipo($event.value)">
+                <mat-option [value]="null">Todos</mat-option>
+                @for (t of tiposAnotacion; track t[0]) {
+                  <mat-option [value]="t[0]">{{ t[1] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Buscar estudiante</mat-label>
+              <input #buscador matInput [value]="filtroBuscar()" (keyup.enter)="buscarEnHistorial(buscador.value)" />
+              <button mat-icon-button matIconSuffix type="button" aria-label="Buscar" (click)="buscarEnHistorial(buscador.value)">
+                <mat-icon>search</mat-icon>
+              </button>
+            </mat-form-field>
+          </div>
+
+          @if (cargandoHistorial() && historial().length === 0) {
+            <mat-progress-bar mode="indeterminate" aria-label="Cargando historial" />
+          }
+
+          <ul class="lista-anotaciones">
+            @for (h of historial(); track h.id) {
+              <li [class.situacion]="esSituacion(h.tipo)" [class.positiva]="h.tipo === 'Positiva'">
+                <div class="anotacion-cabecera">
+                  <strong>{{ h.estudianteNombre }}</strong>
+                  <span class="chip">{{ nombreTipo[h.tipo] }}</span>
+                  @if (esSituacion(h.tipo)) {
+                    <span class="chip estado">{{ estadosCaso[h.estado] }}</span>
+                  }
+                  <span class="fecha">{{ h.fecha | date: 'dd/MM/yyyy' }}</span>
+                </div>
+                <p class="descripcion">{{ h.descripcion }}</p>
+                @if (h.compromisos) {
+                  <p class="compromisos"><strong>Compromisos:</strong> {{ h.compromisos }}</p>
+                }
+                <p class="texto-suave meta">
+                  Registró: {{ h.autorNombre }}
+                  @if (h.enteradoEn) {
+                    · Enterado: {{ h.enteradoPor }} ({{ h.enteradoEn | date: 'dd/MM/yyyy' }})
+                  }
+                  @if (h.seguimientos.length) {
+                    · {{ h.seguimientos.length }} {{ h.seguimientos.length === 1 ? 'seguimiento' : 'seguimientos' }}
+                  }
+                </p>
+              </li>
+            } @empty {
+              @if (!cargandoHistorial()) {
+                <li class="vacio texto-suave">
+                  {{ filtroTipo() || filtroBuscar() ? 'No hay anotaciones con esos filtros.' : 'Este curso todavía no tiene anotaciones en el observador.' }}
+                </li>
+              }
+            }
+          </ul>
+
+          @if (hayMasHistorial()) {
+            <div class="acciones">
+              <button mat-stroked-button type="button" [disabled]="cargandoHistorial()" (click)="cargarHistorial(true)">
+                {{ cargandoHistorial() ? 'Cargando...' : 'Ver más anotaciones' }}
+              </button>
+            </div>
+          }
+        </section>
       </mat-tab>
     </mat-tab-group>
   } @else if (!error()) {

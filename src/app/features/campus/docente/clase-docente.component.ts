@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,7 +15,9 @@ import { RouterLink } from '@angular/router';
 
 import {
   AYUDA_TIPO_ANOTACION,
+  Anotacion,
   CursoDocente,
+  ESTADOS_CASO,
   DESEMPENOS,
   ESTADOS_ASISTENCIA,
   EstadoAsistencia,
@@ -54,11 +57,15 @@ interface FilaLista {
 /** Días hacia atrás en que el docente todavía puede registrar la asistencia (igual que la API). */
 const DIAS_ASISTENCIA = 7;
 
+/** Posición de la pestaña Observador en la planilla de la clase. */
+const PESTANA_OBSERVADOR = 2;
+
 /** Planilla de una clase: notas del periodo, toma de asistencia con aviso a acudientes y anotaciones al observador. */
 @Component({
   selector: 'app-clase-docente',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DatePipe,
     FormsModule,
     MatButtonModule,
     MatButtonToggleModule,
@@ -123,6 +130,18 @@ export class ClaseDocenteComponent implements OnInit {
     compromisos: '',
   };
   protected readonly guardandoAnotacion = signal(false);
+
+  // ---- Historial del observador del curso ----
+  protected readonly estadosCaso = ESTADOS_CASO;
+  protected readonly nombreTipo = TIPOS_ANOTACION;
+  protected readonly historial = signal<Anotacion[]>([]);
+  protected readonly totalHistorial = signal(0);
+  protected readonly paginaHistorial = signal(1);
+  protected readonly cargandoHistorial = signal(false);
+  protected readonly filtroTipo = signal<TipoAnotacion | null>(null);
+  protected readonly filtroBuscar = signal('');
+  protected readonly hayMasHistorial = computed(() => this.historial().length < this.totalHistorial());
+  #historialCargado = false;
 
   protected readonly titulo = computed(() => {
     const c = this.clase();
@@ -352,14 +371,60 @@ export class ClaseDocenteComponent implements OnInit {
         descripcion: a.descripcion.trim(),
         compromisos: a.compromisos.trim() || null,
       });
-      this.#snackBar.open('Anotación registrada. El acudiente recibe el aviso en el campus.', 'Cerrar', { duration: 5000 });
+      this.#snackBar.open('Anotación registrada. Ya aparece en el historial del curso.', 'Cerrar', { duration: 5000 });
       a.descripcion = '';
       a.compromisos = '';
+      void this.cargarHistorial();
     } catch (error) {
       this.#snackBar.open(mensajeDeError(error), 'Cerrar');
     } finally {
       this.guardandoAnotacion.set(false);
     }
+  }
+
+  // ================= Historial del observador =================
+
+  /** Se carga la primera vez que el docente abre la pestaña Observador (la tercera: Notas, Asistencia, Observador). */
+  protected cambioDePestana(indice: number): void {
+    if (indice === PESTANA_OBSERVADOR && !this.#historialCargado) {
+      void this.cargarHistorial();
+    }
+  }
+
+  protected filtrarTipo(tipo: TipoAnotacion | null): void {
+    this.filtroTipo.set(tipo);
+    void this.cargarHistorial();
+  }
+
+  protected buscarEnHistorial(texto: string): void {
+    this.filtroBuscar.set(texto);
+    void this.cargarHistorial();
+  }
+
+  /** Recarga desde la primera página, o agrega la siguiente si <paramref name="mas" /> es verdadero. */
+  protected async cargarHistorial(mas = false): Promise<void> {
+    const pagina = mas ? this.paginaHistorial() + 1 : 1;
+    this.cargandoHistorial.set(true);
+    try {
+      const resultado = await this.#servicio.historialObservador(this.asignacionId(), {
+        tipo: this.filtroTipo(),
+        buscar: this.filtroBuscar(),
+        pagina,
+        tamanoPagina: 20,
+      });
+      this.#historialCargado = true;
+      this.historial.update((actual) => (mas ? [...actual, ...resultado.items] : [...resultado.items]));
+      this.totalHistorial.set(resultado.total);
+      this.paginaHistorial.set(pagina);
+    } catch (error) {
+      this.#snackBar.open(mensajeDeError(error), 'Cerrar');
+    } finally {
+      this.cargandoHistorial.set(false);
+    }
+  }
+
+  protected esSituacion(tipo: TipoAnotacion): boolean {
+    return tipo.startsWith('Situacion');
   }
 }
 
