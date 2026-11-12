@@ -13,8 +13,11 @@ import { RolCampus, cursoDe } from '../../core/models/campus.model';
 import { ESTADOS_ELECCION, EleccionCampus } from '../../core/models/eleccion.model';
 import { CampusAcademicoService } from '../../core/services/campus-academico.service';
 import { CampusService } from '../../core/services/campus.service';
+import { CampusMejorasService } from '../../core/services/mejoras.service';
+import { PwaService } from '../../core/services/pwa.service';
 import { mensajeDeError } from '../../core/utils/http-error';
 import { PageHeadingComponent } from '../../shared/page-heading/page-heading.component';
+import { AppCelularComponent } from './compartido/app-celular.component';
 
 interface AccesoCampus {
   readonly ruta: string;
@@ -26,6 +29,7 @@ interface AccesoCampus {
 /** Módulos del campus según el rol de quien ingresa. */
 const ACCESOS: Readonly<Record<RolCampus, readonly AccesoCampus[]>> = {
   Estudiante: [
+    { ruta: '/campus/aula', icono: 'auto_stories', titulo: 'Aula virtual', descripcion: 'Material de clase, tareas y entregas.' },
     { ruta: '/campus/horario', icono: 'schedule', titulo: 'Horario', descripcion: 'Sus clases de la semana, día por día.' },
     { ruta: '/campus/boletines', icono: 'grading', titulo: 'Boletines', descripcion: 'Notas de cada periodo, promedio y puesto.' },
     { ruta: '/campus/simulacros', icono: 'quiz', titulo: 'Simulacros Saber', descripcion: 'Practique para las Pruebas Saber y vea sus resultados.' },
@@ -33,20 +37,27 @@ const ACCESOS: Readonly<Record<RolCampus, readonly AccesoCampus[]>> = {
     { ruta: '/campus/observador', icono: 'diversity_3', titulo: 'Observador', descripcion: 'Anotaciones positivas y de convivencia.' },
     { ruta: '/campus/circulares', icono: 'campaign', titulo: 'Circulares', descripcion: 'Comunicados del colegio.' },
     { ruta: '/campus/calendario', icono: 'calendar_month', titulo: 'Calendario', descripcion: 'Evaluaciones, reuniones y actividades.' },
+    { ruta: '/campus/recuperaciones', icono: 'restart_alt', titulo: 'Recuperaciones', descripcion: 'Planes de mejoramiento y sus resultados.' },
+    { ruta: '/campus/mensajes', icono: 'forum', titulo: 'Mensajes', descripcion: 'Escriba a sus docentes.' },
     { ruta: '/campus/carnet', icono: 'badge', titulo: 'Carné digital', descripcion: 'Su carné estudiantil con código QR.' },
   ],
   Acudiente: [
+    { ruta: '/campus/mensajes', icono: 'forum', titulo: 'Mensajes', descripcion: 'Hable con los docentes de sus hijos.' },
+    { ruta: '/campus/aula', icono: 'auto_stories', titulo: 'Tareas', descripcion: 'Tareas pendientes, entregas y notas del aula virtual.' },
     { ruta: '/campus/boletines', icono: 'grading', titulo: 'Boletines', descripcion: 'Notas de cada periodo, listas para imprimir.' },
     { ruta: '/campus/asistencia', icono: 'event_available', titulo: 'Asistencia', descripcion: 'Fallas y llegadas tarde de sus hijos.' },
     { ruta: '/campus/horario', icono: 'schedule', titulo: 'Horario', descripcion: 'Las clases de la semana de sus hijos.' },
     { ruta: '/campus/observador', icono: 'diversity_3', titulo: 'Observador', descripcion: 'Anotaciones del colegio; confirme que las leyó.' },
+    { ruta: '/campus/recuperaciones', icono: 'restart_alt', titulo: 'Recuperaciones', descripcion: 'Planes de mejoramiento y fechas límite.' },
     { ruta: '/campus/simulacros', icono: 'quiz', titulo: 'Simulacros Saber', descripcion: 'Resultados de los simulacros presentados.' },
     { ruta: '/campus/circulares', icono: 'campaign', titulo: 'Circulares', descripcion: 'Comunicados y confirmación de lectura.' },
     { ruta: '/campus/calendario', icono: 'calendar_month', titulo: 'Calendario', descripcion: 'Reuniones, entregas de boletines y actividades.' },
     { ruta: '/campus/carnet', icono: 'badge', titulo: 'Carné de acudiente', descripcion: 'Para identificarse en la portería.' },
   ],
   Docente: [
-    { ruta: '/campus/docente', icono: 'co_present', titulo: 'Mis clases', descripcion: 'Notas, asistencia y anotaciones de sus cursos.' },
+    { ruta: '/campus/docente', icono: 'co_present', titulo: 'Mis clases', descripcion: 'Notas, asistencia, aula virtual y recuperaciones.' },
+    { ruta: '/campus/planeador', icono: 'edit_calendar', titulo: 'Planeador', descripcion: 'Planeación semanal según la malla (estándares y DBA).' },
+    { ruta: '/campus/mensajes', icono: 'forum', titulo: 'Mensajes', descripcion: 'Conversaciones con acudientes y estudiantes.' },
     { ruta: '/campus/horario', icono: 'schedule', titulo: 'Mi horario', descripcion: 'Sus clases de la semana por día y hora.' },
     { ruta: '/campus/simulacros', icono: 'quiz', titulo: 'Simulacros Saber', descripcion: 'Resultados de sus cursos por área y pregunta.' },
     { ruta: '/campus/circulares', icono: 'campaign', titulo: 'Circulares', descripcion: 'Comunicados para docentes.' },
@@ -73,6 +84,7 @@ const ACCESOS: Readonly<Record<RolCampus, readonly AccesoCampus[]>> = {
     MatInputModule,
     MatProgressBarModule,
     PageHeadingComponent,
+    AppCelularComponent,
   ],
   templateUrl: './campus.component.html',
   styleUrl: './campus.component.scss',
@@ -86,6 +98,8 @@ export class CampusComponent {
   #perfilActualizado = false;
   protected readonly campus = inject(CampusService);
   protected readonly academico = inject(CampusAcademicoService);
+  protected readonly mejoras = inject(CampusMejorasService);
+  readonly #pwa = inject(PwaService);
 
   protected readonly estados = ESTADOS_ELECCION;
   protected readonly cursoDe = cursoDe;
@@ -121,8 +135,10 @@ export class CampusComponent {
       if (!this.#perfilActualizado) {
         this.#perfilActualizado = true;
         void this.campus.actualizarPerfil().catch(() => undefined);
+        void this.#pwa.renovarRegistro();
       }
       void this.cargarAvisos();
+      void this.mejoras.bandeja().catch(() => undefined);
       if (!clave.endsWith('|Acudiente')) {
         void this.cargarElecciones();
       }
@@ -180,7 +196,9 @@ export class CampusComponent {
     this.avisos.update((lista) => lista?.map((a) => ({ ...a, leido: true })) ?? null);
   }
 
-  protected salir(): void {
+  protected async salir(): Promise<void> {
+    // En un celular compartido, quien sale deja de recibir las notificaciones en ese equipo.
+    await this.#pwa.desactivarNotificaciones().catch(() => undefined);
     this.campus.cerrar();
     this.elecciones.set(null);
     this.avisos.set(null);

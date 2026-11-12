@@ -12,8 +12,9 @@ const CLAVE_ALMACEN = 'jv-sesion-campus';
 export const URL_CAMPUS = `${environment.apiBaseUrl}/campus`;
 
 /**
- * Sesión del campus virtual y votación. La sesión vive solo en la pestaña (sessionStorage):
+ * Sesión del campus virtual y votación. En el navegador la sesión vive solo en la pestaña (sessionStorage):
  * en la sala de informática los equipos se comparten, así que nunca queda guardada al cerrar.
+ * En la app instalada en el celular (PWA) sí se recuerda hasta que vence, como cualquier app.
  */
 @Injectable({ providedIn: 'root' })
 export class CampusService {
@@ -70,9 +71,25 @@ export class CampusService {
   }
 }
 
+/** true cuando el sitio corre como app instalada (pantalla de inicio del celular o del computador). */
+export function esAppInstalada(): boolean {
+  try {
+    return (
+      window.matchMedia?.('(display-mode: standalone)').matches === true ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true
+    );
+  } catch {
+    return false;
+  }
+}
+
+function almacen(): Storage {
+  return esAppInstalada() ? localStorage : sessionStorage;
+}
+
 function leer(): SesionCampus | null {
   try {
-    const texto = sessionStorage.getItem(CLAVE_ALMACEN);
+    const texto = almacen().getItem(CLAVE_ALMACEN);
     const sesion = texto ? (JSON.parse(texto) as SesionCampus) : null;
     return sesion && Date.parse(sesion.expira) > Date.now() ? sesion : null;
   } catch {
@@ -83,9 +100,10 @@ function leer(): SesionCampus | null {
 function escribir(sesion: SesionCampus | null): void {
   try {
     if (sesion) {
-      sessionStorage.setItem(CLAVE_ALMACEN, JSON.stringify(sesion));
+      almacen().setItem(CLAVE_ALMACEN, JSON.stringify(sesion));
     } else {
       sessionStorage.removeItem(CLAVE_ALMACEN);
+      localStorage.removeItem(CLAVE_ALMACEN);
     }
   } catch {
     // Sin almacenamiento, la sesión dura hasta recargar la página.

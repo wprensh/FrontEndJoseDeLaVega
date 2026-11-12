@@ -13,7 +13,10 @@ export type Modulo =
   | 'Circulares'
   | 'Calendario'
   | 'Carnets'
-  | 'Indicadores';
+  | 'Indicadores'
+  | 'Planeacion'
+  | 'Evaluacion'
+  | 'Reportes';
 
 /** Nivel de acción sobre los registros de un módulo. */
 export type Accion = 'Ver' | 'Crear' | 'Editar' | 'Eliminar';
@@ -151,6 +154,30 @@ export const MODULOS: readonly InfoModulo[] = [
     ruta: '/admin/calendario',
     acciones: ACCIONES_GENERICAS,
   },
+  {
+    modulo: 'Planeacion',
+    etiqueta: 'Planeación académica',
+    descripcion: 'Mallas con estándares y DBA por asignatura y grado, y revisión de las planeaciones de clase de los docentes.',
+    icono: 'edit_calendar',
+    ruta: '/admin/planeacion',
+    acciones: { Ver: 'Ver', Crear: 'Crear', Editar: 'Editar mallas y revisar planeaciones', Eliminar: 'Eliminar' },
+  },
+  {
+    modulo: 'Evaluacion',
+    etiqueta: 'Comisión de evaluación',
+    descripcion: 'Recuperaciones por periodo y actas de la comisión de evaluación y promoción (Decreto 1290).',
+    icono: 'gavel',
+    ruta: '/admin/evaluacion',
+    acciones: { Ver: 'Ver', Crear: 'Levantar actas', Editar: 'Editar actas', Eliminar: 'Eliminar' },
+  },
+  {
+    modulo: 'Reportes',
+    etiqueta: 'Reportes oficiales',
+    descripcion: 'Matrícula en formato tipo SIMAT, libro final de calificaciones y certificado de estudios con notas.',
+    icono: 'assignment',
+    ruta: '/admin/reportes',
+    acciones: { Ver: 'Ver y descargar', Crear: 'Expedir certificados', Editar: 'Editar', Eliminar: 'Eliminar' },
+  },
 ];
 
 export const ACCIONES_TODAS: readonly Accion[] = ['Ver', 'Crear', 'Editar', 'Eliminar'];
@@ -174,9 +201,10 @@ export const PERFILES_PERMISOS: readonly PerfilPermisos[] = [
   },
   {
     nombre: 'Coordinación',
-    descripcion: 'Académico, asistencia y observador, simulador Saber, circulares, calendario y tablero.',
+    descripcion: 'Académico, planeación, comisión de evaluación, asistencia y observador, simulador Saber, circulares, calendario y tablero.',
     permisos: [
-      ...todo('Academico', 'Convivencia', 'Simulacros', 'Calendario'),
+      ...todo('Academico', 'Convivencia', 'Simulacros', 'Calendario', 'Planeacion', 'Evaluacion'),
+      ...algunas('Reportes', 'Ver'),
       ...algunas('Circulares', 'Ver', 'Crear', 'Editar'),
       ...algunas('Indicadores', 'Ver'),
       ...algunas('Campus', 'Ver'),
@@ -185,9 +213,9 @@ export const PERFILES_PERMISOS: readonly PerfilPermisos[] = [
   },
   {
     nombre: 'Secretaría',
-    descripcion: 'Pre-matrícula, comunidad del campus, carnés, certificados, PQRS, circulares y calendario.',
+    descripcion: 'Pre-matrícula, comunidad del campus, carnés, certificados, reportes oficiales (SIMAT), PQRS, circulares y calendario.',
     permisos: [
-      ...todo('Admisiones', 'Carnets', 'Certificados', 'Pqrs'),
+      ...todo('Admisiones', 'Carnets', 'Certificados', 'Pqrs', 'Reportes'),
       ...algunas('Campus', 'Ver', 'Crear', 'Editar'),
       ...algunas('Circulares', 'Ver', 'Crear', 'Editar'),
       ...algunas('Calendario', 'Ver', 'Crear', 'Editar'),

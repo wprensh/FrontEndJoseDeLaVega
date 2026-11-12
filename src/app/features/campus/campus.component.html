@@ -1,7 +1,7 @@
 <div class="contenedor">
   <app-page-heading
     titulo="Campus Virtual & Plataforma Académica"
-    subtitulo="Estudiantes, docentes y acudientes: boletines, asistencia, simulacros Saber, circulares y elecciones"
+    subtitulo="Estudiantes, docentes y acudientes: aula virtual, boletines, asistencia, mensajes, simulacros Saber y elecciones"
     etiqueta="Acceso seguro"
   />
 
@@ -69,11 +69,18 @@
       @for (a of accesos(); track a.ruta) {
         <a class="tarjeta-franja franja-azul acceso-modulo" [routerLink]="a.ruta">
           <mat-icon aria-hidden="true">{{ a.icono }}</mat-icon>
-          <span class="titulo">{{ a.titulo }}</span>
+          <span class="titulo">
+            {{ a.titulo }}
+            @if (a.ruta === '/campus/mensajes' && mejoras.mensajesSinLeer()) {
+              <span class="contador" [attr.aria-label]="mejoras.mensajesSinLeer() + ' sin leer'">{{ mejoras.mensajesSinLeer() }}</span>
+            }
+          </span>
           <span class="descripcion">{{ a.descripcion }}</span>
         </a>
       }
     </nav>
+
+    <app-app-celular />
 
     @if (votaODocente()) {
     <section aria-labelledby="titulo-elecciones">
@@ -183,6 +190,13 @@
           <div>
             <h3>Simulacros Saber</h3>
             <p>Pruebas tipo Saber 11, 3°, 5° y 9° con resultados por área al entregar.</p>
+          </div>
+        </li>
+        <li class="tarjeta-lateral franja-azul">
+          <mat-icon aria-hidden="true">install_mobile</mat-icon>
+          <div>
+            <h3>App en su celular</h3>
+            <p>Instale el campus con el escudo del colegio y reciba avisos de tareas, notas y mensajes al instante.</p>
           </div>
         </li>
         <li class="tarjeta-lateral franja-azul">

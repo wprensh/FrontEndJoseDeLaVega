@@ -364,7 +364,17 @@ export interface Observador {
 
 // ---------- Avisos del campus ----------
 
-export type TipoAviso = 'Asistencia' | 'Convivencia' | 'Calificaciones' | 'Circular' | 'Simulacro' | 'General';
+export type TipoAviso =
+  | 'Asistencia'
+  | 'Convivencia'
+  | 'Calificaciones'
+  | 'Circular'
+  | 'Simulacro'
+  | 'General'
+  | 'Tarea'
+  | 'Mensaje'
+  | 'Planeacion'
+  | 'Recuperacion';
 
 export const ICONOS_AVISO: Readonly<Record<TipoAviso, string>> = {
   Asistencia: 'event_busy',
@@ -373,6 +383,10 @@ export const ICONOS_AVISO: Readonly<Record<TipoAviso, string>> = {
   Circular: 'campaign',
   Simulacro: 'quiz',
   General: 'notifications',
+  Tarea: 'assignment',
+  Mensaje: 'chat',
+  Planeacion: 'edit_calendar',
+  Recuperacion: 'restart_alt',
 };
 
 export interface Aviso {

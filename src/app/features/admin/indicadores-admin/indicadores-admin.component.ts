@@ -55,6 +55,10 @@ import { PageHeadingComponent } from '../../../shared/page-heading/page-heading.
             <mat-icon aria-hidden="true">print</mat-icon>
             Imprimir
           </button>
+          <a mat-flat-button class="boton-institucional no-imprimir" routerLink="/admin/alertas">
+            <mat-icon aria-hidden="true">crisis_alert</mat-icon>
+            Alerta temprana
+          </a>
         </div>
 
         <section class="cifras">

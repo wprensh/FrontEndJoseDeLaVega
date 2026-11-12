@@ -147,6 +147,45 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/campus/docente/clase-docente.component').then((m) => m.ClaseDocenteComponent),
   },
+  {
+    path: 'campus/aula',
+    title: 'Aula virtual',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () => import('./features/campus/aula/aula-campus.component').then((m) => m.AulaCampusComponent),
+  },
+  {
+    path: 'campus/recuperaciones',
+    title: 'Recuperaciones',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () =>
+      import('./features/campus/recuperaciones/recuperaciones-campus.component').then((m) => m.RecuperacionesCampusComponent),
+  },
+  {
+    path: 'campus/mensajes',
+    title: 'Mensajes',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () =>
+      import('./features/campus/mensajes/mensajes-campus.component').then((m) => m.MensajesCampusComponent),
+  },
+  {
+    path: 'campus/planeador',
+    title: 'Planeador de clases',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () => import('./features/campus/planeador/planeador.component').then((m) => m.PlaneadorComponent),
+  },
+  {
+    path: 'campus/docente/:asignacionId/aula',
+    title: 'Aula virtual de la clase',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () => import('./features/campus/aula/aula-docente.component').then((m) => m.AulaDocenteComponent),
+  },
+  {
+    path: 'campus/docente/:asignacionId/recuperaciones',
+    title: 'Recuperaciones de la clase',
+    canActivate: [requiereSesionCampus],
+    loadComponent: () =>
+      import('./features/campus/recuperaciones/recuperaciones-docente.component').then((m) => m.RecuperacionesDocenteComponent),
+  },
   // ---- Panel administrativo: inicio de sesión y un módulo por ruta, según los permisos del usuario ----
   {
     path: 'admin/login',
@@ -215,6 +254,32 @@ export const routes: Routes = [
         canActivate: [requierePermiso('Indicadores')],
         loadComponent: () =>
           import('./features/admin/indicadores-admin/indicadores-admin.component').then((m) => m.IndicadoresAdminComponent),
+      },
+      {
+        path: 'alertas',
+        title: 'Alerta temprana',
+        canActivate: [requierePermiso('Indicadores')],
+        loadComponent: () => import('./features/admin/alertas-admin/alertas-admin.component').then((m) => m.AlertasAdminComponent),
+      },
+      {
+        path: 'planeacion',
+        title: 'Planeación académica',
+        canActivate: [requierePermiso('Planeacion')],
+        loadComponent: () =>
+          import('./features/admin/planeacion-admin/planeacion-admin.component').then((m) => m.PlaneacionAdminComponent),
+      },
+      {
+        path: 'evaluacion',
+        title: 'Comisión de evaluación y promoción',
+        canActivate: [requierePermiso('Evaluacion')],
+        loadComponent: () =>
+          import('./features/admin/evaluacion-admin/evaluacion-admin.component').then((m) => m.EvaluacionAdminComponent),
+      },
+      {
+        path: 'reportes',
+        title: 'Reportes oficiales',
+        canActivate: [requierePermiso('Reportes')],
+        loadComponent: () => import('./features/admin/reportes-admin/reportes-admin.component').then((m) => m.ReportesAdminComponent),
       },
       {
         path: 'academico',
