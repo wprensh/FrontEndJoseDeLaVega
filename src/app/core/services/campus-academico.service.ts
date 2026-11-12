@@ -8,6 +8,8 @@ import {
   Boletin,
   BoletinesDisponibles,
   CrearAnotacion,
+  EditarAnotacion,
+  EstadoCaso,
   MisCursos,
   NotaEstudiante,
   Novedad,
@@ -160,6 +162,21 @@ export class CampusAcademicoService {
 
   crearAnotacion(datos: CrearAnotacion): Promise<Anotacion> {
     return firstValueFrom(this.#http.post<Anotacion>(`${URL_CAMPUS}/docente/anotaciones`, datos));
+  }
+
+  /** Corrige una anotación propia (dentro de 48 horas y antes de que el acudiente la lea). */
+  editarAnotacion(id: string, datos: EditarAnotacion): Promise<Anotacion> {
+    return firstValueFrom(this.#http.put<Anotacion>(`${URL_CAMPUS}/docente/anotaciones/${id}`, datos));
+  }
+
+  /** Elimina una anotación propia (dentro de 48 horas, sin seguimientos y antes de que el acudiente la lea). */
+  eliminarAnotacion(id: string): Promise<void> {
+    return firstValueFrom(this.#http.delete<void>(`${URL_CAMPUS}/docente/anotaciones/${id}`));
+  }
+
+  /** Registra un seguimiento y, en las situaciones, el nuevo estado del caso. */
+  seguimientoAnotacion(id: string, texto: string, estado: EstadoCaso | null): Promise<Anotacion> {
+    return firstValueFrom(this.#http.post<Anotacion>(`${URL_CAMPUS}/docente/anotaciones/${id}/seguimientos`, { texto, estado }));
   }
 
   /** Historial del observador del curso de una clase del docente (más recientes primero). */

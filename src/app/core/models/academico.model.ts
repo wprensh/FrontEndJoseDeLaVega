@@ -332,6 +332,8 @@ export interface Anotacion {
   readonly descripcion: string;
   readonly compromisos: string | null;
   readonly autorNombre: string;
+  /** Docente que la registró desde el campus; null si la registró coordinación. */
+  readonly autorMiembroId?: string | null;
   readonly estado: EstadoCaso;
   readonly enteradoEn: string | null;
   readonly enteradoPor: string | null;
@@ -342,6 +344,8 @@ export interface Anotacion {
     readonly creadoEn: string;
   }[];
   readonly creadoEn: string;
+  /** El docente que consulta puede corregirla o eliminarla (es suya, dentro de 48 h y sin acudiente enterado). */
+  readonly puedeModificar?: boolean;
 }
 
 export interface CrearAnotacion {
@@ -351,6 +355,8 @@ export interface CrearAnotacion {
   descripcion: string;
   compromisos: string | null;
 }
+
+export type EditarAnotacion = Omit<CrearAnotacion, 'estudianteId'>;
 
 export interface Observador {
   readonly estudianteId: string;

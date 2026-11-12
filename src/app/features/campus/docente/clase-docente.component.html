@@ -257,6 +257,9 @@
             <h2 id="titulo-historial">Historial del observador del curso</h2>
             <span class="texto-suave">{{ totalHistorial() }} {{ totalHistorial() === 1 ? 'anotación' : 'anotaciones' }}</span>
           </div>
+          <p class="texto-suave ayuda-historial">
+            Puede editar o eliminar sus propias anotaciones durante 48 horas, mientras el acudiente no las haya leído. Después, o si la anotación es de otra persona, registre un seguimiento.
+          </p>
           <div class="historial-filtros">
             <mat-form-field>
               <mat-label>Tipo</mat-label>
@@ -291,19 +294,106 @@
                   }
                   <span class="fecha">{{ h.fecha | date: 'dd/MM/yyyy' }}</span>
                 </div>
-                <p class="descripcion">{{ h.descripcion }}</p>
-                @if (h.compromisos) {
-                  <p class="compromisos"><strong>Compromisos:</strong> {{ h.compromisos }}</p>
+                @if (editandoId() === h.id) {
+                  <form class="formulario edicion" (ngSubmit)="guardarEdicion(h)">
+                    <mat-form-field>
+                      <mat-label>Tipo</mat-label>
+                      <mat-select [(ngModel)]="edicion.tipo" name="tipoEdicion">
+                        @for (t of tiposAnotacion; track t[0]) {
+                          <mat-option [value]="t[0]">{{ t[1] }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Fecha</mat-label>
+                      <input matInput [matDatepicker]="selectorFechaEdicion" [max]="hoy" name="fechaEdicion" required [ngModel]="edicion.fecha" (ngModelChange)="edicion.fecha = aIso($event)" />
+                      <mat-datepicker-toggle matIconSuffix [for]="selectorFechaEdicion" />
+                      <mat-datepicker #selectorFechaEdicion />
+                    </mat-form-field>
+                    <mat-form-field class="ancho">
+                      <mat-label>Descripción de los hechos</mat-label>
+                      <textarea matInput rows="3" name="descripcionEdicion" required [(ngModel)]="edicion.descripcion"></textarea>
+                    </mat-form-field>
+                    <mat-form-field class="ancho">
+                      <mat-label>Compromisos (opcional)</mat-label>
+                      <textarea matInput rows="2" name="compromisosEdicion" [(ngModel)]="edicion.compromisos"></textarea>
+                    </mat-form-field>
+                    <div class="acciones ancho">
+                      <button mat-button type="button" (click)="editandoId.set(null)">Cancelar</button>
+                      <button mat-flat-button color="primary" type="submit" [disabled]="guardandoCambio()">Guardar cambios</button>
+                    </div>
+                  </form>
+                } @else {
+                  <p class="descripcion">{{ h.descripcion }}</p>
+                  @if (h.compromisos) {
+                    <p class="compromisos"><strong>Compromisos:</strong> {{ h.compromisos }}</p>
+                  }
                 }
                 <p class="texto-suave meta">
                   Registró: {{ h.autorNombre }}
                   @if (h.enteradoEn) {
                     · Enterado: {{ h.enteradoPor }} ({{ h.enteradoEn | date: 'dd/MM/yyyy' }})
                   }
-                  @if (h.seguimientos.length) {
-                    · {{ h.seguimientos.length }} {{ h.seguimientos.length === 1 ? 'seguimiento' : 'seguimientos' }}
-                  }
                 </p>
+
+                @if (h.seguimientos.length) {
+                  <button mat-button type="button" class="ver-seguimientos" (click)="alternarDetalle(h.id)" [attr.aria-expanded]="abiertas().has(h.id)">
+                    <mat-icon>{{ abiertas().has(h.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    {{ h.seguimientos.length }} {{ h.seguimientos.length === 1 ? 'seguimiento' : 'seguimientos' }}
+                  </button>
+                  @if (abiertas().has(h.id)) {
+                    <ul class="seguimientos">
+                      @for (sg of h.seguimientos; track sg.id) {
+                        <li>
+                          <span class="texto-suave">{{ sg.creadoEn | date: 'dd/MM/yyyy h:mm a' }} · {{ sg.autorNombre }}</span>
+                          <p>{{ sg.texto }}</p>
+                        </li>
+                      }
+                    </ul>
+                  }
+                }
+
+                @if (seguimientoId() === h.id) {
+                  <form class="formulario edicion" (ngSubmit)="guardarSeguimiento(h)">
+                    <mat-form-field class="ancho">
+                      <mat-label>Seguimiento</mat-label>
+                      <textarea matInput rows="2" name="textoSeguimiento" required [(ngModel)]="seguimiento.texto" placeholder="Ej.: Se citó al acudiente y se firmaron compromisos."></textarea>
+                    </mat-form-field>
+                    @if (esSituacion(h.tipo)) {
+                      <mat-form-field>
+                        <mat-label>Estado del caso</mat-label>
+                        <mat-select [(ngModel)]="seguimiento.estado" name="estadoSeguimiento">
+                          <mat-option [value]="null">Automático</mat-option>
+                          @for (e of estadosCasoLista; track e[0]) {
+                            <mat-option [value]="e[0]">{{ e[1] }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    }
+                    <div class="acciones ancho">
+                      <button mat-button type="button" (click)="seguimientoId.set(null)">Cancelar</button>
+                      <button mat-flat-button color="primary" type="submit" [disabled]="guardandoCambio()">Guardar seguimiento</button>
+                    </div>
+                  </form>
+                }
+
+                @if (editandoId() !== h.id && seguimientoId() !== h.id) {
+                  <div class="acciones-anotacion">
+                    <button mat-button type="button" (click)="empezarSeguimiento(h)">
+                      <mat-icon>add_comment</mat-icon> Seguimiento
+                    </button>
+                    @if (h.puedeModificar) {
+                      <button mat-button type="button" (click)="empezarEdicion(h)">
+                        <mat-icon>edit</mat-icon> Editar
+                      </button>
+                      @if (!h.seguimientos.length) {
+                        <button mat-button type="button" color="warn" [disabled]="guardandoCambio()" (click)="eliminar(h)">
+                          <mat-icon>delete</mat-icon> Eliminar
+                        </button>
+                      }
+                    }
+                  </div>
+                }
               </li>
             } @empty {
               @if (!cargandoHistorial()) {

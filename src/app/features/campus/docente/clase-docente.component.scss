@@ -329,3 +329,38 @@
     color: var(--jv-texto-suave);
   }
 }
+
+.acciones-anotacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-block-start: 0.35rem;
+}
+
+.ver-seguimientos {
+  margin-block-start: 0.25rem;
+  padding-inline: 0.25rem;
+}
+
+.lista-anotaciones .seguimientos {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0 0 0 0.75rem;
+  border-inline-start: 2px solid var(--jv-borde, #e2e6ee);
+
+  li {
+    border: none;
+    padding: 0.35rem 0;
+  }
+}
+
+.ayuda-historial {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.formulario.edicion {
+  margin-block-start: 0.75rem;
+  padding-block-start: 0.5rem;
+}
